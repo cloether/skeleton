@@ -12,10 +12,10 @@ skeleton.cli module
    :undoc-members:
    :show-inheritance:
 
-skeleton.errors module
-----------------------
+skeleton.error module
+---------------------
 
-.. automodule:: skeleton.errors
+.. automodule:: skeleton.error
    :members:
    :undoc-members:
    :show-inheritance:

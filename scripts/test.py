@@ -12,27 +12,24 @@ import os
 from subprocess import check_call
 
 _DIRNAME = os.path.dirname
-REPO_ROOT = _DIRNAME(_DIRNAME(os.path.abspath(__file__)))
-TESTS_DIR = os.path.join(REPO_ROOT, 'tests')
 
-os.chdir(os.path.join(REPO_ROOT))
+REPO_ROOT = _DIRNAME(_DIRNAME(os.path.abspath(__file__)))
+os.chdir(REPO_ROOT)
 
 
 def _run(command):
   return check_call(command, shell=True)
 
 
-def _touch(filename, times=None):
-  fh = open(filename, 'a')
-  try:
-    os.utime(filename, times)
-  finally:
-    fh.close()
-
-
+TESTS_DIR = os.path.join(REPO_ROOT, 'tests')
 TESTS_LOG_FILE = os.path.join(TESTS_DIR, "pytest.log")
 
 if not os.path.exists(TESTS_LOG_FILE):
-  _touch(TESTS_LOG_FILE)
+  # `touch` file pytest.log
+  fh = open(TESTS_LOG_FILE, 'a')
+  try:
+    os.utime(TESTS_LOG_FILE, None)
+  finally:
+    fh.close()
 
-_run("python -m pytest -c %s" % os.path.join(REPO_ROOT, "setup.cfg"))
+_run("tox")
