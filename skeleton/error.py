@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-"""errors.py
+"""error.py
 
-Module Errors.
+Module Error Implementation.
 """
 from __future__ import unicode_literals, print_function, absolute_import
 
@@ -42,7 +42,7 @@ class BaseError(Exception):
   References:
     https://github.com/boto/botocore/blob/develop/botocore/exceptions.py
   """
-  fmt = "An unspecified error occurred"
+  fmt = "An unspecified error occurred: {error}"
 
   def __init__(self, **kwargs):
     msg = self.fmt.format(**kwargs)

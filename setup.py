@@ -2,12 +2,14 @@
 # -*- encoding: utf-8 -*-
 """setup.py
 """
+import re
+from io import open
 # io.open is needed for projects that support Python 2.7. It ensures open()
 # defaults to text mode with universal newlines, and accepts an argument to
 # specify the text encoding. Python 3 only  projects can skip this import.
+#
 # References:
 #   https://raw.githubusercontent.com/pypa/sampleproject/master/setup.py
-from io import open
 from os import path
 
 from setuptools import find_packages, setup
@@ -31,11 +33,38 @@ def __readlines(filepath, **kwargs):
     return [line.strip() for line in filter(None, f)]
 
 
+def __find_version(filepath):
+  version_file = __readfile(filepath)
+  version_match = re.search(r"^__version__ = ['\"](?P<version>[^'\"]*)['\"]",
+                            version_file, re.M)
+  if version_match:
+    return version_match.group("version")
+  raise RuntimeError("Unable to find version string.")
+
+
+# TODO: Get ALL setup options from __version.py
+
+AUTHOR = "cloether"
+AUTHOR_EMAIL = "cloether@outlook.com"
+DESCRIPTION = "Skeleton Python Module"
+INCLUDE_PACKAGE_DATA = False
+LICENSE = "MIT"
+LONG_DESCRIPTION = __readfile('README.rst')
+LONG_DESCRIPTION_CONTENT_TYPE = "text/x-rst"
 NAME = "skeleton"
+PACKAGE_DATA = {}
+PACKAGES = find_packages(exclude=('tests',))
+REQUIREMENTS = __readlines("requirements.txt")
+SCRIPTS = None
+URL = "https://github.com/%s/%s" % (AUTHOR, NAME)
+VERSION = __find_version(path.join(NAME, "__version__.py"))
+ZIP_SAFE = False
+
+# Execute Setup
 
 setup(
-    author="cloether",
-    author_email="cloether@outlook.com",
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
     classifiers=[
         'Development Status :: 1 - Planning',
         'Natural Language :: English',
@@ -53,7 +82,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Topic :: Internet',
     ],
-    description="Skeleton Python Module",
+    description=DESCRIPTION,
     entry_points={
         'console_scripts': [
             '%(name)s=%(name)s.__main__:main' % {
@@ -69,19 +98,20 @@ setup(
         ],
         "tests": [
             "pycodestyle",
-            "pytest"
+            "pytest",
+            "requests"
         ]
     },
-    include_package_data=True,
-    install_requires=__readlines("requirements.txt"),
-    license="MIT",
-    long_description=__readfile('README.rst'),
-    long_description_content_type="text/x-rst",
+    include_package_data=INCLUDE_PACKAGE_DATA,
+    install_requires=REQUIREMENTS,
+    license=LICENSE,
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
     name=NAME,
-    packages=find_packages(exclude=('tests',)),
-    package_data={},
-    scripts=None,
-    url="https://github.com/cloether/skeleton",
-    version="0.0.1",
-    zip_safe=False
+    packages=PACKAGES,
+    package_data=PACKAGE_DATA,
+    scripts=SCRIPTS,
+    url=URL,
+    version=VERSION,
+    zip_safe=ZIP_SAFE
 )

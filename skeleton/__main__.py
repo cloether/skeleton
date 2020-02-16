@@ -2,6 +2,7 @@
 # -*- encoding: utf-8 -*-
 """__main__.py
 """
+
 if __name__ == "__main__":
   import sys
 
@@ -10,16 +11,13 @@ if __name__ == "__main__":
   # noinspection PyBroadException
   try:
     status = main()
-
   except NotImplementedError as exc:
-    sys.exit(exc)
-
+    sys.stderr.write("%s\n" % exc)
+    sys.exit(0)
   except KeyboardInterrupt as e:
     sys.exit(0)
-
   except SystemExit:
     raise
-
   except Exception:
     sys.stderr.write("""\
 ERROR: {{
@@ -36,7 +34,6 @@ ERROR: {{
     )
     sys.stderr.flush()
     sys.exit(1)
-
   except:  # noqa
     import traceback
 

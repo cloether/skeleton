@@ -13,7 +13,7 @@ from .__version__ import (
   __version__
 )
 
-from . import cli, errors, log, utils
+from . import cli, error, log, utils
 
 try:
   from logging import NullHandler
@@ -42,7 +42,7 @@ __all__ = (
     "__url__",
     "__version__",
     "cli",
-    "errors",
+    "error",
     "log",
     "utils"
 )

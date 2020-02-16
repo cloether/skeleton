@@ -10,7 +10,7 @@ import re
 import types
 from os import getenv
 
-from six import iteritems
+from six import iteritems, text_type
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,52 +33,70 @@ CONTENT_DISPOSITION_RE = re.compile(r"attachment; ?filename=[\"\w.]+", re.I)
 # noinspection PyUnusedLocal
 def log_request(request, *args, **kwargs):
   """Log HTTP Request
+
+  Args:
+    request (requests.PreparedRequest): PreparedRequest Instance
   """
   try:
-    LOGGER.debug("Request:")
-    LOGGER.debug(" - URL: %r", request.url)
-    LOGGER.debug(" - Method: %r", request.method)
-    LOGGER.debug(" - Headers:")
-    for header, value in iteritems(request.headers):
-      if header.lower() == "authorization":
-        value = "*" * len(value)
-      LOGGER.debug(" -- %r: %r", header, value)
-    LOGGER.debug(" - Body:")
-    if isinstance(request.body, types.GeneratorType):
-      LOGGER.debug(" -- (FILE-UPLOAD)")
+    LOGGER.debug("REQUEST:")
+    LOGGER.debug(" - URL: %s", request.url)
+    LOGGER.debug(" - METHOD: %s", request.method)
+    LOGGER.debug(" - HEADERS:")
+    if request.headers:
+      for header, value in iteritems(request.headers):
+        if header.lower() == "authorization":
+          value = "*" * len(value)
+        LOGGER.debug("   - %s: %s", header, value)
+    LOGGER.debug(" - BODY:")
+    if request.body is None:
+      LOGGER.debug("   - (NO-BODY)")
+    elif isinstance(request.body, types.GeneratorType):
+      LOGGER.debug("   - (FILE-UPLOAD)")
     else:
-      LOGGER.debug(" -- %s", str(request.body))
+      LOGGER.debug("   - %s", (text_type(request.body)))
   except Exception as err:
-    LOGGER.error("Failed to log request %r", err)
+    LOGGER.error("FAILED to log request: %r", err)
 
 
 # noinspection PyUnusedLocal
 def log_response(response, *args, **kwargs):
   """Log HTTP Response
+
+  Args:
+    response (requests.Response): Response Instance
   """
   try:
-    LOGGER.debug("Response:")
-    LOGGER.debug(" - Status: %r", response.status_code)
-    LOGGER.debug(" - Headers:")
-    for header, value in iteritems(response.headers):
-      LOGGER.debug(" --  %r: %r", header, value)
-    LOGGER.debug(" - Content:")
+    LOGGER.debug("RESPONSE:")
+    LOGGER.debug(" - STATUS CODE: %s", response.status_code)
+    LOGGER.debug(" - REASON: %s", response.reason)
+    if response.headers:
+      LOGGER.debug(" - HEADERS:")
+      for header, value in iteritems(response.headers):
+        LOGGER.debug("   -  %s: %s", header, value)
+    LOGGER.debug(" - CONTENT:")
     header = response.headers.get("content-disposition")
     if header and CONTENT_DISPOSITION_RE.match(header):
       filename = header.partition("=")[2]
-      LOGGER.debug(" -- (FILE-ATTACHMENT: %s)", filename)
+      LOGGER.debug("   - (FILE-ATTACHMENT: %s)", filename)
     elif response.headers.get("content-type", "").endswith("octet-stream"):
-      LOGGER.debug(" -- (BINARY-DATA)")
+      LOGGER.debug("   - (BINARY-DATA)")
     elif response.headers.get("content-type", "").endswith("image"):
-      LOGGER.debug(" -- (IMAGE-DATA)")
+      LOGGER.debug("   - (IMAGE-DATA)")
     else:
       if kwargs.get("stream", False):
-        LOGGER.debug(" -- (STREAM-DATA)")
+        LOGGER.debug("   - (STREAM-DATA)")
       else:
-        LOGGER.debug(" -- %s", json.dumps(
-            response.json(),
-            indent=getenv("LOGGING_JSON_INDENT", LOGGING_JSON_INDENT),
-            sort_keys=getenv("LOGGING_JSON_SORT_KEYS", LOGGING_JSON_SORT_KEYS)
-        ))
+        try:
+          response_json = json.dumps(
+              response.json(),
+              indent=getenv("LOGGING_JSON_INDENT", LOGGING_JSON_INDENT),
+              sort_keys=getenv("LOGGING_JSON_SORT_KEYS", LOGGING_JSON_SORT_KEYS)
+          )
+          for line in response_json.splitlines():
+            LOGGER.debug("   - %s", line)
+        except ValueError as e:
+          # Catch simplejson.JSONDecoderError, which inherits from ValueError
+          response_json = (response.content or b'(NO-CONTENT)').decode("utf8")
+          LOGGER.debug("   - %s", response_json)
   except Exception as err:
-    LOGGER.debug("Failed to log response %r", err)
+    LOGGER.debug("FAILED to log response: %r", err)

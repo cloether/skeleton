@@ -4,8 +4,8 @@
 
 Module Metadata.
 """
-__author__ = "cloether"
-__author_email__ = "cloether@outlook.com"
+__author__ = ""
+__author_email__ = ""
 __description__ = "Skeleton Python Module"
 __name__ = "skeleton"
 __license__ = "MIT"

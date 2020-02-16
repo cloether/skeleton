@@ -24,7 +24,6 @@ from .log import (
 LOGGER = logging.getLogger(__name__)
 
 _IS_PY2 = sys.version_info[0]
-
 _IS_WIN32 = sys.platform == "Win32"
 
 if _IS_WIN32:
@@ -49,7 +48,7 @@ if _IS_WIN32:
 _DEFAULT_FILE_WRITE_MODE = 'wb' if _IS_PY2 else "w"
 
 
-def handle_teardown_signals(callback):
+def _handle_teardown_signals(callback):
   """Register handler for SIGTERM/SIGINT/SIGBREAK signal.
 
   Catch SIGTERM/SIGINT/SIGBREAK signals, and invoke callback
@@ -67,7 +66,7 @@ def handle_teardown_signals(callback):
     signal.signal(signal.SIGBREAK, callback)
 
 
-def shutdown_handler(signum, _):
+def _shutdown_handler(signum, _):
   """Handle Shutdown
   """
   LOGGER.debug("signal received: %d", signum)
@@ -165,35 +164,27 @@ def _arg_parser(**kwargs):
 
 
 def main():
-  """CLI Entry Point
+  """Module Command Line Entry Point
   """
-  handle_teardown_signals(shutdown_handler)
-
+  _handle_teardown_signals(_shutdown_handler)
   _parser = _arg_parser()
   _options = vars(_parser.parse_args())
-
   _logging_format = _options.get("log_format", LOGGING_FORMAT)
   _logging_datefmt = _options.get("log_datefmt", LOGGING_DATEFMT)
   _logging_filename = _options.get("log_filename", LOGGING_FILENAME)
   _logging_level = _options.get("log_level", LOGGING_LEVEL)
-
   logging.basicConfig(
       format=_logging_format,
       filename=_logging_filename,
       level=_logging_level,
       datefmt=_logging_datefmt
   )
-
   LOGGER.setLevel(_logging_level)
-
   _logging_stream_handler = logging.StreamHandler()
   _logging_stream_handler.setFormatter(
       logging.Formatter(_logging_format, datefmt=_logging_datefmt)
   )
-
   LOGGER.addHandler(_logging_stream_handler)
-
   LOGGER.debug("Created logger: %s" % LOGGER)
-
-  raise NotImplementedError("%s command line interface not implemented."
-                            % __name__)
+  LOGGER.error("%s command line interface not implemented." % __name__)
+  return 0
