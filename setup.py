@@ -33,17 +33,23 @@ def __readlines(filepath, **kwargs):
     return [line.strip() for line in filter(None, f)]
 
 
-def __find_version(filepath):
-  version_file = __readfile(filepath)
-  version_match = re.search(r"^__version__ = ['\"](?P<version>[^'\"]*)['\"]",
-                            version_file, re.M)
-  if version_match:
-    return version_match.group("version")
-  raise RuntimeError("Unable to find version string.")
+def __find_attr(filepath, name):
+  file = __readfile(filepath)
+  match = re.search(r"^__%(name)s__ = ['\"](?P<%(name)s>[^'\"]*)['\"]"
+                    % dict(name=name), file, re.M)
+  if match:
+    return match.group(name)
+  raise RuntimeError("Unable to find %s string." % name)
 
 
+# GET PACKAGE NAME
+PACKAGES = find_packages(exclude=('tests',))
+NAME = PACKAGES[0]
+
+# COLLECT SETUP OPTIONS
 # TODO: Get ALL setup options from __version.py
 
+METADATA_FILE = path.join(NAME, "__version__.py")
 AUTHOR = "cloether"
 AUTHOR_EMAIL = "cloether@outlook.com"
 DESCRIPTION = "Skeleton Python Module"
@@ -51,16 +57,15 @@ INCLUDE_PACKAGE_DATA = False
 LICENSE = "MIT"
 LONG_DESCRIPTION = __readfile('README.rst')
 LONG_DESCRIPTION_CONTENT_TYPE = "text/x-rst"
-NAME = "skeleton"
+NAME = __find_attr(METADATA_FILE, "title")
 PACKAGE_DATA = {}
-PACKAGES = find_packages(exclude=('tests',))
 REQUIREMENTS = __readlines("requirements.txt")
 SCRIPTS = None
 URL = "https://github.com/%s/%s" % (AUTHOR, NAME)
-VERSION = __find_version(path.join(NAME, "__version__.py"))
+VERSION = __find_attr(METADATA_FILE, "version")
 ZIP_SAFE = False
 
-# Execute Setup
+# RUN SETUP
 
 setup(
     author=AUTHOR,
@@ -97,8 +102,10 @@ setup(
             "guzzle_sphinx_theme"
         ],
         "tests": [
-            "pycodestyle",
             "pytest",
+            "pytest-cov",
+            "pycodestyle",
+            "coverage",
             "requests"
         ]
     },

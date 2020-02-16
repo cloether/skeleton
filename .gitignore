@@ -131,3 +131,8 @@ dmypy.json
 
 # IDEA / PyCharm IDE
 .idea/
+
+# MacOS
+.DS_Store
+
+tests/.pytest_cache/

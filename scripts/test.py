@@ -23,7 +23,6 @@ def _run(command):
 
 TESTS_DIR = os.path.join(REPO_ROOT, 'tests')
 TESTS_LOG_FILE = os.path.join(TESTS_DIR, "pytest.log")
-
 if not os.path.exists(TESTS_LOG_FILE):
   # `touch` file pytest.log
   fh = open(TESTS_LOG_FILE, 'a')
@@ -31,5 +30,4 @@ if not os.path.exists(TESTS_LOG_FILE):
     os.utime(TESTS_LOG_FILE, None)
   finally:
     fh.close()
-
 _run("tox")

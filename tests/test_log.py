@@ -10,6 +10,11 @@ from skeleton.log import log_request, log_response
 
 @pytest.fixture
 def prepared_request():
+  """PreparedRequest Fixture for Testing `skeleton.log_request`
+
+  Returns:
+    PreparedRequest:  PreparedRequest Instance
+  """
   _request = PreparedRequest()
   _request.url = "https://www.google.com/"
   _request.method = "get"
@@ -22,6 +27,11 @@ def prepared_request():
 
 @pytest.fixture
 def response():
+  """Response Fixture for Testing `skeleton.log_response`
+
+  Returns:
+    Response: Response Instance
+  """
   _response = Response()
   _response.status_code = 200
   _response.reason = "OK"
@@ -36,8 +46,18 @@ def response():
 
 
 def test_log_request(prepared_request):
+  """Test `skeleton.log_request`
+
+  Args:
+    prepared_request (PreparedRequest):
+  """
   log_request(prepared_request)
 
 
 def test_log_response(response):
+  """Test `skeleton.log_response`
+
+  Args:
+    response (Response): Response Instance
+  """
   log_response(response)

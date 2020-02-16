@@ -1,10 +1,42 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """__init__.py
-"""
-__all__ = ("__version__", "cli", "error", "log", "utils")
 
-from .__version__ import __version__
+Skeleton
+--------
+Skeleton is an template for easily creating Python modules.
+
+The official repo is at <https://github.com/cloether/skeleton>.
+
+:copyright: (c) 2020 Chad Loether.
+:license: MIT, see LICENSE for more details.
+"""
+__all__ = (
+    "__author__",
+    "__author_email__",
+    "__copyright__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__url__",
+    "__version__",
+    "cli",
+    "error",
+    "log",
+    "utils"
+)
+
+from .__version__ import (
+  __author__,
+  __author_email__,
+  __copyright__,
+  __description__,
+  __license__,
+  __title__,
+  __url__,
+  __version__,
+)
+
 from . import cli, error, log, utils
 
 try:

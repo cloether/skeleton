@@ -2,12 +2,13 @@
 # -*- encoding: utf-8 -*-
 """__version__.py
 
-Module Metadata.
+Skeleton Module Metadata.
 """
-__author__ = ""
-__author_email__ = ""
+__author__ = "Chad Loether"
+__author_email__ = "chad.loether@outlook.com"
+__copyright__ = "Copyright 2020 Chad Loether"
 __description__ = "Skeleton Python Module"
-__name__ = "skeleton"
+__title__ = "skeleton"
 __license__ = "MIT"
 __url__ = "https://github.com/cloether/skeleton"
-__version__ = "0.0.1"
+__version__ = "0.0.2"

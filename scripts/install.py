@@ -11,6 +11,7 @@ from six import text_type
 
 _DIRNAME = os.path.dirname
 REPO_ROOT = _DIRNAME(_DIRNAME(os.path.abspath(__file__)))
+
 os.chdir(REPO_ROOT)
 
 
@@ -23,10 +24,14 @@ try:
   python_version = os.environ['PYTHON_VERSION']
 except KeyError:
   python_version = '.'.join([text_type(i) for i in sys.version_info[:2]])
+
 run('pip install -r requirements.txt')
-run('pip install coverage')
 run('pip install pytest')
 run('pip install pytest-cov')
+run('pip install pycodestyle')
+run('pip install tox')
+run('pip install tox-travis')
+run('pip install coverage')
 run('pip install requests')
 if os.path.isdir('dist') and os.listdir('dist'):
   shutil.rmtree('dist')

@@ -1,0 +1,23 @@
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=test_error.py:test_base_error:23 | Caught Test Exception: BaseError('An unspecified error occurred: TEST ERROR MESSAGE')
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:50 | REQUEST:
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:51 |  - URL: https://www.google.com/
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:52 |  - PATH: /
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:53 |  - METHOD: get
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:54 |  - HEADERS:
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:59 |    - Accept: application/json
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:59 |    - Content-type: application/json
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:60 |  - BODY:
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_request:62 |    - (NO-BODY)
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:78 | RESPONSE:
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:79 |  - COOKIES: <RequestsCookieJar[]>
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:80 |  - ENCODING: None
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:82 |  - HEADERS:
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:84 |    -  Accept: application/json
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:84 |    -  Content-type: application/json
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:84 |    -  Content-disposition: application/json
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:85 |  - REASON: OK
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:86 |  - STATUS CODE: 200
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:87 |  - CONTENT:
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:107 |    - {
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:107 |    -  "TEST": "TEST"
+2020-02-16 18:18:42 DEBUG pid=11887 tid=MainThread file=log.py:log_response:107 |    - }
