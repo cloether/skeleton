@@ -6,7 +6,7 @@ official repo is `here`_.
 
   .. _here: https://github.com/cloether/skeleton
 
-.. note:: This library is under active development.
+  .. note:: This library is under active development.
 
 Installation
 ------------
