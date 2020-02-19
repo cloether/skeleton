@@ -35,5 +35,5 @@ run('pip install coverage')
 run('pip install requests')
 if os.path.isdir('dist') and os.listdir('dist'):
   shutil.rmtree('dist')
-run('python setup.py bdist_wheel')
+run('python setup.py release')
 run('pip install %s' % (os.path.join('dist', os.listdir('dist')[0])))

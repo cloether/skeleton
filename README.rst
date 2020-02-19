@@ -6,6 +6,8 @@ official repo is at <http://github.com/cloether/skeleton>.
 
 .. note:: This library is under active development.
 
+.. copyright:: (c) 2020 Chad Loether
+
 Installation
 ------------
 To install the library into the current virtual environment::

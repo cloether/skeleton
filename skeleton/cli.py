@@ -93,7 +93,6 @@ def _arg_parser(**kwargs):
   )
 
   parser = ArgumentParser(**kwargs)
-
   parser.set_defaults(
       argument_default=SUPPRESS,
       conflict_handler="resolve",
@@ -102,19 +101,16 @@ def _arg_parser(**kwargs):
       prog=__name__,
       usage=__doc__
   )
-
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
       help="Enable DEBUG logging"
   )
-
   parser.add_argument(
       "-v", "--version",
       action="version",
       version=__version__
   )
-
   parser.add_argument(
       '-o', '--output',
       default="-",
@@ -123,7 +119,6 @@ def _arg_parser(**kwargs):
       metavar='OUT',
       type=FileType(_DEFAULT_FILE_WRITE_MODE)
   )
-
   parser.add_argument(
       '--log-datefmt',
       dest='log_datefmt',
@@ -132,7 +127,6 @@ def _arg_parser(**kwargs):
       metavar='LOG_DATEFMT',
       default=LOGGING_DATEFMT
   )
-
   parser.add_argument(
       '--log-file',
       dest='log_file',
@@ -141,7 +135,6 @@ def _arg_parser(**kwargs):
       metavar='LOG_FILE',
       default=LOGGING_FILENAME
   )
-
   parser.add_argument(
       '--log-format',
       dest='log_format',
@@ -150,7 +143,6 @@ def _arg_parser(**kwargs):
       metavar='LOG_FORMAT',
       default=LOGGING_FORMAT
   )
-
   parser.add_argument(
       '--log-level',
       dest='log_level',
@@ -159,12 +151,11 @@ def _arg_parser(**kwargs):
       metavar='LOG_LEVEL',
       default=LOGGING_LEVEL
   )
-
   return parser
 
 
 def main():
-  """Module Command Line Entry Point
+  """Module CLI Entry Point
   """
   _handle_teardown_signals(_shutdown_handler)
   _parser = _arg_parser()

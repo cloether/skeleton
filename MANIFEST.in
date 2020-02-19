@@ -3,9 +3,10 @@ include *.rst
 include *.md
 include *.txt
 prune docs/build
-graft docs
-graft scripts
-graft tests
-global-exclude __pycache__
-global-exclude *.py[co]
+exclude tests/.*
+exclude tests/*.log
+include tests/*.py
 global-exclude *~
+global-exclude .DS_Store
+global-exclude __pycache__
+global-exclude *.py[cod]

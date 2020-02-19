@@ -8,7 +8,7 @@ Skeleton is an template for easily creating Python modules.
 
 The official repo is at <https://github.com/cloether/skeleton>.
 
-:copyright: (c) 2020 Chad Loether.
+:copyright: (c) Copyright 2020 Chad Loether
 :license: MIT, see LICENSE for more details.
 """
 __all__ = (
@@ -26,6 +26,7 @@ __all__ = (
     "utils"
 )
 
+from . import cli, error, log, utils
 from .__version__ import (
   __author__,
   __author_email__,
@@ -37,8 +38,6 @@ from .__version__ import (
   __version__,
 )
 
-from . import cli, error, log, utils
-
 try:
   from logging import NullHandler
 except ImportError:
@@ -46,8 +45,10 @@ except ImportError:
 
 
   class NullHandler(Handler):
-    """Python 2.7 introduced a NullHandler which we want to use,
-    but to support older versions, we implement our own if needed.
+    """Needed for Backwards Compatibility (Python 2.6).
+
+    Notes:
+      NullHandler was introduced in Python 2.7
     """
 
     def emit(self, record):

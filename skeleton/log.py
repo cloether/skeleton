@@ -15,7 +15,6 @@ from six import iteritems, text_type
 LOGGER = logging.getLogger(__name__)
 
 # LOGGING OPTIONS
-
 LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_FILEMODE = "a+"
 LOGGING_FILENAME = None
@@ -31,12 +30,10 @@ LOGGING_LEVEL = "WARNING"
 LOGGING_STYLE = "%"
 
 # LOGGING ENVIRONMENT VARIABLES
-
 LOGGING_JSON_SORT_KEYS = 1
 LOGGING_JSON_INDENT = 1
 
 # MISCELLANEOUS CONSTANTS
-
 CONTENT_DISPOSITION_RE = re.compile(r"attachment; ?filename=[\"\w.]+", re.I)
 
 

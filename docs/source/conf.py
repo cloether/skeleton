@@ -1,13 +1,12 @@
 # Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
-from __future__ import unicode_literals, absolute_import
+# This file only contains a selection of the most common options.
+# For a full list see the documentation:
+#   http://www.sphinx-doc.org/en/master/config
+from __future__ import unicode_literals, absolute_import, print_function
 
 import os
 import sys
-from datetime import datetime
+import time
 
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -16,15 +15,20 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.abspath('.'))
 
-from skeleton.__version__ import __author__, __name__, __version__
+from skeleton.__version__ import (
+  __author__,
+  __title__,
+  __version__,
+  __description__
+)
 
 # -- Project information -----------------------------------------------------
 
-project = __name__
+project = __title__
 author = __author__
 
 # noinspection PyShadowingBuiltins
-copyright = '%s, %s' % (author, datetime.now().year)
+copyright = '%s, %s' % (author, time.strftime('%Y'))
 version = '%s.' % __version__.split(".")[:-1]  # The short X.Y version.
 release = __version__  # The full version, including alpha/beta/rc tags
 
@@ -38,6 +42,10 @@ extensions = [
     'sphinxcontrib.napoleon',
     'guzzle_sphinx_theme'
 ]
+
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+
+todo_include_todos = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -70,6 +78,7 @@ html_static_path = ['_static']
 # Custom sidebar templates, maps document names to template names.
 html_show_sourcelink = False
 
+# Custom sidebar templates, filenames relative to this file.
 html_sidebars = {
     '**': [
         'logo-text.html',
@@ -82,6 +91,10 @@ html_sidebars = {
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project
 
+# If not '', a 'Last updated on:' timestamp is inserted at
+# every page bottom, using the given strftime format.
+html_last_updated_fmt = '%b %d, %Y'
+
 import guzzle_sphinx_theme
 
 html_translator_class = 'guzzle_sphinx_theme.HTMLTranslator'
@@ -91,18 +104,14 @@ html_theme = 'guzzle_sphinx_theme'
 # -- Options for LaTeX output --------------------------------------------------
 
 latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    # 'papersize': 'letterpaper',
-    #
-    # The font size ('10pt', '11pt' or '12pt').
-    # 'pointsize': '10pt',
-    #
-    # Additional stuff for the LaTeX preamble.
-    # 'preamble': '',
+    # 'papersize': 'letterpaper',  # Paper size ('letterpaper' or 'a4paper').
+    # 'pointsize': '10pt',  # The font size ('10pt', '11pt' or '12pt').
+    # 'preamble': '',  # Additional stuff for the LaTeX preamble.
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass [howto/manual]).
+# (source start file, target name, title, author,
+# documentclass [howto/manual]).
 latex_documents = [
     ('index', '%s.tex' % project, '%s Documentation' % project,
      author, 'manual')
@@ -132,7 +141,9 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [('index', project, '%s Documentation' % project, [author], 3)]
+man_pages = [
+    ('index', project, '%s Documentation' % project, [author], 3)
+]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -145,7 +156,7 @@ man_pages = [('index', project, '%s Documentation' % project, [author], 3)]
 
 texinfo_documents = [
     ('index', project, '%s Documentation' % project, author, project,
-     'One line description of project.', 'Miscellaneous'),
+     __description__, 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.

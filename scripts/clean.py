@@ -14,6 +14,7 @@ for file_or_dir in map(lambda parts: os.path.join(REPO_ROOT, *parts), (
     ("docs", "build", "html"),
     ("skeleton.egg-info",),
     ("tests", ".pytest_cache"),
+    ("tests", "pytest.log"),
 )):
   if os.path.isdir(file_or_dir):
     os.system("rm -rf %s" % file_or_dir)
