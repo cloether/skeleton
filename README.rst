@@ -2,11 +2,11 @@ skeleton
 ========
 
 ``skeleton`` is a module template used for easily creating Python modules.  The
-official repo is at <http://github.com/cloether/skeleton>.
+official repo is `here`_.
+
+  .. _here: https://github.com/cloether/skeleton
 
 .. note:: This library is under active development.
-
-.. copyright:: (c) 2020 Chad Loether
 
 Installation
 ------------
@@ -35,6 +35,7 @@ Requirements
 License
 -------
 MIT - See `LICENSE`_ for more information.
+
   .. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE
 
 Copyright
