@@ -81,7 +81,10 @@ EXTRAS_REQUIRE = {
     "tests": [
         "pytest",
         "pytest-cov",
+        "pytest-html",
         "pycodestyle",
+        "tox",
+        "tox-travis",
         "coverage",
         "requests"
     ]

@@ -13,7 +13,7 @@ import sys
 
 from six import text_type
 
-from .__version__ import __description__, __name__, __version__
+from .__version__ import __description__, __version__, __title__
 from .log import (
   LOGGING_DATEFMT,
   LOGGING_FILENAME,
@@ -98,7 +98,6 @@ def _arg_parser(**kwargs):
       conflict_handler="resolve",
       description=__description__,
       formatter_class=ArgumentDefaultsHelpFormatter,
-      prog=__name__,
       usage=__doc__
   )
   parser.add_argument(
@@ -177,5 +176,5 @@ def main():
   )
   LOGGER.addHandler(_logging_stream_handler)
   LOGGER.debug("Created logger: %s" % LOGGER)
-  LOGGER.error("%s command line interface not implemented." % __name__)
+  LOGGER.error("%s command line interface not implemented." % __title__)
   return 0
