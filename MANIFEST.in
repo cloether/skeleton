@@ -1,7 +1,16 @@
 include LICENSE
+include pytest.ini
+include tox.ini
+include *.yaml
 include *.rst
 include *.md
 include *.txt
+recursive-include docs *.bat
+recursive-include docs *.html
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs Makefile
+recursive-include scripts *.py
 prune docs/build
 exclude tests/.*
 exclude tests/*.log
