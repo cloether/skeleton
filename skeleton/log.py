@@ -2,15 +2,17 @@
 # -*- encoding: utf-8 -*-
 """log.py
 
-Logging Utilities
+Logging Utilities.
 """
 import json
 import logging
 import re
 import types
+# noinspection PyUnresolvedReferences,PyProtectedMember
+from logging import _checkLevel
 from os import getenv
 
-from six import iteritems, text_type
+from six import iteritems, text_type, string_types
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +36,27 @@ LOGGING_JSON_SORT_KEYS = 1
 LOGGING_JSON_INDENT = 1
 
 # MISCELLANEOUS CONSTANTS
-CONTENT_DISPOSITION_RE = re.compile(r"attachment; ?filename=[\"\w.]+", re.I)
+CONTENT_DISPOSITION_RE = re.compile(
+    r"attachment; ?filename=[\"\w.]+", re.I
+)
+
+
+def log_level(level):
+  """Return valid integer log level
+
+  Args:
+    level (str or int): Log level
+
+  Returns:
+    int: Log level
+  """
+  if isinstance(level, string_types):
+    if level.isdigit():
+      level = int(level)
+    else:
+      level = level.upper()
+  # noinspection PyProtectedMember
+  return _checkLevel(level)
 
 
 def log_request(request, **kwargs):

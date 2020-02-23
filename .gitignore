@@ -136,3 +136,5 @@ dmypy.json
 .DS_Store
 
 tests/.pytest_cache/
+tests/reports/
+tests/*.log

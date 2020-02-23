@@ -2,11 +2,10 @@
 # -*- encoding: utf-8 -*-
 """__main__.py
 """
+from .cli import main
 
 if __name__ == "__main__":
   import sys
-
-  from .cli import main
 
   # noinspection PyBroadException
   try:

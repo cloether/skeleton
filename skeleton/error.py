@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 """error.py
 
-Module Error Implementation.
+Module Error(s).
 """
 from __future__ import unicode_literals, print_function, absolute_import
 
@@ -51,3 +51,7 @@ class BaseError(Exception):
 
   def __reduce__(self):
     return _err_from_packed_args, (self.__class__, None, self.kwargs)
+
+  @property
+  def msg(self):
+    return self.args[0]

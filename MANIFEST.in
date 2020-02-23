@@ -1,21 +1,26 @@
-include LICENSE
-include pytest.ini
-include tox.ini
-include *.yaml
-include *.rst
-include *.md
-include *.txt
-recursive-include docs *.bat
-recursive-include docs *.html
-recursive-include docs *.py
-recursive-include docs *.rst
+include LICENSE.txt
+include requirements.txt
+include README.rst
+include CHANGELOG.rst
+
+exclude .travis.yaml
+exclude pytest.ini
+exclude tox.ini
+
 recursive-include docs Makefile
+recursive-include docs make.bat
+recursive-include docs source *.py
+recursive-include docs source *.rst
+recursive-include docs source *.html
+recursive-include docs source _static *.html
+recursive-include docs source _templates *.html
 recursive-include scripts *.py
-prune docs/build
-exclude tests/.*
-exclude tests/*.log
-include tests/*.py
+recursive-include scripts *.sh
+recursive-include tests *.py
+
 global-exclude *~
 global-exclude .DS_Store
 global-exclude __pycache__
 global-exclude *.py[cod]
+
+prune docs/build

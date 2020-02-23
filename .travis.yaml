@@ -9,4 +9,3 @@ script:
   - python scripts/test.py
 after_success:
   - pycodestyle *.py
-

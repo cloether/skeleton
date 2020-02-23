@@ -55,12 +55,33 @@ def __find_meta(filepath):
 
 
 PACKAGES = find_packages(exclude=('tests',))
+
 NAME = PACKAGES[0]
 
 METADATA = __find_meta(path.join(ROOT, NAME, "__version__.py"))
 
 AUTHOR = METADATA.get("author")
+
 AUTHOR_EMAIL = METADATA.get("author_email")
+
+CLASSIFIERS = [
+    'Development Status :: 1 - Planning',
+    'Natural Language :: English',
+    'Intended Audience :: Developers',
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Topic :: Internet',
+]
 
 DESCRIPTION = METADATA.get("description")
 
@@ -79,76 +100,67 @@ EXTRAS_REQUIRE = {
         "guzzle_sphinx_theme"
     ],
     "tests": [
+        "coverage",
+        "pycodestyle",
         "pytest",
         "pytest-cov",
         "pytest-html",
-        "pycodestyle",
         "tox",
         "tox-travis",
-        "coverage",
-        "requests"
+        "twine"
     ]
 }
 
 INCLUDE_PACKAGE_DATA = False
 
+KEYWORDS = '%s template' % NAME
+
 LICENSE = METADATA.get("license")
 
+LONG_DESCRIPTION = __readfile(path.join(ROOT, 'README.rst'))
+
 # TODO: detect long description file/content type.
-LONG_DESCRIPTION = __readfile('README.rst')
 LONG_DESCRIPTION_CONTENT_TYPE = "text/x-rst"
 
 PACKAGE_DATA = {}
 
-REQUIREMENTS = __readlines("requirements.txt")
+PLATFORMS = 'Posix; MacOS X; Windows'
+
+REQUIREMENTS = __readlines(path.join(ROOT, "requirements.txt"))
 
 SCRIPTS = None
 
 TITLE = METADATA.get("title")
+
 URL = METADATA.get("url")
+
 VERSION = METADATA["version"]
 
 ZIP_SAFE = False
 
+PROJECT_URLS = {
+    'Source': 'https://github.com/cloether/%s/' % TITLE,
+    'Tracker': 'https://github.com/cloether/%s/issues/' % TITLE
+}
+
 setup(
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
-    classifiers=[
-        'Development Status :: 1 - Planning',
-        'Natural Language :: English',
-        'Intended Audience :: Developers',
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3",
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Internet',
-    ],
+    classifiers=CLASSIFIERS,
     description=DESCRIPTION,
     entry_points=ENTRY_POINTS,
     extras_require=EXTRAS_REQUIRE,
     include_package_data=INCLUDE_PACKAGE_DATA,
     install_requires=REQUIREMENTS,
-    keywords='%s template' % NAME,
+    keywords=KEYWORDS,
     license=LICENSE,
     long_description=LONG_DESCRIPTION,
     long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
     name=NAME,
     packages=PACKAGES,
     package_data=PACKAGE_DATA,
-    platforms='all',
-    project_urls={
-        # 'Documentation': '',
-        'Source': 'https://github.com/cloether/%s/' % TITLE,
-        'Tracker': 'https://github.com/cloether/%s/issues/' % TITLE
-    },
+    platforms=PLATFORMS,
+    project_urls=PROJECT_URLS,
     scripts=SCRIPTS,
     url=URL,
     version=VERSION,

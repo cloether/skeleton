@@ -3,7 +3,6 @@
 """test_log.py
 """
 import pytest
-from requests import PreparedRequest, Response
 
 from skeleton.log import log_request, log_response
 
@@ -15,14 +14,20 @@ def prepared_request():
   Returns:
     PreparedRequest:  PreparedRequest Instance
   """
-  _request = PreparedRequest()
-  _request.url = "https://www.google.com/"
-  _request.method = "get"
-  _request.headers = {
-      "Accept": "application/json",
-      "Content-type": "application/json"
-  }
-  return _request
+
+  class PreparedRequest(object):
+    """Mock requests.PreparedRequest
+    """
+    body = b""
+    headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json"
+    }
+    method = "get"
+    path_url = "?p1=param1&p2=param2"
+    url = "https://www.google.com/"
+
+  return PreparedRequest()
 
 
 @pytest.fixture
@@ -32,17 +37,24 @@ def response():
   Returns:
     Response: Response Instance
   """
-  _response = Response()
-  _response.status_code = 200
-  _response.reason = "OK"
-  _response.url = "https://www.google.com/"
-  _response._content = b'{"TEST": "TEST"}'
-  _response.headers = {
-      "Accept": "application/json",
-      "Content-type": "application/json",
-      "Content-disposition": "application/json"
-  }
-  return _response
+
+  class Response(object):
+    """Mock requests.Response
+    """
+    _content = b'{"TEST": "TEST"}'
+    cookies = {}
+    encoding = "utf8"
+    headers = {
+        "Accept": "application/json",
+        "Content-type": "application/json",
+        "Content-disposition": "application/json"
+    }
+    json = lambda self: {}
+    reason = "OK"
+    status_code = 200
+    url = "https://www.google.com/"
+
+  return Response()
 
 
 def test_log_request(prepared_request):
