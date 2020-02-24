@@ -3,9 +3,6 @@ language: python
 python:
   - "2.7"
   - "3.7"
-install:
-  - python scripts/install.py
-script:
-  - python scripts/test.py
-after_success:
-  - pycodestyle *.py
+install: pip install tox-travis
+script: tox
+after_success: pycodestyle *.py

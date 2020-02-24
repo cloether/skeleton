@@ -39,7 +39,7 @@ TESTS_LOG_FILE = os.path.join(TESTS_DIR, "pytest.log")
 _touch(TESTS_LOG_FILE)
 
 _run(
-    "pytest %(posargs)s"
+    "pytest %(posargs)s "
     "--cov=skeleton "
     "--html=tests/reports/%(envname)s.html "
     "--self-contained-html" % {

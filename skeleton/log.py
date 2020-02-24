@@ -59,6 +59,7 @@ def log_level(level):
   return _checkLevel(level)
 
 
+# noinspection PyUnusedLocal
 def log_request(request, **kwargs):
   """Log HTTP Request
 

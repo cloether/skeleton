@@ -8,10 +8,11 @@ import os
 import sys
 import time
 
-# -- Path setup --------------------------------------------------------------
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
+# -- Path setup -----------------------------------------------------
+# If extensions (or modules to document with autodoc) are in another
+# directory, add these directories to sys.path here. If the directory
+# is relative to the documentation root, use os.path.abspath to make
+# it absolute, like shown here.
 
 sys.path.insert(0, os.path.abspath('.'))
 
@@ -22,20 +23,21 @@ from skeleton.__version__ import (
   __description__
 )
 
-# -- Project information -----------------------------------------------------
+# -- Project information --------------------------------------------
 
 project = __title__
 author = __author__
 
 # noinspection PyShadowingBuiltins
 copyright = '%s, %s' % (author, time.strftime('%Y'))
-version = '%s.' % __version__.split(".")[:-1]  # The short X.Y version.
-release = __version__  # The full version, including alpha/beta/rc tags
+version = '%s.' % __version__.split(".")[:-1]  # Short X.Y version.
+release = __version__  # Full version, including alpha/beta/rc tags
 
-# -- General configuration ---------------------------------------------------
+# -- General configuration ------------------------------------------
 
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+# Add any Sphinx extension module names here, as strings. They can
+# be extensions coming with Sphinx (named 'sphinx.ext.*') or your
+# custom ones.
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
@@ -47,7 +49,8 @@ intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 
 todo_include_todos = True
 
-# Add any paths that contain templates here, relative to this directory.
+# Add any paths that contain templates here, relative to this
+# directory.
 templates_path = ['_templates']
 
 # The suffix of source filenames.
@@ -56,23 +59,24 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files. This pattern also
-# affects html_static_path and html_extra_path.
+# List of patterns, relative to source directory, that match files
+# and directories to ignore when looking for source files. This
+# pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-# -- Options for HTML output -------------------------------------------------
+# -- Options for HTML output ----------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
+# The theme to use for HTML and HTML Help pages.  See the
+# documentation for a list of builtin themes.
 # html_theme = 'default'
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
+# Add any paths that contain custom static files (such as style
+# sheets) here, relative to this directory. They are copied after
+# the builtin static files, so a file named "default.css" will
+# overwrite the builtin "default.css".
 html_static_path = ['_static']
 
 # Custom sidebar templates, maps document names to template names.
@@ -101,12 +105,17 @@ html_translator_class = 'guzzle_sphinx_theme.HTMLTranslator'
 html_theme_path = guzzle_sphinx_theme.html_theme_path()
 html_theme = 'guzzle_sphinx_theme'
 
-# -- Options for LaTeX output --------------------------------------------------
+# -- Options for LaTeX output ---------------------------------------
 
 latex_elements = {
-    # 'papersize': 'letterpaper',  # Paper size ('letterpaper' or 'a4paper').
-    # 'pointsize': '10pt',  # The font size ('10pt', '11pt' or '12pt').
-    # 'preamble': '',  # Additional stuff for the LaTeX preamble.
+    # Paper size ('letterpaper' or 'a4paper').
+    # 'papersize': 'letterpaper',
+    #
+    # The font size ('10pt', '11pt' or '12pt').
+    # 'pointsize': '10pt',
+    #
+    # Additional stuff for the LaTeX preamble.
+    # 'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -117,12 +126,12 @@ latex_documents = [
      author, 'manual')
 ]
 
-# The name of an image file (relative to this directory) to place at the top of
-# the title page.
+# The name of an image file (relative to this directory) to place at
+# the top of the title page.
 # latex_logo = None
 
-# For "manual" documents, if this is true, then toplevel headings are parts,
-# not chapters.
+# For "manual" documents, if this is true, then toplevel headings
+# are parts, not chapters.
 # latex_use_parts = False
 
 # If true, show page references after internal links.
@@ -137,7 +146,7 @@ latex_documents = [
 # If false, no module index is generated.
 # latex_domain_indices = True
 
-# -- Options for manual page output --------------------------------------------
+# -- Options for manual page output ---------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
@@ -148,7 +157,7 @@ man_pages = [
 # If true, show URL addresses after external links.
 # man_show_urls = False
 
-# -- Options for Texinfo output ------------------------------------------------
+# -- Options for Texinfo output -------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
