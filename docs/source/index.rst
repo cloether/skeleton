@@ -1,45 +1,56 @@
 Skeleton Documentation
 ======================
+``skeleton`` is a template used for creating Python modules.  The
+official repo is `here`_.
 
-``skelton`` is a collection of utilities to make it easier to build
-client-side tools, especially those that talk to Google APIs.
-
-This library is under active development. However, any bugs
-or security issues will be fixed promptly.
-
+  .. note:: This library is under active development.
 
 Installation
 ------------
-
-Install the latest Skeleton release via :command:`pip`::
+To install the library into the current virtual environment::
 
     $ pip install skeleton
 
+Requirements
+------------
+- six
 
-You may also install a specific version::
+Running the Tests
+-----------------
+Install test dependencies and run `tox`::
 
-    $ pip install skeleton==1.0.0
+    $ pip install skeleton[tests]
+    $ tox
 
+Building the Docs
+-----------------
+Install dependencies and build::
 
-.. note::
-  The latest development version can always be found on `GitHub <https://github.com/cloether/skeleton>`_.
+    $ pip install skeleton[docs]
+    $ python setup.py docs
 
+License
+-------
+MIT - See `LICENSE`_ for more information.
+
+Copyright
+---------
+Copyright (c) 2020 Chad Loether
 
 Reference
 =========
-
 ``skeleton`` module reference.
-
 
 ..  toctree::
     :maxdepth: 3
 
     modules
 
-
 Indices and tables
 ------------------
-
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _here: https://github.com/cloether/skeleton
+.. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE

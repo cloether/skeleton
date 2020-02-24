@@ -1,7 +1,7 @@
 Skeleton
 ========
 
-``skeleton`` is a module template used for easily creating Python modules.  The
+``skeleton`` is a template used for creating Python modules.  The
 official repo is `here`_.
 
   .. note:: This library is under active development.
