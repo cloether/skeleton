@@ -139,8 +139,8 @@ VERSION = METADATA["version"]
 ZIP_SAFE = False
 
 PROJECT_URLS = {
-    'Source': 'https://github.com/cloether/%s/' % TITLE,
-    'Tracker': 'https://github.com/cloether/%s/issues/' % TITLE
+    'Source': '%s/%s/' % (URL, TITLE),
+    'Tracker': '%s/%s/issues/' % (URL, TITLE)
 }
 
 setup(

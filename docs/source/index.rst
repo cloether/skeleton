@@ -1,7 +1,8 @@
 Skeleton Documentation
 ======================
-``skeleton`` is a template used for creating Python modules.  The
-official repo is `here`_.
+``skeleton`` is a template used for creating Python modules.
+
+The official repo is `here`_.
 
   .. note:: This library is under active development.
 
@@ -53,4 +54,4 @@ Indices and tables
 * :ref:`search`
 
 .. _here: https://github.com/cloether/skeleton
-.. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE
+.. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE.txt

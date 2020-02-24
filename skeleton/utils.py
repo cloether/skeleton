@@ -6,6 +6,7 @@ General Utilities.
 """
 import os
 import pickle
+from errno import EEXIST
 
 from six import binary_type
 
@@ -19,6 +20,19 @@ def as_text(text_or_bytes):
   if isinstance(text_or_bytes, binary_type):
     return text_or_bytes.decode('utf8')
   return text_or_bytes
+
+
+def mkdir_p(path):
+  """Unix mkdir equivalent.
+
+  Args:
+    path (str): Filepath
+  """
+  try:
+    os.makedirs(path)
+  except OSError as exc:  # Python >2.5
+    if not (exc.errno == EEXIST and os.path.isdir(path)):
+      raise
 
 
 def run_in_separate_process(func, *args, **kwargs):
