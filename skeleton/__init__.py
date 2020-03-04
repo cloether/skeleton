@@ -8,7 +8,7 @@ Skeleton is an template for easily creating Python modules.
 
 The official repo is at <https://github.com/cloether/skeleton>.
 
-:copyright: (c) Copyright 2020 Chad Loether
+:copyright: Copyright 2020 Chad Loether
 :license: MIT, see LICENSE for more details.
 """
 __all__ = (
@@ -26,7 +26,6 @@ __all__ = (
     "utils"
 )
 
-from . import cli, error, log, utils
 from .__version__ import (
   __author__,
   __author_email__,
@@ -37,6 +36,10 @@ from .__version__ import (
   __url__,
   __version__,
 )
+
+APP_ID = "-".join((__title__, __version__))
+
+from . import cli, error, log, utils
 
 try:
   from logging import NullHandler

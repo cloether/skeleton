@@ -1,11 +1,22 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """__main__.py
+
+Command Line Interface (CLI) Entry Point
 """
-from .cli import main
 
 if __name__ == "__main__":
+  import os
+  import signal
   import sys
+
+  from .cli import _shutdown_handler, main
+
+  signal.signal(signal.SIGTERM, _shutdown_handler)
+  signal.signal(signal.SIGINT, _shutdown_handler)
+
+  if os.name == 'nt':
+    signal.signal(signal.SIGBREAK, _shutdown_handler)
 
   # noinspection PyBroadException
   try:
@@ -14,7 +25,7 @@ if __name__ == "__main__":
     sys.stderr.write("%s\n" % exc)
     sys.exit(0)
   except KeyboardInterrupt as e:
-    sys.exit(0)
+    sys.exit(e)
   except SystemExit:
     raise
   except Exception:

@@ -27,14 +27,11 @@ def main():
     if os.path.isdir(file_or_dir):
       os.system("rm -rf %s" % file_or_dir)
       sys.stdout.write("Removed Directory: %s\n" % file_or_dir)
-      sys.stdout.flush()
     elif os.path.isfile(file_or_dir):
       os.remove(file_or_dir)
       sys.stdout.write("Removed File: %s\n" % file_or_dir)
-      sys.stdout.flush()
     else:
       sys.stderr.write("Unknown File or Directory: %s\n" % file_or_dir)
-      sys.stderr.flush()
   return 0
 
 

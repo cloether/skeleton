@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """error.py
-
-Module Error(s).
 """
 from __future__ import unicode_literals, print_function, absolute_import
 

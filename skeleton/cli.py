@@ -2,24 +2,17 @@
 # -*- encoding: utf-8 -*-
 """cli.py
 
-Command Line Interface.
+Command Line Interface (CLI).
 """
 from __future__ import unicode_literals, print_function, absolute_import
 
+import errno
 import logging
 import os
-import signal
 import sys
 
-from six import text_type
-
-from .__version__ import __description__, __version__, __title__
-from .log import (
-  LOGGING_DATEFMT,
-  LOGGING_FILENAME,
-  LOGGING_FORMAT,
-  LOGGING_LEVEL
-)
+from .__version__ import __description__, __version__
+from .log import LOGGING_FILENAME, LOGGING_LEVEL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,29 +41,28 @@ if _IS_WIN32:
 _DEFAULT_FILE_WRITE_MODE = 'wb' if _IS_PY2 else "w"
 
 
-def _handle_teardown_signals(callback):
-  """Register handler for SIGTERM/SIGINT/SIGBREAK signal.
-
-  Catch SIGTERM/SIGINT/SIGBREAK signals, and invoke callback
-
-  Notes:
-    this should be called in main thread since Python only
-    catches signals in main thread.
+def _shutdown_handler(signum, _):
+  """Handle Shutdown.
 
   Args:
-    callback (function): Callback for tear down signals.
+    signum (int): Signal Number,
+    _ (types.FrameType): Interrupted Stack Frame.
   """
-  signal.signal(signal.SIGTERM, callback)
-  signal.signal(signal.SIGINT, callback)
-  if os.name == 'nt':
-    signal.signal(signal.SIGBREAK, callback)
+  sys.stderr.write("\b\b\b\b\n")
+  LOGGER.debug("Received Signal(%d)", signum)
+  sys.exit(signum)
 
 
-def _shutdown_handler(signum, _):
-  """Handle Shutdown
-  """
-  LOGGER.debug("signal received: %d", signum)
-  sys.exit(0)
+def _epipe_wrapper(func):
+  def _f(*args, **kwargs):
+    try:
+      return func(*args, **kwargs)
+    except IOError as e:
+      if e.errno == errno.EPIPE:
+        sys.exit(e.errno)
+      raise
+
+  return _f
 
 
 def _arg_parser(**kwargs):
@@ -113,68 +105,27 @@ def _arg_parser(**kwargs):
   parser.add_argument(
       '-o', '--output',
       default="-",
-      dest='output',
-      help='Program output file or buffer.',
-      metavar='OUT',
+      metavar="path",
+      help='Output Location (default: -)',
       type=FileType(_DEFAULT_FILE_WRITE_MODE)
   )
   parser.add_argument(
-      '--log-datefmt',
-      dest='log_datefmt',
-      type=text_type,
-      help='Log Date Format. (default: %(default)s)',
-      metavar='LOG_DATEFMT',
-      default=LOGGING_DATEFMT
-  )
-  parser.add_argument(
-      '--log-file',
-      dest='log_file',
-      type=text_type,
-      help='Log File. (default: %(default)s)',
-      metavar='LOG_FILE',
+      '--logfile',
+      help='Log to File. (default: %(default)s)',
+      metavar='FILE',
       default=LOGGING_FILENAME
-  )
-  parser.add_argument(
-      '--log-format',
-      dest='log_format',
-      type=text_type,
-      help='Log Format. (default: %(default)s)',
-      metavar='LOG_FORMAT',
-      default=LOGGING_FORMAT
-  )
-  parser.add_argument(
-      '--log-level',
-      dest='log_level',
-      type=text_type,
-      help='log level',
-      metavar='LOG_LEVEL',
-      default=LOGGING_LEVEL
   )
   return parser
 
 
+@_epipe_wrapper
 def main():
   """Module CLI Entry Point
   """
-  _handle_teardown_signals(_shutdown_handler)
   _parser = _arg_parser()
-  _options = vars(_parser.parse_args())
-  _logging_format = _options.get("log_format", LOGGING_FORMAT)
-  _logging_datefmt = _options.get("log_datefmt", LOGGING_DATEFMT)
-  _logging_filename = _options.get("log_filename", LOGGING_FILENAME)
-  _logging_level = _options.get("log_level", LOGGING_LEVEL)
-  logging.basicConfig(
-      format=_logging_format,
-      filename=_logging_filename,
-      level=_logging_level,
-      datefmt=_logging_datefmt
-  )
-  LOGGER.setLevel(_logging_level)
-  _logging_stream_handler = logging.StreamHandler()
-  _logging_stream_handler.setFormatter(
-      logging.Formatter(_logging_format, datefmt=_logging_datefmt)
-  )
-  LOGGER.addHandler(_logging_stream_handler)
-  LOGGER.debug("Created logger: %s" % LOGGER)
-  LOGGER.error("%s command line interface not implemented." % __title__)
+  _options = _parser.parse_args()
+  logging.basicConfig(filename=_options.logfile,
+                      level=logging.DEBUG if _options.debug else LOGGING_LEVEL)
+  LOGGER.debug("Created Logger: %s" % LOGGER.name)
+  LOGGER.warning("Command line interface not implemented.")
   return 0

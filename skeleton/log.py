@@ -21,24 +21,13 @@ LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_FILEMODE = "a+"
 LOGGING_FILENAME = None
 LOGGING_FORMAT = (
-    "%(asctime)s:"
-    "[%(levelname)s]:"
-    "%(name)s:"
-    "%(filename)s:"
-    "%(funcName)s(%(lineno)d):"
-    "%(message)s"
+    "%(asctime)s:[%(levelname)s]:%(name)s:%(funcName)s"
+    "(%(lineno)d):%(message)s"
 )
 LOGGING_LEVEL = "WARNING"
 LOGGING_STYLE = "%"
-
-# LOGGING ENVIRONMENT VARIABLES
 LOGGING_JSON_SORT_KEYS = 1
 LOGGING_JSON_INDENT = 1
-
-# MISCELLANEOUS CONSTANTS
-CONTENT_DISPOSITION_RE = re.compile(
-    r"attachment; ?filename=[\"\w.]+", re.I
-)
 
 
 def log_level(level):
@@ -86,6 +75,9 @@ def log_request(request, **kwargs):
       LOGGER.debug("   - %s", text_type(request.body))
   except Exception as err:
     LOGGER.error("FAILED to log request: %r", err)
+
+
+CONTENT_DISPOSITION_RE = re.compile(r"attachment;\s?filename=[\"\w.]+", re.I)
 
 
 def log_response(response, **kwargs):

@@ -1,6 +1,3 @@
-skeleton
-========
-
 .. toctree::
    :maxdepth: 4
 

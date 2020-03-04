@@ -1,46 +1,32 @@
-skeleton package
-================
+.. automodule:: skeleton
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-Submodules
-----------
-
-skeleton.cli module
--------------------
-
+Command Line Interface (CLI)
+----------------------------
 .. automodule:: skeleton.cli
    :members:
    :undoc-members:
    :show-inheritance:
 
-skeleton.error module
----------------------
-
+Error
+-----
 .. automodule:: skeleton.error
    :members:
    :undoc-members:
    :show-inheritance:
 
-skeleton.log module
--------------------
-
+Logging
+-------
 .. automodule:: skeleton.log
    :members:
    :undoc-members:
    :show-inheritance:
 
-skeleton.utils module
----------------------
-
+Utility
+-------
 .. automodule:: skeleton.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: skeleton
    :members:
    :undoc-members:
    :show-inheritance:

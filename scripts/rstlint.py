@@ -1,9 +1,18 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-"""rst.py
+"""rstlint.py
 
 Check for stylistic and formal issues in .rst and .py files included
 in the documentation.
+
+Usage:
+  rstlint.py [-vf] [-s SEVERITY] [-i IGNORED_PATH*] PATH
+
+Options:
+  -v       verbose (print all checked file names)
+  -f       enable checkers that yield many false positives
+  -s sev   only show problems with severity >= sev
+  -i path  ignore subdir or file path
 
 References:
   https://raw.githubusercontent.com/python/devguide/master/tools/rstlint.py
@@ -11,17 +20,25 @@ References:
 from __future__ import with_statement, unicode_literals
 
 import getopt
+import logging
 import os
 import re
 import sys
 from collections import defaultdict
-from os.path import join, splitext, abspath, exists, basename
+from os.path import join, splitext, abspath, exists
 
 # TODO:
-#  wrong versions in versionadded/changed
-#  wrong markup after versionchanged directive
+#  Wrong versions in versionadded/changed.
+#  Wrong markup after versionchanged directive.
 
-directives = [
+LOGGER = logging.getLogger(__name__)
+
+CHECKERS = {}
+CHECKER_PROPS = {'severity': 1, 'falsepositives': False}
+
+DEFAULT_ROLE_RE = re.compile(r'(?:^| )`\w(?P<default_role>[^`]*?\w)?`(?:$| )')
+
+DIRECTIVES = [
     # standard docutils ones
     'admonition',
     'attention',
@@ -128,25 +145,13 @@ directives = [
     'versionadded',
     'versionchanged',
 ]
+ALL_DIRECTIVES = '(' + '|'.join(DIRECTIVES) + ')'
 
-all_directives = '(' + '|'.join(directives) + ')'
+LEAKED_MARKDOWN_RE = re.compile(r'[a-z]::\s|`|\.\.\s*\w+:')
 
-# noinspection RegExpAnonymousGroup
-seems_directive_re = re.compile(
-    r'(?<!\.)\.\. %s([^a-z:]|:(?!:))' % all_directives
+SEEMS_DIRECTIVE_RE = re.compile(
+    r'(?<!\.)\.\. %s(?P<directive>[^a-z:]|:(?!:))' % ALL_DIRECTIVES
 )
-
-# noinspection RegExpAnonymousGroup
-default_role_re = re.compile(r'(^| )`\w([^`]*?\w)?`($| )')
-
-leaked_markup_re = re.compile(r'[a-z]::\s|`|\.\.\s*\w+:')
-
-checkers = {}
-
-checker_props = {
-    'severity': 1,
-    'falsepositives': False
-}
 
 
 def checker(*suffixes, **kwargs):
@@ -155,9 +160,9 @@ def checker(*suffixes, **kwargs):
 
   def deco(func):
     for suffix in suffixes:
-      checkers.setdefault(suffix, []).append(func)
-    for prop in checker_props:
-      setattr(func, prop, kwargs.get(prop, checker_props[prop]))
+      CHECKERS.setdefault(suffix, []).append(func)
+    for prop in CHECKER_PROPS:
+      setattr(func, prop, kwargs.get(prop, CHECKER_PROPS[prop]))
     return func
 
   return deco
@@ -166,6 +171,9 @@ def checker(*suffixes, **kwargs):
 @checker('.py', severity=4)
 def check_syntax(fn, lines):
   """Check Python examples for valid syntax.
+
+  Yields:
+    tuple[int,str]: Line Number and Message.
   """
   code = ''.join(lines)
   if '\r' in code:
@@ -178,26 +186,27 @@ def check_syntax(fn, lines):
     yield err.lineno, 'not compilable: %s' % err
 
 
-# noinspection PyUnusedLocal
 @checker('.rst', severity=2)
-def check_suspicious_constructs(fn, lines):
+def check_suspicious_constructs(_, lines):
   """Check for suspicious reST constructs.
+
+  Yields:
+    tuple[int,str]: Line Number and Message.
   """
   in_prod = False
   for lno, line in enumerate(lines):
-    if seems_directive_re.search(line):
+    if SEEMS_DIRECTIVE_RE.search(line):
       yield lno + 1, 'comment seems to be intended as a directive'
     if '.. productionlist::' in line:
       in_prod = True
-    elif not in_prod and default_role_re.search(line):
+    elif not in_prod and DEFAULT_ROLE_RE.search(line):
       yield lno + 1, 'default role used'
     elif in_prod and not line.strip():
       in_prod = False
 
 
-# noinspection PyUnusedLocal
 @checker('.py', '.rst')
-def check_whitespace(fn, lines):
+def check_whitespace(_, lines):
   """Check for whitespace and line length issues.
   """
   for lno, line in enumerate(lines):
@@ -209,77 +218,54 @@ def check_whitespace(fn, lines):
       yield lno + 1, 'trailing whitespace'
 
 
-# noinspection PyUnusedLocal
 @checker('.rst', severity=0)
-def check_line_length(fn, lines):
+def check_line_length(_, lines):
   """Check for line length; this checker is not run by default.
+
+  Yields:
+    tuple[int,str]: Line Number and Message.
   """
   for lno, line in enumerate(lines):
     if len(line) > 81:
       # don't complain about tables, links and function signatures
       if (
-          line.lstrip()[0] not in '+|' and 'http://' not in line
-          and not line.lstrip().startswith(('.. function',
-                                            '.. method',
-                                            '.. cfunction')
-                                           )):
+          line.lstrip()[0] not in '+|'
+          and 'http://' not in line
+          and not line.lstrip().startswith(('.. function', '.. method',
+                                            '.. cfunction'))
+      ):
         yield lno + 1, "line too long"
 
 
-# noinspection PyUnusedLocal
 @checker('.html', severity=2, falsepositives=True)
-def check_leaked_markup(fn, lines):
+def check_leaked_markup(_, lines):
   """Check HTML files for leaked reST markup.
 
   Notes:
     This only works if the HTML files have been built.
+
+  Yields:
+    tuple[int,str]: Line Number and Message.
   """
   for lno, line in enumerate(lines):
-    if leaked_markup_re.search(line):
+    if LEAKED_MARKDOWN_RE.search(line):
       yield lno + 1, 'possibly leaked markup: %r' % line
 
 
-def main(argv):
-  """CLI Entry Point
-  """
-  usage = """%s
-Usage:
-  %s [-v] [-f] [-s sev] [-i path]* [path]
+def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
+  """Check for stylistic and formal issues in .rst and .py files
+  included in the documentation.
 
-Options:
-  -v       verbose (print all checked file names)
-  -f       enable checkers that yield many false positives
-  -s sev   only show problems with severity >= sev
-  -i path  ignore subdir or file path
-""" % (__doc__, basename(argv[0]))
-  try:
-    opts, args = getopt.getopt(argv[1:], 'vfs:i:')
-  except getopt.GetoptError:
-    sys.stderr.write("%s\n" % usage)
-    return 2
-  verbose = False
-  severity = 1
-  ignore = []
-  false_pos = False
-  for opt, val in opts:
-    if opt == '-v':
-      verbose = True
-    elif opt == '-f':
-      false_pos = True
-    elif opt == '-s':
-      severity = int(val)
-    elif opt == '-i':
-      ignore.append(abspath(val))
-  if len(args) == 0:
-    path = '.'
-  elif len(args) == 1:
-    path = args[0]
-  else:
-    sys.stderr.write("%s\n" % usage)
-    return 2
-  if not exists(path):
-    sys.stderr.write('Error: path %s does not exist\n' % path)
-    return 2
+  Args:
+    path (str): Path to search for files.
+    false_pos (bool): Enable checkers that yield many false positives
+    ignore (list): Ignore subdir or file path
+    severity (int): Only show problems with severity >= sev
+    verbose (bool): Verbose (print all checked file names)
+
+  Returns:
+    defaultdict[int,int]: Severity and Error Hit Count.
+  """
   count = defaultdict(int)
   for root, dirs, files in os.walk(path):
     # ignore subdirectories in ignore list
@@ -290,20 +276,18 @@ Options:
       fn = join(root, fn)
       if fn[:2] == './':
         fn = fn[2:]
-      # ignore files in ignore list
       if abspath(fn) in ignore:
-        continue
-      ext = splitext(fn)[1]
-      checker_list = checkers.get(ext, None)
+        continue  # ignore files in ignore list
+      checker_list = CHECKERS.get(splitext(fn)[1], None)
       if not checker_list:
         continue
       if verbose:
-        sys.stdout.write('Checking %s...\n' % fn)
+        sys.stdout.write('[-] CHECKING: %s...\n' % fn)
       try:
-        with open(fn, encoding='utf-8') as f:
+        with open(fn) as f:
           lines = list(f)
-      except (IOError, OSError) as err:
-        sys.stderr.write('%s: cannot open: %s\n' % (fn, err))
+      except (UnicodeDecodeError, IOError, OSError) as err:
+        sys.stderr.write('[!] ERROR: %s: cannot open: %s\n' % (fn, err))
         count[4] += 1
         continue
       for _checker in checker_list:
@@ -311,25 +295,92 @@ Options:
           continue
         c_sev = _checker.severity
         if c_sev >= severity:
-          for lno, msg in _checker(fn, lines):
-            sys.stdout.write('[%d] %s:%d: %s\n' % (c_sev, fn, lno, msg))
+          for n, msg in _checker(fn, lines):
+            sys.stdout.write('[%d] PROBLEMS: %s:%d: %s\n' % (c_sev, fn, n, msg))
             count[c_sev] += 1
-  if verbose:
-    sys.stdout.write("\n")
   if not count:
     if severity > 1:
-      sys.stdout.write('No problems with severity >= %d found.\n' % severity)
+      sys.stdout.write('No Problems With Severity >= %d Found.\n' % severity)
     else:
-      sys.stdout.write('No problems found.\n')
+      sys.stdout.write('No Problems Found.\n')
   else:
     for severity in sorted(count):
       number = count[severity]
-      sys.stdout.write(
-          '%d problem%s with severity %d found.\n'
-          % (number, 's' if number > 1 else '', severity)
-      )
-  return int(bool(count))
+      sys.stdout.write('%d Problem%s With Severity %d Found.\n' % (
+          number, 's' if number > 1 else '', severity
+      ))
+  return count
+
+
+def _parse_args(argv):
+  """Parse CLI Arguments.
+  """
+  try:
+    opts, args = getopt.getopt(argv[1:], 'vfs:i:')
+  except getopt.GetoptError:
+    sys.stderr.write(__doc__)
+    return 2
+
+  argd = {
+      "verbose": False,
+      "severity": 1,
+      "ignore": [],
+      "false_pos": False,
+  }
+
+  for opt, val in opts:
+    if opt == '-v':
+      argd["verbose"] = True
+    elif opt == '-f':
+      argd["false_pos"] = True
+    elif opt == '-s':
+      argd["severity"] = int(val)
+    elif opt == '-i':
+      argd["ignore"].append(abspath(val))
+
+  if len(args) == 0:
+    argd["path"] = '.'
+  elif len(args) == 1:
+    argd["path"] = args[0]
+  else:
+    sys.stderr.write(__doc__)
+    return 2
+
+  if not exists(argd["path"]):
+    sys.stderr.write('ERROR: path %s does not exist\n' % argd["path"])
+    return 2
+
+  return argd
+
+
+def main():
+  """Entry Point
+  """
+  import signal
+
+  def _shutdown_handler(signum, _):
+    """Handle Shutdown.
+
+    Args:
+      signum (int): Signal Number,
+      _ (types.FrameType): Interrupted Stack Frame.
+    """
+    sys.stderr.write("\b\b\b\b\n")
+    LOGGER.debug("Received Signal(%d)", signum)
+    sys.exit(signum)
+
+  signal.signal(signal.SIGTERM, _shutdown_handler)
+  signal.signal(signal.SIGINT, _shutdown_handler)
+  if os.name == 'nt':
+    signal.signal(signal.SIGBREAK, _shutdown_handler)
+
+  argd = _parse_args(sys.argv)
+  if not isinstance(argd, dict):
+    return argd
+  if argd["verbose"]:
+    logging.basicConfig(level=logging.DEBUG)
+  return int(bool(rstlint(**argd)))
 
 
 if __name__ == '__main__':
-  sys.exit(main(sys.argv))
+  sys.exit(main())
