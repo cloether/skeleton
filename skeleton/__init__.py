@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """__init__.py
 
 Skeleton
@@ -45,6 +45,7 @@ try:
   from logging import NullHandler
 except ImportError:
   from logging import Handler
+
 
   class NullHandler(Handler):
     """Needed for Backwards Compatibility (Python 2.6).

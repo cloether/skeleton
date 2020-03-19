@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """__version__.py
 
 Module Attributes.

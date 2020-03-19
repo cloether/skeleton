@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """test_cli.py
 
 Command Line Interface (cli) Tests.

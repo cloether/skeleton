@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """setup.py
 
 References:
@@ -108,7 +108,14 @@ EXTRAS_REQUIRE = {
         "tox",
         "tox-travis",
         "twine"
-    ]
+    ],
+    ':python_version=="2.6"': [
+        'ordereddict==1.1',
+        'simplejson==3.3.0'
+    ],
+    ':python_version=="2.7"': [
+        "ipaddress"
+    ],
 }
 
 INCLUDE_PACKAGE_DATA = False
@@ -142,6 +149,61 @@ PROJECT_URLS = {
     'Source': '%s/%s/' % (URL, TITLE),
     'Tracker': '%s/%s/issues/' % (URL, TITLE)
 }
+
+setup_options = dict(
+    author=AUTHOR,
+    author_email=AUTHOR_EMAIL,
+    classifiers=CLASSIFIERS,
+    description=DESCRIPTION,
+    entry_points=ENTRY_POINTS,
+    extras_require=EXTRAS_REQUIRE,
+    include_package_data=INCLUDE_PACKAGE_DATA,
+    install_requires=REQUIREMENTS,
+    keywords=KEYWORDS,
+    license=LICENSE,
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
+    name=NAME,
+    packages=PACKAGES,
+    package_data=PACKAGE_DATA,
+    platforms=PLATFORMS,
+    project_urls=PROJECT_URLS,
+    scripts=SCRIPTS,
+    url=URL,
+    version=VERSION,
+    zip_safe=ZIP_SAFE
+)
+
+import sys
+
+if 'py2exe' in sys.argv:
+  # This will actually give us a py2exe command.
+  #
+  # References:
+  #   https://github.com/aws/aws-cli/blob/develop/setup.py
+  #
+  # noinspection PyUnresolvedReferences,PyPackageRequirements
+  import py2exe
+
+  # And we have some py2exe specific options.
+  setup_options['options'] = {
+      'py2exe': {
+          'optimize': 0,
+          'skip_archive': True,
+          'dll_excludes': ['crypt32.dll'],
+          'packages': [
+              'docutils',
+              'urllib',
+              'httplib',
+              'HTMLParser',
+              __name__,
+              'ConfigParser',
+              'xml.etree',
+              'pipes'
+          ],
+      }
+  }
+  setup_options['console'] = ['bin/mmdb']
 
 setup(
     author=AUTHOR,

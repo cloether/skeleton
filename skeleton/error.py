@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """error.py
 """
-from __future__ import unicode_literals, print_function, absolute_import
+from __future__ import absolute_import, print_function, unicode_literals
 
 
 def _err_from_packed_args(exception_cls, args=None, kwargs=None):

@@ -1,24 +1,27 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """cli.py
 
 Command Line Interface (CLI).
 """
-from __future__ import unicode_literals, print_function, absolute_import
+from __future__ import absolute_import, print_function, unicode_literals
 
 import errno
 import logging
 import os
 import sys
 
-from .__version__ import __description__, __version__
+from .__version__ import (
+  __description__,
+  __title__,
+  __version__
+)
 from .log import LOGGING_FILENAME, LOGGING_LEVEL
 
-LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 _IS_PY2 = sys.version_info[0]
 _IS_WIN32 = sys.platform == "Win32"
-
 if _IS_WIN32:
   # Binary mode is required for persistent mode on windows.
   # sys.stdout in Python is by default opened in text mode,
@@ -49,7 +52,7 @@ def _shutdown_handler(signum, _):
     _ (types.FrameType): Interrupted Stack Frame.
   """
   sys.stderr.write("\b\b\b\b\n")
-  LOGGER.debug("Received Signal(%d)", signum)
+  _LOGGER.debug("Received Signal(%d)", signum)
   sys.exit(signum)
 
 
@@ -90,7 +93,8 @@ def _arg_parser(**kwargs):
       conflict_handler="resolve",
       description=__description__,
       formatter_class=ArgumentDefaultsHelpFormatter,
-      usage=__doc__
+      usage=__doc__,
+      prog=__title__,
   )
   parser.add_argument(
       "-d", "--debug",
@@ -107,7 +111,7 @@ def _arg_parser(**kwargs):
       default="-",
       metavar="path",
       help='Output Location (default: -)',
-      type=FileType(_DEFAULT_FILE_WRITE_MODE)
+      type=FileType(_DEFAULT_FILE_WRITE_MODE + "+")
   )
   parser.add_argument(
       '--logfile',
@@ -124,8 +128,12 @@ def main():
   """
   _parser = _arg_parser()
   _options = _parser.parse_args()
-  logging.basicConfig(filename=_options.logfile,
-                      level=logging.DEBUG if _options.debug else LOGGING_LEVEL)
-  LOGGER.debug("Created Logger: %s" % LOGGER.name)
-  LOGGER.warning("Command line interface not implemented.")
+  logging.basicConfig(
+      filename=_options.logfile,
+      level=logging.DEBUG if _options.debug else LOGGING_LEVEL
+  )
+  _LOGGER.debug("Created Logger: %s", _LOGGER.name)
+  _LOGGER.warning("Command line interface not implemented.")
+  if os.isatty(_options.output):
+    _options.output.write("\n")
   return 0

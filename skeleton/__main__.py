@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """__main__.py
 
 Command Line Interface (CLI) Entry Point
@@ -14,7 +14,6 @@ if __name__ == "__main__":
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
-
   if os.name == 'nt':
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 

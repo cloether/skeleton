@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """log.py
 
 Logging Utilities.
@@ -12,7 +12,7 @@ import types
 from logging import _checkLevel
 from os import getenv
 
-from six import iteritems, text_type, string_types
+from six import iteritems, string_types, text_type
 
 LOGGER = logging.getLogger(__name__)
 
@@ -20,10 +20,7 @@ LOGGER = logging.getLogger(__name__)
 LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_FILEMODE = "a+"
 LOGGING_FILENAME = None
-LOGGING_FORMAT = (
-    "%(asctime)s:[%(levelname)s]:%(name)s:%(funcName)s"
-    "(%(lineno)d):%(message)s"
-)
+LOGGING_FORMAT = "%(asctime)s:[%(levelname)s]:%(name)s:%(funcName)s(%(lineno)d):%(message)s"
 LOGGING_LEVEL = "WARNING"
 LOGGING_STYLE = "%"
 LOGGING_JSON_SORT_KEYS = 1

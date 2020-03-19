@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -*- coding: utf8 -*-
 """rstlint.py
 
 Check for stylistic and formal issues in .rst and .py files included
