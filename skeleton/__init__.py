@@ -46,7 +46,6 @@ try:
 except ImportError:
   from logging import Handler
 
-
   class NullHandler(Handler):
     """Needed for Backwards Compatibility (Python 2.6).
 
