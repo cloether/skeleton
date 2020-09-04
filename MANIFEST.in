@@ -2,11 +2,9 @@ include LICENSE.txt
 include requirements.txt
 include README.rst
 include CHANGELOG.rst
-
 exclude .travis.yaml
 exclude pytest.ini
 exclude tox.ini
-
 recursive-include docs Makefile
 recursive-include docs make.bat
 recursive-include docs source *.py
@@ -17,10 +15,8 @@ recursive-include docs source _templates *.html
 recursive-include scripts *.py
 recursive-include scripts *.sh
 recursive-include tests *.py
-
 global-exclude *~
 global-exclude .DS_Store
 global-exclude __pycache__
 global-exclude *.py[cod]
-
 prune docs/build

@@ -1,7 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
+#!/usr/bin/env python3
+# coding=utf8
 """test_log.py
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
 import pytest
 
 from skeleton.log import log_request, log_response

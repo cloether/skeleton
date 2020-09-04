@@ -1,16 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
-"""__init__.py
-
+# coding=utf8
+"""
 Skeleton
---------
+========
 Skeleton is an template for easily creating Python modules.
 
-The official repo is at <https://github.com/cloether/skeleton>.
-
-:copyright: Copyright 2020 Chad Loether
-:license: MIT, see LICENSE for more details.
+See the official repo [here](https://github.com/cloether/skeleton)
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
 __all__ = (
     "__author__",
     "__author_email__",
@@ -37,7 +34,7 @@ from .__version__ import (
   __version__,
 )
 
-APP_ID = "-".join((__title__, __version__))
+__app_id__ = "-".join((__title__, __version__))
 
 from . import cli, error, log, utils
 
@@ -54,7 +51,8 @@ except ImportError:
     """
 
     def emit(self, record):
-      """Emit Nothing"""
+      """Emit Nothing
+      """
 
 from logging import getLogger
 

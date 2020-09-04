@@ -1,8 +1,21 @@
-# -*- coding: utf8 -*-
+# coding=utf8
 """__version__.py
 
-Module Attributes.
+Module Attributes
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
+__all__ = (
+    "__author__",
+    "__author_email__",
+    "__copyright__",
+    "__description__",
+    "__title__",
+    "__license__",
+    "__url__",
+    "__version__",
+)
+
 __author__ = "Chad Loether"
 __author_email__ = "chad.loether@outlook.com"
 __copyright__ = "Copyright 2020 Chad Loether"

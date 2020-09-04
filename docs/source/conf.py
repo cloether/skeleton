@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 # Configuration file for the Sphinx documentation builder.
 # This file only contains a selection of the most common options.
 # For a full list see the documentation:
 #   http://www.sphinx-doc.org/en/master/config
-from __future__ import unicode_literals, absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
@@ -14,7 +15,7 @@ import time
 # is relative to the documentation root, use os.path.abspath to make
 # it absolute, like shown here.
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath(__file__))
 
 from skeleton.__version__ import (
   __author__,
@@ -25,8 +26,7 @@ from skeleton.__version__ import (
 
 # -- Project information --------------------------------------------
 
-project = __title__
-author = __author__
+project, author = __title__, __author__
 
 # noinspection PyShadowingBuiltins
 copyright = '%s, %s' % (author, time.strftime('%Y'))

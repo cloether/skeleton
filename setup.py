@@ -1,12 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
+# coding=utf8
 """setup.py
 
 References:
   https://packaging.python.org/guides/distributing-packages-using-setuptools/
   https://setuptools.readthedocs.io/en/latest/setuptools.html
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
 import re
+import sys
 from io import open
 # io.open is needed for projects that support Python 2.7. It ensures open()
 # defaults to text mode with universal newlines, and accepts an argument to
@@ -18,10 +20,8 @@ from os import path
 from setuptools import find_packages, setup
 
 ROOT = path.abspath(path.dirname(__file__))
-
 MODULE_META_RE = re.compile(
-    r"^__(?P<name>.*)__ = ['\"](?P<value>[^'\"]*)['\"]",
-    re.MULTILINE
+    r"^__(?P<name>.*)__ = ['\"](?P<value>[^'\"]*)['\"]", re.M
 )
 
 
@@ -50,18 +50,15 @@ def __find_meta(filepath):
   content = __readfile(filepath)
   match = MODULE_META_RE.findall(content)
   if not match:
-    raise RuntimeError("Unable to find module meta.")
+    raise RuntimeError("error finding module meta in file: %s" % filepath)
   return dict(match)
 
 
 PACKAGES = find_packages(exclude=('tests',))
-
 NAME = PACKAGES[0]
-
 METADATA = __find_meta(path.join(ROOT, NAME, "__version__.py"))
 
 AUTHOR = METADATA.get("author")
-
 AUTHOR_EMAIL = METADATA.get("author_email")
 
 CLASSIFIERS = [
@@ -82,7 +79,6 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.7',
     'Topic :: Internet',
 ]
-
 DESCRIPTION = METADATA.get("description")
 
 ENTRY_POINTS = {
@@ -92,7 +88,6 @@ ENTRY_POINTS = {
         }
     ]
 }
-
 EXTRAS_REQUIRE = {
     "docs": [
         "sphinx",
@@ -119,28 +114,21 @@ EXTRAS_REQUIRE = {
 }
 
 INCLUDE_PACKAGE_DATA = False
-
 KEYWORDS = '%s template' % NAME
-
 LICENSE = METADATA.get("license")
 
-LONG_DESCRIPTION = __readfile(path.join(ROOT, 'README.rst'))
-
 # TODO: detect long description file/content type.
+LONG_DESCRIPTION = __readfile(path.join(ROOT, 'README.rst'))
 LONG_DESCRIPTION_CONTENT_TYPE = "text/x-rst"
 
 PACKAGE_DATA = {}
 
 PLATFORMS = 'Posix; MacOS X; Windows'
-
 REQUIREMENTS = __readlines(path.join(ROOT, "requirements.txt"))
-
 SCRIPTS = None
 
 TITLE = METADATA.get("title")
-
 URL = METADATA.get("url")
-
 VERSION = METADATA["version"]
 
 ZIP_SAFE = False
@@ -174,8 +162,6 @@ setup_options = dict(
     zip_safe=ZIP_SAFE
 )
 
-import sys
-
 if 'py2exe' in sys.argv:
   # This will actually give us a py2exe command.
   #
@@ -190,20 +176,22 @@ if 'py2exe' in sys.argv:
       'py2exe': {
           'optimize': 0,
           'skip_archive': True,
-          'dll_excludes': ['crypt32.dll'],
+          'dll_excludes': [
+              'crypt32.dll'
+          ],
           'packages': [
               'docutils',
               'urllib',
               'httplib',
               'HTMLParser',
-              __name__,
+              NAME,
               'ConfigParser',
               'xml.etree',
               'pipes'
           ],
       }
   }
-  setup_options['console'] = ['bin/mmdb']
+  setup_options['console'] = [path.join("bin", NAME)]
 
 setup(
     author=AUTHOR,

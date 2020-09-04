@@ -1,30 +1,77 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
+# coding=utf8
 """log.py
 
-Logging Utilities.
+Logging Utilities
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
 import json
 import logging
 import re
 import types
-# noinspection PyUnresolvedReferences,PyProtectedMember
-from logging import _checkLevel
+from logging import _checkLevel  # noqa
 from os import getenv
 
 from six import iteritems, string_types, text_type
 
+__all__ = (
+    "LOGGING_DATEFMT",
+    "LOGGING_FILEMODE",
+    "LOGGING_FILENAME",
+    "LOGGING_FORMAT",
+    "LOGGING_LEVEL",
+    "LOGGING_STYLE",
+    "log_level",
+    "log_request",
+    "log_response"
+)
+
+from skeleton.utils import as_number
+
 LOGGER = logging.getLogger(__name__)
+
+_CONTENT_DISPOSITION_RE = re.compile(
+    r"attachment;\s?filename=[\"\w.]+",
+    re.I
+)
 
 # LOGGING OPTIONS
 LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_FILEMODE = "a+"
 LOGGING_FILENAME = None
-LOGGING_FORMAT = "%(asctime)s:[%(levelname)s]:%(name)s:%(funcName)s(%(lineno)d):%(message)s"
+LOGGING_FORMAT = (
+    "%(asctime)s:[%(levelname)s]:%(name)s:%(funcName)s(%(lineno)d):%(message)s"
+)
 LOGGING_LEVEL = "WARNING"
 LOGGING_STYLE = "%"
-LOGGING_JSON_SORT_KEYS = 1
-LOGGING_JSON_INDENT = 1
+
+_LOGGING_JSON_SORT_KEYS = 1
+_LOGGING_JSON_INDENT = 1
+
+
+def _getenv(name, default=None):
+  value = getenv(name, default)
+  if not value or value is None:
+    return value
+  if isinstance(value, string_types):
+    value = value.strip()
+    if value.isdecimal():
+      value = float(value)
+    elif value.isdigit():
+      value = int(value)
+    elif value.lower() == "true":
+      value = True
+    elif value.lower() == "false":
+      value = False
+  return bool(value)
+
+
+def _getenv_json_sort_keys(default=_LOGGING_JSON_SORT_KEYS):
+  return _getenv("LOGGING_JSON_SORT_KEYS", default)
+
+
+def _getenv_json_indent(default=_LOGGING_JSON_INDENT):
+  return _getenv("LOGGING_JSON_SORT_KEYS", default)
 
 
 def log_level(level):
@@ -36,11 +83,9 @@ def log_level(level):
   Returns:
     int: Log level
   """
+  level = as_number(level)
   if isinstance(level, string_types):
-    if level.isdigit():
-      level = int(level)
-    else:
-      level = level.upper()
+    level = level.upper()
   # noinspection PyProtectedMember
   return _checkLevel(level)
 
@@ -74,9 +119,6 @@ def log_request(request, **kwargs):
     LOGGER.error("FAILED to log request: %r", err)
 
 
-CONTENT_DISPOSITION_RE = re.compile(r"attachment;\s?filename=[\"\w.]+", re.I)
-
-
 def log_response(response, **kwargs):
   """Log HTTP Response
 
@@ -95,7 +137,7 @@ def log_response(response, **kwargs):
     LOGGER.debug(" - STATUS CODE: %s", response.status_code)
     LOGGER.debug(" - CONTENT:")
     header = response.headers.get("content-disposition")
-    if header and CONTENT_DISPOSITION_RE.match(header):
+    if header and _CONTENT_DISPOSITION_RE.match(header):
       filename = header.partition("=")[2]
       LOGGER.debug("   - (FILE-ATTACHMENT: %s)", filename)
     elif response.headers.get("content-type", "").endswith("octet-stream"):
@@ -109,12 +151,12 @@ def log_response(response, **kwargs):
         try:
           response_json = json.dumps(
               response.json(),
-              indent=getenv("LOGGING_JSON_INDENT", LOGGING_JSON_INDENT),
-              sort_keys=getenv("LOGGING_JSON_SORT_KEYS", LOGGING_JSON_SORT_KEYS)
+              indent=_getenv_json_indent(),
+              sort_keys=_getenv_json_sort_keys()
           )
           for line in response_json.splitlines():
             LOGGER.debug("   - %s", line)
-        except ValueError as e:
+        except ValueError:
           # Catch ValueError, which handles simplejson.JSONDecoderError,
           # because it inherits from ValueError.
           response_json = (response.content or b'(NO-CONTENT)').decode("utf8")

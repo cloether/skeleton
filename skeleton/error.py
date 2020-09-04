@@ -1,8 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
+# coding=utf8
 """error.py
+
+Module Exception Definitions
 """
 from __future__ import absolute_import, print_function, unicode_literals
+
+__all__ = (
+    "BaseError",
+)
 
 
 def _err_from_packed_args(exception_cls, args=None, kwargs=None):

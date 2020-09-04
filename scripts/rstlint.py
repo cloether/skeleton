@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
+#!/usr/bin/env python3
+# coding=utf8
 """rstlint.py
 
 Check for stylistic and formal issues in .rst and .py files included
@@ -17,7 +17,7 @@ Options:
 References:
   https://raw.githubusercontent.com/python/devguide/master/tools/rstlint.py
 """
-from __future__ import with_statement, unicode_literals
+from __future__ import print_function, unicode_literals, with_statement
 
 import getopt
 import logging
@@ -25,7 +25,7 @@ import os
 import re
 import sys
 from collections import defaultdict
-from os.path import join, splitext, abspath, exists
+from os.path import abspath, exists, join, splitext
 
 # TODO:
 #  Wrong versions in versionadded/changed.
@@ -34,6 +34,7 @@ from os.path import join, splitext, abspath, exists
 LOGGER = logging.getLogger(__name__)
 
 CHECKERS = {}
+
 CHECKER_PROPS = {'severity': 1, 'falsepositives': False}
 
 DEFAULT_ROLE_RE = re.compile(r'(?:^| )`\w(?P<default_role>[^`]*?\w)?`(?:$| )')
@@ -145,6 +146,7 @@ DIRECTIVES = [
     'versionadded',
     'versionchanged',
 ]
+
 ALL_DIRECTIVES = '(' + '|'.join(DIRECTIVES) + ')'
 
 LEAKED_MARKDOWN_RE = re.compile(r'[a-z]::\s|`|\.\.\s*\w+:')
@@ -220,7 +222,7 @@ def check_whitespace(_, lines):
 
 @checker('.rst', severity=0)
 def check_line_length(_, lines):
-  """Check for line length; this checker is not run by default.
+  """Check for line length; this checker is not _run by default.
 
   Yields:
     tuple[int,str]: Line Number and Message.
