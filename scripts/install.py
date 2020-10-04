@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding=utf8
 """install.py
 """
@@ -56,7 +57,7 @@ def main():
   # full path of the currently running python interpreter
   exe = sys.executable
 
-  args = " ".join(sys.argv)
+  args = " ".join(sys.argv[1:])
 
   # install requirements
   run_in_root("{0} -m pip install -r requirements.txt {1}".format(exe, args))

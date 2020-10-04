@@ -109,6 +109,7 @@ EXTRAS_REQUIRE = {
         "guzzle_sphinx_theme"
     ],
     "tests": [
+        "wheel",
         "coverage",
         "pycodestyle",
         "pytest",
