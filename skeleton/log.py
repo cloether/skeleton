@@ -157,8 +157,8 @@ def log_response(response, **kwargs):
           for line in response_json.splitlines():
             LOGGER.debug("   - %s", line)
         except ValueError:
-          # Catch ValueError, which handles simplejson.JSONDecoderError,
-          # because it inherits from ValueError.
+          # Catch ValueError to handles simplejson.JSONDecoderError which
+          # inherits from ValueError
           response_json = (response.content or b'(NO-CONTENT)').decode("utf8")
           LOGGER.debug("   - %s", response_json)
   except Exception as err:

@@ -11,6 +11,7 @@ See the official repo [here](https://github.com/cloether/skeleton)
 from __future__ import absolute_import, print_function, unicode_literals
 
 __all__ = (
+    "__app_id__",
     "__author__",
     "__author_email__",
     "__copyright__",

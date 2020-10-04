@@ -125,8 +125,6 @@ def main():
 
   LOGGER.debug("New Logger: level=%s logfile=%s", log_level, logfile)
   LOGGER.warning("Command line interface not implemented.")
-
   if os.isatty(options.output):
     options.output.write("\n")
-
   return 0
