@@ -1,7 +1,9 @@
 # coding=utf8
-"""
+"""__init__.py
+
 Skeleton
 ========
+
 Skeleton is an template for easily creating Python modules.
 
 See the official repo [here](https://github.com/cloether/skeleton)

@@ -5,9 +5,7 @@ Module Exception Definitions
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-__all__ = (
-    "BaseError",
-)
+__all__ = ("BaseError",)
 
 
 def _err_from_packed_args(exception_cls, args=None, kwargs=None):
@@ -30,8 +28,10 @@ def _err_from_packed_args(exception_cls, args=None, kwargs=None):
   """
   if args is None:
     args = ()
+
   if kwargs is None:
     kwargs = {}
+
   return exception_cls(*args, **kwargs)
 
 

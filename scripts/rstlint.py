@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # coding=utf8
 """rstlint.py
 
@@ -34,11 +33,8 @@ from os.path import abspath, exists, join, splitext
 LOGGER = logging.getLogger(__name__)
 
 CHECKERS = {}
-
 CHECKER_PROPS = {'severity': 1, 'falsepositives': False}
-
 DEFAULT_ROLE_RE = re.compile(r'(?:^| )`\w(?P<default_role>[^`]*?\w)?`(?:$| )')
-
 DIRECTIVES = [
     # standard docutils ones
     'admonition',
@@ -146,13 +142,11 @@ DIRECTIVES = [
     'versionadded',
     'versionchanged',
 ]
-
 ALL_DIRECTIVES = '(' + '|'.join(DIRECTIVES) + ')'
-
 LEAKED_MARKDOWN_RE = re.compile(r'[a-z]::\s|`|\.\.\s*\w+:')
-
 SEEMS_DIRECTIVE_RE = re.compile(
-    r'(?<!\.)\.\. %s(?P<directive>[^a-z:]|:(?!:))' % ALL_DIRECTIVES
+    r'(?<!\.)\.\. %s(?P<directive>[^a-z:]|:(?!:))'
+    % ALL_DIRECTIVES
 )
 
 
@@ -373,14 +367,18 @@ def main():
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
+
   if os.name == 'nt':
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 
   argd = _parse_args(sys.argv)
+
   if not isinstance(argd, dict):
     return argd
+
   if argd["verbose"]:
     logging.basicConfig(level=logging.DEBUG)
+
   return int(bool(rstlint(**argd)))
 
 

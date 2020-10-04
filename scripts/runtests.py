@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # coding=utf8
 """run_tests.py
 
@@ -7,7 +6,7 @@ Don't _run tests from the root repo dir.
 We want to ensure we're importing from the installed binary package not
 from the CWD.
 """
-from __future__ import print_function, unicode_literals
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 from contextlib import contextmanager
@@ -73,6 +72,7 @@ def main():
 
     tests_dir = os.path.join(repo_root, 'tests')
     tests_log_file = os.path.join(tests_dir, "pytest.log")
+
     touch(tests_log_file)  # prevent pytest errors
 
     tests_html_filename = "{0!s}.html".format(env_name)
@@ -89,6 +89,7 @@ def main():
             posargs=tests_dir
         )
     )
+
   return return_code
 
 

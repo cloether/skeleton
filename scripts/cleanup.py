@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # coding=utf8
 """cleanup.py
 """
@@ -19,7 +18,7 @@ FILES = [
 ]
 
 
-def module_name(exclude=("tests.*", "tests"), where="."):
+def module_name(exclude=("test",), where="."):
   """Get current module name.
 
   Returns:
@@ -34,6 +33,7 @@ def main():
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
   files = FILES.copy()
+
   files.append(
       ("{0!s}.egg-info".format(module_name(where=repo_root)),)
   )
@@ -59,6 +59,7 @@ def main():
       _handle_file(file_or_dir)
     else:
       _handle_unknown(file_or_dir)
+
   return 0
 
 

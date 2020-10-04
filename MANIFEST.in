@@ -1,7 +1,7 @@
-include LICENSE.txt
+include CHANGELOG*
+include LICENSE*
+include README*
 include requirements.txt
-include README.rst
-include CHANGELOG.rst
 exclude .travis.yaml
 exclude pytest.ini
 exclude tox.ini

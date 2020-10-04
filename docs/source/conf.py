@@ -1,8 +1,11 @@
-#!/usr/bin/env python3
-# Configuration file for the Sphinx documentation builder.
-# This file only contains a selection of the most common options.
-# For a full list see the documentation:
-#   http://www.sphinx-doc.org/en/master/config
+# coding=utf8
+"""Configuration file for the Sphinx documentation builder.
+
+This file only contains a selection of the most common options.
+
+For a full list see the documentation:
+  http://www.sphinx-doc.org/en/master/config
+"""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
@@ -99,7 +102,7 @@ htmlhelp_basename = '%sdoc' % project
 # every page bottom, using the given strftime format.
 html_last_updated_fmt = '%b %d, %Y'
 
-import guzzle_sphinx_theme
+import guzzle_sphinx_theme  # noqa
 
 html_translator_class = 'guzzle_sphinx_theme.HTMLTranslator'
 html_theme_path = guzzle_sphinx_theme.html_theme_path()

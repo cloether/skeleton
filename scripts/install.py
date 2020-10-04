@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # coding=utf8
 """install.py
 """
@@ -51,16 +50,19 @@ def main():
   """CLI Entry Point
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
   run_in_root = run_factory(repo_root)
 
   # full path of the currently running python interpreter
   exe = sys.executable
 
+  args = " ".join(sys.argv)
+
   # install requirements
-  run_in_root("{0!s} -m pip install -r requirements.txt".format(exe))
+  run_in_root("{0} -m pip install -r requirements.txt {1}".format(exe, args))
 
   # install module with docs and test extras
-  run_in_root("{0!s} -m pip install .[docs,tests]".format(exe))
+  run_in_root("{0} -m pip install .[docs,tests] {1}".format(exe, args))
 
   # cleanup generated distribution
   if os.path.isdir("dist") and os.listdir("dist"):
@@ -73,7 +75,7 @@ def main():
   dist = os.path.join(repo_root, "dist")
   dist = os.path.join(dist, os.listdir(dist)[0])
 
-  run_in_root("{0!s} -m pip install {1!s}".format(exe, dist))
+  run_in_root("{0} -m pip install {1} {2}".format(exe, dist, args))
   return 0
 
 

@@ -138,4 +138,3 @@ dmypy.json
 tests/.pytest_cache/
 tests/reports/
 tests/*.log
-!/scripts/winbuild.py

@@ -72,6 +72,7 @@ def arg_parser(**kwargs):
   )
 
   parser = ArgumentParser(**kwargs)
+
   parser.set_defaults(
       argument_default=SUPPRESS,
       conflict_handler="resolve",
@@ -80,16 +81,19 @@ def arg_parser(**kwargs):
       usage=__doc__,
       prog=__title__,
   )
+
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
       help="Enable DEBUG logging"
   )
+
   parser.add_argument(
       "-v", "--version",
       action="version",
       version=__version__
   )
+
   parser.add_argument(
       '-o', '--output',
       default="-",
@@ -97,12 +101,14 @@ def arg_parser(**kwargs):
       help='Output Location (default: %(default)s)',
       type=FileType("{0!s}+".format(_DEFAULT_FILE_WRITE_MODE))
   )
+
   parser.add_argument(
       '--logfile',
       help='Log to File. (default: %(default)s)',
       metavar='FILE',
       default=LOGGING_FILENAME
   )
+
   return parser
 
 
