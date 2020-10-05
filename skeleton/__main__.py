@@ -39,8 +39,9 @@ if __name__ == "__main__":
   # noinspection PyBroadException
   try:
     status = main()
-  except NotImplementedError as exc:
-    sys.stderr.write("%s\n" % exc)
+  except NotImplementedError as e:
+    sys.stderr.write("{0!r}".format(e))
+    sys.stderr.flush()
     sys.exit(0)
   except KeyboardInterrupt as e:
     sys.exit(e)

@@ -51,12 +51,10 @@ def main():
   """CLI Entry Point
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
   run_in_root = run_factory(repo_root)
 
   # full path of the currently running python interpreter
   exe = sys.executable
-
   args = " ".join(sys.argv[1:])
 
   # install requirements

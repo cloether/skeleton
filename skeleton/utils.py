@@ -7,6 +7,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import pickle
+import re
 from contextlib import contextmanager
 from datetime import datetime
 from errno import EEXIST
@@ -19,12 +20,22 @@ __all__ = (
     "mkdir_p",
     "run_in_separate_process",
     "timestamp_from_datetime",
+    "to_valid_filename",
+    "to_valid_module_name"
 )
 
 EPOCH = datetime(1970, 1, 1)
 
 
 def as_number(value):
+  """Coerced value to number.
+
+  Args:
+    value: Value to coerce to number
+
+  Returns:
+    int: Value coerced to number
+  """
   if isinstance(value, string_types):
     if value.isdecimal():
       value = float(value)
@@ -80,6 +91,7 @@ def run_in_separate_process(func, *args, **kwargs):
   pid = os.fork()
 
   if pid > 0:  # in child process
+
     # Close write file descriptor.
     os.close(write_fd)
 
@@ -92,22 +104,20 @@ def run_in_separate_process(func, *args, **kwargs):
 
     if status == 0:
       return result
-    else:
-      raise result
+
+    raise result
   else:
-    # Close read file descriptor
+    # close read file descriptor
     os.close(read_fd)
 
     try:
-      # Call the function.
-      # - Success:  0
-      # - Fail:     1
+      # call the function. Success=0, Fail=1
       result, status = func(*args, **kwargs), 0
     except Exception as exc:
       result, status = exc, 1
 
-    # Dump results.
     with os.fdopen(write_fd, 'wb') as f:
+      # dump results.
       try:
         pickle.dump((status, result), f, pickle.HIGHEST_PROTOCOL)
       except pickle.PicklingError as exc:
@@ -132,3 +142,40 @@ def timestamp_from_datetime(dt, epoch=EPOCH):
   """
   delta = dt - epoch
   return delta.seconds + delta.days * 86400
+
+
+def to_valid_filename(filename):
+  # noinspection LongLine
+  """Given any string, return a valid filename.
+
+  For this purpose, filenames are expected to be all lower-cased,
+  and we err on the side of being more restrictive with allowed characters,
+  including not allowing space.
+
+  References:
+    https://github.com/googleapis/gapic-generator-python/blob/master/gapic/utils/filename.py
+
+  Args:
+    filename (str): The input filename.
+
+  Returns:
+    str: A valid filename.
+  """
+  return re.sub(r'[^a-z0-9.$_-]+', '-', filename.lower())
+
+
+def to_valid_module_name(module_name):
+  # noinspection LongLine
+  """Given any string, return a valid Python module name.
+
+  References:
+    https://github.com/googleapis/gapic-generator-python/blob/master/gapic/utils/filename.py
+
+  Args:
+    module_name (str): The input filename
+
+  Returns:
+    str: A valid module name. Extensions (e.g. *.py), if present,
+      are untouched.
+  """
+  return to_valid_filename(module_name).replace('-', '_')

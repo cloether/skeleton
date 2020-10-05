@@ -28,10 +28,8 @@ def _err_from_packed_args(exception_cls, args=None, kwargs=None):
   """
   if args is None:
     args = ()
-
   if kwargs is None:
     kwargs = {}
-
   return exception_cls(*args, **kwargs)
 
 

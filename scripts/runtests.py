@@ -2,7 +2,7 @@
 # coding=utf8
 """run_tests.py
 
-Don't _run tests from the root repo dir.
+Don not run tests from the root repo dir.
 
 We want to ensure we're importing from the installed binary package not
 from the CWD.
@@ -63,7 +63,6 @@ def main():
   """CLI Entry Point
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
   module = module_name(where=repo_root)
 
   return_code = -1  # noqa
@@ -90,7 +89,6 @@ def main():
             posargs=tests_dir
         )
     )
-
   return return_code
 
 

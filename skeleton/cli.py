@@ -40,7 +40,13 @@ if _IS_WIN32:
 _DEFAULT_FILE_WRITE_MODE = 'wb' if _IS_PY2 else "w"
 
 
-def _epipe(func):
+def epipe(func):
+  """Decorator to Handle EPIPE Errors.
+
+  Raises:
+    IOError: Raised when non-EPIPE exceptions are encountered.
+  """
+
   def _f(*args, **kwargs):
     try:
       return func(*args, **kwargs)
@@ -112,19 +118,24 @@ def arg_parser(**kwargs):
   return parser
 
 
-@_epipe
+@epipe
 def main():
   """Module CLI Entry Point
   """
+  # parse cli arguments
   parser = arg_parser()
   options = parser.parse_args()
 
+  # setup logging
   logfile = options.logfile
   log_level = logging.DEBUG if options.debug else LOGGING_LEVEL
   logging.basicConfig(filename=logfile, level=log_level)
-
   LOGGER.debug("New Logger: level=%s logfile=%s", log_level, logfile)
-  LOGGER.warning("Command line interface not implemented.")
+
+  # run
+  LOGGER.warning("command line interface not implemented")
   if os.isatty(options.output):
     options.output.write("\n")
+
+  # return exit code
   return 0
