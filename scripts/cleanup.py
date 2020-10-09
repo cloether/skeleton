@@ -2,10 +2,12 @@
 # coding=utf8
 """cleanup.py
 """
+import copy
 import os
 import sys
 
 from setuptools import find_packages
+from six import next
 
 FILES = [
     (".coverage",),
@@ -19,7 +21,7 @@ FILES = [
 ]
 
 
-def module_name(exclude=("test",), where="."):
+def module_name(exclude=("test*", "script*"), where="."):
   """Get current module name.
 
   Returns:
@@ -33,13 +35,13 @@ def main():
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-  files = FILES.copy()
+  files = copy.copy(FILES)
 
   files.append(
       ("{0!s}.egg-info".format(module_name(where=repo_root)),)
   )
 
-  def join_repo(parts):
+  def _join_repo(parts):
     return os.path.join(repo_root, *parts)
 
   def _handle_file(value):
@@ -53,7 +55,7 @@ def main():
   def _handle_unknown(value):
     sys.stderr.write("Invalid Filepath: {0!s}\n".format(value))
 
-  for file_or_dir in map(join_repo, files):
+  for file_or_dir in map(_join_repo, files):
     if os.path.isdir(file_or_dir):
       _handle_dir(file_or_dir)
     elif os.path.isfile(file_or_dir):

@@ -14,6 +14,7 @@ from contextlib import contextmanager
 from subprocess import CalledProcessError, check_call
 
 from setuptools import find_packages
+from six import next
 
 
 def run(command):
@@ -39,7 +40,7 @@ def cwd(dirname):
     os.chdir(orig)
 
 
-def module_name(exclude=("tests.*", "tests"), where="."):
+def module_name(exclude=("test*", "script*"), where="."):
   """Get current module name.
 
   Returns:
@@ -63,6 +64,7 @@ def main():
   """CLI Entry Point
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
   module = module_name(where=repo_root)
 
   return_code = -1  # noqa

@@ -50,7 +50,6 @@ def response():
         "Content-type": "application/json",
         "Content-disposition": "application/json"
     }
-
     reason = "OK"
     status_code = 200
     url = "https://www.google.com/"

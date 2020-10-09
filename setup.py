@@ -28,21 +28,13 @@ MODULE_META_RE = re.compile(
 
 
 def __readfile(filepath, **kwargs):
-  if not path.isfile(filepath):
-    raise FileNotFoundError(filepath)
-
   kwargs.setdefault("encoding", 'utf8')
-
   with open(filepath, **kwargs) as f:
     return f.read()
 
 
 def __iterlines(filepath, **kwargs):
-  if not path.isfile(filepath):
-    raise FileNotFoundError(filepath)
-
   kwargs.setdefault("encoding", 'utf8')
-
   with open(filepath, **kwargs) as f:
     for line in filter(None, (line.strip() for line in f)):
       yield line
@@ -63,7 +55,7 @@ def __find_meta(filepath):
   return dict(match)
 
 
-PACKAGES = find_packages(exclude=('test*',))
+PACKAGES = find_packages(exclude=("test*", "script*"))
 
 NAME = PACKAGES[0]
 
