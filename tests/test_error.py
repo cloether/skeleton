@@ -32,7 +32,7 @@ def test_base_error(error):
   """
   LOGGER.debug(
       """
-BaseError: 
+BaseError:
   fmt=%s
   msg=%s
   args=%s
@@ -43,7 +43,6 @@ BaseError:
       error.fmt,
       error.args
   )
-
   try:
     raise error
   except BaseError as e:

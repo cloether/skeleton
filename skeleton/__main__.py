@@ -17,7 +17,6 @@ if __name__ == "__main__":
   import signal
   import sys
 
-
   def _shutdown_handler(signum, _):
     """Handle Shutdown.
 
@@ -30,7 +29,6 @@ if __name__ == "__main__":
     """
     sys.stderr.write("\b\b\b\bshutdown handler called, signal=%d" % signum)
     sys.exit(signum)
-
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
