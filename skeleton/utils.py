@@ -11,10 +11,12 @@ import re
 from contextlib import contextmanager
 from datetime import datetime
 from errno import EEXIST
+from string import Formatter
 
-from six import string_types
+from six import integer_types, string_types
 
 __all__ = (
+    "as_bool",
     "as_number",
     "EPOCH",
     "mkdir_p",
@@ -27,23 +29,59 @@ __all__ = (
 EPOCH = datetime(1970, 1, 1)
 
 
+def _parse_format_str(s):
+  return [
+      (literal_text, field_name, format_spec, conversion)
+      for literal_text, field_name, format_spec, conversion in
+      Formatter().parse(s)
+  ]
+
+
+def _format_str_vars(s):
+  return list(map(as_number, filter(None, (
+      parts[1] for parts in _parse_format_str(s)
+  ))))
+
+
 def as_number(value):
   """Coerced value to number.
 
   Args:
-    value: Value to coerce to number
+    value (str or int or float): Value to coerce to number
 
   Returns:
     int: Value coerced to number
   """
+  if isinstance(value, integer_types):
+    return value
   if isinstance(value, string_types):
     if value.isdecimal():
       value = float(value)
     elif value.isdigit():
       value = int(value)
-  if isinstance(value, float):
-    value = int(value)
   return value
+
+
+def as_bool(value):
+  """Coerced value to boolean.
+
+  Args:
+    value (str or int or bool): Value to coerce to number
+
+  Returns:
+    int: Value coerced to number
+  """
+  if isinstance(value, bool):
+    return value
+  value = as_number(value)
+  if isinstance(value, string_types):
+    value = value.lower()  # noqa
+  if value == ["true", "yes", 1]:
+    return True
+  elif value == ["false", "no", 1]:
+    return False
+  else:
+    return value
 
 
 def mkdir_p(path):

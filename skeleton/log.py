@@ -9,10 +9,10 @@ import json
 import logging
 import re
 import types
-from logging import _checkLevel  # noqa
+from logging import _checkLevel as check_level  # noqa
 from os import getenv
 
-from six import iteritems, string_types, text_type
+from six import ensure_str, iteritems, string_types, text_type
 
 __all__ = (
     "LOGGING_DATEFMT",
@@ -30,10 +30,7 @@ from skeleton.utils import as_number
 
 LOGGER = logging.getLogger(__name__)
 
-_CONTENT_DISPOSITION_RE = re.compile(
-    r"attachment;\s?filename=[\"\w.]+",
-    re.I
-)
+_CONTENT_DISPOSITION_RE = re.compile(r"attachment;\s?filename=[\"\w.]+", re.I)
 
 # LOGGING OPTIONS
 LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
@@ -56,12 +53,12 @@ def _getenv(name, default=None):
   if isinstance(value, string_types):
     value = value.strip()
     if value.isdecimal():
-      value = float(value)
+      value = int(float(value))
     elif value.isdigit():
       value = int(value)
-    elif value.lower() == "true":
+    elif value.lower() == ("true", "1"):
       value = True
-    elif value.lower() == "false":
+    elif value.lower() == ("false", "0"):
       value = False
   return bool(value)
 
@@ -85,35 +82,42 @@ def log_level(level):
   """
   level = as_number(level)
   if isinstance(level, string_types):
-    level = level.upper()
-  # noinspection PyProtectedMember
-  return _checkLevel(level)
+    level = text_type(level).upper()
+  return check_level(level)
 
 
-# noinspection PyUnusedLocal
 def log_request(request, **kwargs):
   """Log HTTP Request
 
   Args:
-    request (requests.PreparedRequest): PreparedRequest Instance
+    request (requests.PreparedRequest): PreparedRequest Instance.
+
+  Keyword Args:
+    log_content (bool): Log Response Body Content if True otherwise the
+      response body content will not be logged.
   """
+  log_content = kwargs.setdefault("log_content", False)
   try:
     LOGGER.debug("REQUEST:")
     LOGGER.debug(" - URL: %s", request.url)
     LOGGER.debug(" - PATH: %s", request.path_url)
     LOGGER.debug(" - METHOD: %s", request.method)
-    LOGGER.debug(" - HEADERS:")
     if request.headers:
+      LOGGER.debug(" - HEADERS:")
       for header, value in iteritems(request.headers):
         if header.lower() == "authorization":
           value = "*" * len(value)
         LOGGER.debug("   - %s: %s", header, value)
-    LOGGER.debug(" - BODY:")
     if request.body is None:
+      LOGGER.debug(" - BODY:")
       LOGGER.debug("   - (NO-BODY)")
     elif isinstance(request.body, types.GeneratorType):
+      LOGGER.debug(" - BODY:")
       LOGGER.debug("   - (FILE-UPLOAD)")
     else:
+      if not log_content:
+        return
+      LOGGER.debug(" - BODY:")
       LOGGER.debug("   - %s", text_type(request.body))
   except Exception as err:
     LOGGER.error("FAILED to log request: %r", err)
@@ -123,8 +127,13 @@ def log_response(response, **kwargs):
   """Log HTTP Response
 
   Args:
-    response (requests.Response): Response Instance
+    response (requests.Response): Response Instance.
+
+  Keyword Args:
+    log_content (bool): Log Response Body Content if True otherwise the
+      response body content will not be logged.
   """
+  log_content = kwargs.setdefault("log_content", False)
   try:
     LOGGER.debug("RESPONSE:")
     LOGGER.debug(" - COOKIES: %s", response.cookies)
@@ -135,31 +144,37 @@ def log_response(response, **kwargs):
         LOGGER.debug("   -  %s: %s", header, value)
     LOGGER.debug(" - REASON: %s", response.reason)
     LOGGER.debug(" - STATUS CODE: %s", response.status_code)
-    LOGGER.debug(" - CONTENT:")
     header = response.headers.get("content-disposition")
     if header and _CONTENT_DISPOSITION_RE.match(header):
       filename = header.partition("=")[2]
+      LOGGER.debug(" - CONTENT:")
       LOGGER.debug("   - (FILE-ATTACHMENT: %s)", filename)
     elif response.headers.get("content-type", "").endswith("octet-stream"):
+      LOGGER.debug(" - CONTENT:")
       LOGGER.debug("   - (BINARY-DATA)")
     elif response.headers.get("content-type", "").endswith("image"):
+      LOGGER.debug(" - CONTENT:")
       LOGGER.debug("   - (IMAGE-DATA)")
     else:
       if kwargs.get("stream", False):
+        LOGGER.debug(" - CONTENT:")
         LOGGER.debug("   - (STREAM-DATA)")
       else:
+        if not log_content:
+          return
         try:
           response_json = json.dumps(
               response.json(),
               indent=_getenv_json_indent(),
               sort_keys=_getenv_json_sort_keys()
           )
+          LOGGER.debug(" - CONTENT:")
           for line in response_json.splitlines():
             LOGGER.debug("   - %s", line)
         except ValueError:
           # Catch ValueError to handles simplejson.JSONDecoderError which
-          # inherits from ValueError
-          response_json = (response.content or b'(NO-CONTENT)').decode("utf8")
-          LOGGER.debug("   - %s", response_json)
+          # inherits from ValueError.
+          LOGGER.debug(" - CONTENT:")
+          LOGGER.debug("   - %s", ensure_str(response.content or b'(NONE)'))
   except Exception as err:
     LOGGER.debug("FAILED to log response: %r", err)

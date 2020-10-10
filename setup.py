@@ -46,16 +46,13 @@ def __readlines(filepath, **kwargs):
 
 def __find_meta(filepath):
   content = __readfile(filepath)
-
   match = MODULE_META_RE.findall(content)
-
   if not match:
     raise RuntimeError("error finding module meta in file: %s" % filepath)
-
   return dict(match)
 
 
-PACKAGES = find_packages(exclude=("test*", "script*"))
+PACKAGES = find_packages(exclude=("test*", "script*", "example*"))
 
 NAME = PACKAGES[0]
 

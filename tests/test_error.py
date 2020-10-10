@@ -31,7 +31,13 @@ def test_base_error(error):
     bool: True if success, otherwise False
   """
   LOGGER.debug(
-      "BaseError: fmt=%s, msg=%s, args=%s, kwargs=%s",
+      """
+BaseError: 
+  fmt=%s
+  msg=%s
+  args=%s
+  kwargs=%s
+""",
       error.msg,
       error.kwargs,
       error.fmt,
@@ -39,16 +45,11 @@ def test_base_error(error):
   )
 
   try:
-    raise BaseError(error="TEST ERROR MESSAGE")
-
+    raise error
   except BaseError as e:
-    LOGGER.debug("Caught Test Exception: %r", e)
-
+    LOGGER.exception("Caught Test Exception: %s", e)
     assert e.args[0] == BaseError.fmt.format(error="TEST ERROR MESSAGE")
-
     return True
-
   except Exception as e:
     LOGGER.debug("Caught Incorrect Exception: %r", e)
-
     return False

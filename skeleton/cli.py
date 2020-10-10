@@ -11,12 +11,14 @@ import os
 import sys
 
 from .__version__ import __description__, __title__, __version__
-from .log import LOGGING_FILENAME, LOGGING_LEVEL
-
-__all__ = (
-    "arg_parser",
-    "main",
+from .log import (
+  LOGGING_DATEFMT,
+  LOGGING_FILENAME,
+  LOGGING_FORMAT,
+  LOGGING_LEVEL
 )
+
+__all__ = ("arg_parser", "main")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +30,6 @@ if _IS_WIN32:
   # sys.stdout in Python is by default opened in text mode,
   # and writes to this stdout produce corrupted binary data
   # on Windows.
-  #
   #   python -c "import sys; sys.stdout.write('_\n_')" > file
   #   python -c "print(repr(open('file', 'rb').read()))"
   import msvcrt  # noqa
@@ -78,7 +79,6 @@ def arg_parser(**kwargs):
   )
 
   parser = ArgumentParser(**kwargs)
-
   parser.set_defaults(
       argument_default=SUPPRESS,
       conflict_handler="resolve",
@@ -87,19 +87,16 @@ def arg_parser(**kwargs):
       usage=__doc__,
       prog=__title__,
   )
-
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
       help="Enable DEBUG logging"
   )
-
   parser.add_argument(
       "-v", "--version",
       action="version",
       version=__version__
   )
-
   parser.add_argument(
       '-o', '--output',
       default="-",
@@ -107,14 +104,12 @@ def arg_parser(**kwargs):
       help='Output Location (default: %(default)s)',
       type=FileType("{0!s}+".format(_DEFAULT_FILE_WRITE_MODE))
   )
-
   parser.add_argument(
       '--logfile',
       help='Log to File. (default: %(default)s)',
       metavar='FILE',
       default=LOGGING_FILENAME
   )
-
   return parser
 
 
@@ -125,17 +120,16 @@ def main():
   # parse cli arguments
   parser = arg_parser()
   options = parser.parse_args()
-
   # setup logging
-  logfile = options.logfile
-  log_level = logging.DEBUG if options.debug else LOGGING_LEVEL
-  logging.basicConfig(filename=logfile, level=log_level)
-  LOGGER.debug("New Logger: level=%s logfile=%s", log_level, logfile)
-
+  logging.basicConfig(
+      filename=options.logfile,
+      level=logging.DEBUG if options.debug else LOGGING_LEVEL,
+      format=LOGGING_FORMAT,
+      datefmt=LOGGING_DATEFMT
+  )
   # run
   LOGGER.warning("command line interface not implemented")
-  if os.isatty(options.output):
+  if os.isatty(options.output.fileno()):
     options.output.write("\n")
-
-  # return exit code
-  return 0
+    options.output.flush()
+  return 0  # return exit code

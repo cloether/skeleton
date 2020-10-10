@@ -35,7 +35,7 @@ def run(command):
   return return_code
 
 
-def module_name(exclude=("test*", "script*"), where="."):
+def module_name(exclude=("test*", "script*", "example*"), where="."):
   """Get current module name
   """
   return next(iter(find_packages(exclude=exclude, where=where)), None)

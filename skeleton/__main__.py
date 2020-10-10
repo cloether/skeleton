@@ -7,6 +7,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 
+from .cli import main
+
 # Force absolute path on Python 2.
 # https://github.com/microsoft/debugpy/blob/master/src/debugpy/__main__.py
 __file__ = os.path.abspath(__file__)  # noqa
@@ -15,7 +17,6 @@ if __name__ == "__main__":
   import signal
   import sys
 
-  from .cli import main
 
   def _shutdown_handler(signum, _):
     """Handle Shutdown.
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     """
     sys.stderr.write("\b\b\b\bshutdown handler called, signal=%d" % signum)
     sys.exit(signum)
+
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)

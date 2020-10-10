@@ -21,7 +21,7 @@ FILES = [
 ]
 
 
-def module_name(exclude=("test*", "script*"), where="."):
+def module_name(exclude=("test*", "script*", "example*"), where="."):
   """Get current module name.
 
   Returns:
