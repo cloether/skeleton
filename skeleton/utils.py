@@ -31,16 +31,26 @@ EPOCH = datetime(1970, 1, 1)
 
 def _parse_format_str(s):
   return [
-      (literal_text, field_name, format_spec, conversion)
-      for literal_text, field_name, format_spec, conversion in
+      (
+          literal_text,
+          field_name,
+          format_spec,
+          conversion
+      ) for literal_text, field_name, format_spec, conversion in
       Formatter().parse(s)
   ]
 
 
 def _format_str_vars(s):
-  return list(map(as_number, filter(None, (
-      parts[1] for parts in _parse_format_str(s)
-  ))))
+  return list(
+      map(
+          as_number,
+          filter(None, (
+              parts[1]
+              for parts in _parse_format_str(s)
+          ))
+      )
+  )
 
 
 def as_number(value):
@@ -183,15 +193,11 @@ def timestamp_from_datetime(dt, epoch=EPOCH):
 
 
 def to_valid_filename(filename):
-  # noinspection LongLine
   """Given any string, return a valid filename.
 
   For this purpose, filenames are expected to be all lower-cased,
   and we err on the side of being more restrictive with allowed characters,
   including not allowing space.
-
-  References:
-    https://github.com/googleapis/gapic-generator-python/blob/master/gapic/utils/filename.py
 
   Args:
     filename (str): The input filename.
@@ -199,21 +205,19 @@ def to_valid_filename(filename):
   Returns:
     str: A valid filename.
   """
-  return re.sub(r'[^a-z0-9.$_-]+', '-', filename.lower())
+  return re.compile(r'[^a-z0-9.$_-]+').sub('-', filename.lower())
 
 
 def to_valid_module_name(module_name):
-  # noinspection LongLine
-  """Given any string, return a valid Python module name.
-
-  References:
-    https://github.com/googleapis/gapic-generator-python/blob/master/gapic/utils/filename.py
+  """Given any string return a valid Python module name.
 
   Args:
-    module_name (str): The input filename
+    module_name (str): Input filename.
+
+  Notes:
+    File extensions if present are untouched.
 
   Returns:
-    str: A valid module name. Extensions (e.g. *.py), if present,
-      are untouched.
+    (str): A valid module name.
   """
   return to_valid_filename(module_name).replace('-', '_')

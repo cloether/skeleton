@@ -42,7 +42,7 @@ def module_name(exclude=("test*", "script*", "example*"), where="."):
 
 
 def docs_gen():
-  """Generate Documentation Files
+  """Generate Project Documentation Files using sphinx-apidoc.
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   docs_source = os.path.join(repo_root, "docs", "source")
@@ -52,7 +52,7 @@ def docs_gen():
 
 
 def docs_build():
-  """Build Documentation
+  """Build Project Documentation.
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   with cwd(os.path.join(repo_root, "docs")):

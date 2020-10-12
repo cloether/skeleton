@@ -27,10 +27,52 @@ MODULE_META_RE = re.compile(
 )
 
 
-def __readfile(filepath, **kwargs):
-  kwargs.setdefault("encoding", 'utf8')
-  with open(filepath, **kwargs) as f:
-    return f.read()
+def __find_meta(filepath):
+  content = __readfile(filepath)
+  match = MODULE_META_RE.findall(content)
+  if not match:
+    raise RuntimeError("error finding module meta in file: %s" % filepath)
+  return dict(match)
+
+
+def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
+  """Locate the Projects README file and determine its content type.
+
+  Args:
+    basename (str): README File basename.
+    extensions (list of str): List of README file extensions.
+
+  Returns:
+     (tuple of str,str): Tuple containing the file content and content type.
+  """
+
+  def _readme_content_type(_filename, _default=None):
+    if _filename.endswith("rst"):
+      return "text/x-rst"
+    if _filename.endswith("md"):
+      return "text/x-markdown"
+    if _filename.endswith("txt"):
+      return "text"
+    return _default
+
+  long_description = None
+  long_description_content_type = None
+
+  for ext in extensions:
+    filename = (
+        basename
+        if not ext or ext is None
+        else "{0}.{1}".format(basename, ext)
+    )
+
+    filepath = path.join(ROOT, filename)
+
+    if path.exists(filepath):
+      long_description = __readfile(filepath)
+      long_description_content_type = _readme_content_type(filename, "text")
+      break
+
+  return long_description, long_description_content_type
 
 
 def __iterlines(filepath, **kwargs):
@@ -40,16 +82,14 @@ def __iterlines(filepath, **kwargs):
       yield line
 
 
+def __readfile(filepath, **kwargs):
+  kwargs.setdefault("encoding", 'utf8')
+  with open(filepath, **kwargs) as f:
+    return f.read()
+
+
 def __readlines(filepath, **kwargs):
   return list(__iterlines(filepath, **kwargs))
-
-
-def __find_meta(filepath):
-  content = __readfile(filepath)
-  match = MODULE_META_RE.findall(content)
-  if not match:
-    raise RuntimeError("error finding module meta in file: %s" % filepath)
-  return dict(match)
 
 
 PACKAGES = find_packages(exclude=("test*", "script*", "example*"))
@@ -83,13 +123,7 @@ CLASSIFIERS = [
 
 DESCRIPTION = METADATA.get("description")
 
-ENTRY_POINTS = {
-    'console_scripts': [
-        '%(name)s=%(name)s.__main__:main' % {
-            "name": NAME
-        }
-    ]
-}
+ENTRY_POINTS = {'console_scripts': ['{0}={0}.__main__:main'.format(NAME)]}
 
 EXTRAS_REQUIRE = {
     "docs": [
@@ -119,13 +153,11 @@ EXTRAS_REQUIRE = {
 
 INCLUDE_PACKAGE_DATA = False
 
-KEYWORDS = '%s template' % NAME
+KEYWORDS = '{0} template'.format(NAME)
 
 LICENSE = METADATA.get("license")
 
-# TODO: detect long description file/content type.
-LONG_DESCRIPTION = __readfile(path.join(ROOT, 'README.rst'))
-LONG_DESCRIPTION_CONTENT_TYPE = "text/x-rst"
+LONG_DESCRIPTION, LONG_DESCRIPTION_CONTENT_TYPE = __find_readme()
 
 PACKAGE_DATA = {}
 
@@ -143,10 +175,7 @@ VERSION = METADATA["version"]
 
 ZIP_SAFE = False
 
-PROJECT_URLS = {
-    'Source': URL,
-    'Tracker': '%s/issues/' % URL
-}
+PROJECT_URLS = {'Source': URL, 'Tracker': '{0}/issues/'.format(URL)}
 
 setup_options = dict(
     author=AUTHOR,
@@ -173,15 +202,12 @@ setup_options = dict(
 )
 
 if 'py2exe' in sys.argv:
+  # TODO: Test
   # This will actually give us a py2exe command.
-  #
-  # References:
-  #   https://github.com/aws/aws-cli/blob/develop/setup.py
-  #
-  # noinspection PyUnresolvedReferences,PyPackageRequirements
-  import py2exe
+  # https://github.com/aws/aws-cli/blob/develop/setup.py
+  import py2exe  # noqa
 
-  # And we have some py2exe specific options.
+  # py2exe specific options.
   setup_options['options'] = {
       'py2exe': {
           'optimize': 0,
