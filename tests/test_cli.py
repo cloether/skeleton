@@ -34,29 +34,22 @@ def test_cli():
     bool: True if success, otherwise False.
   """
   command = "{0!s} -m skeleton".format(sys.executable)
-
   LOGGER.debug("command: %s", command)
-
   # noinspection PyBroadException
   try:
     return_code = run(command)
-
     LOGGER.debug("return code: %s", return_code)
-
   except NotImplementedError:
     return False
-
   except Exception as e:
     LOGGER.exception(
         "cli command execution: status=failed command=%s error=%r",
         command, e
     )
     return False
-
   else:
     success = True if return_code == 0 else False
-
-    LOGGER.exception(
+    LOGGER.debug(
         "cli command execution: status=%s command=%s error=%r",
         success, command, None
     )

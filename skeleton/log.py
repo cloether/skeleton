@@ -71,6 +71,70 @@ def _getenv_json_indent(default=_LOGGING_JSON_INDENT):
   return _getenv("LOGGING_JSON_SORT_KEYS", default)
 
 
+def _log_items(data, name, ignore_empty=True, prefix=" - "):
+  if not (ignore_empty and not data):
+    LOGGER.debug("%s%s:", prefix, name.upper())
+    for k, v in iteritems(data):
+      LOGGER.debug("   -  %s: %s", k, v)
+
+
+def _log_list(data, name, ignore_empty=True, prefix=" - "):
+  if not (ignore_empty and not data):
+    LOGGER.debug("%s%s:", prefix, name.upper())
+    for item in data:
+      LOGGER.debug("   -  %s", item)
+
+
+def _log_one(data, name, prefix=" - ", ignore_empty=True):
+  if not (ignore_empty and not data):
+    LOGGER.debug("%s%s: %s", prefix, name.upper(), data)
+
+
+def _log_json(data, name, prefix=" - ", ignore_empty=True):
+  if not (ignore_empty and not data):
+    _log_list(json.dumps(
+        data,
+        indent=_getenv_json_indent(),
+        sort_keys=_getenv_json_sort_keys()
+    ).splitlines(), name, prefix=prefix, ignore_empty=ignore_empty)
+
+
+def _response_content_str(response, **kwargs):
+  """Get Response Content String
+
+  Args:
+    response (requests.models.Response): Response Object.
+
+  Returns:
+    str: Content type string
+  """
+
+  header = response.headers.get("content-disposition")
+
+  if not header:
+    return None
+
+  if kwargs.get("stream", False):
+    return "(STREAM-DATA)"
+
+  if _CONTENT_DISPOSITION_RE.match(header):
+    filename = header.partition("=")[2]
+    return "(FILE-ATTACHMENT: {0})".format(filename)
+
+  content_type = response.headers.get("content-type", "")
+
+  if not content_type:
+    return None
+
+  if content_type.endswith("octet-stream"):
+    return "(BINARY-DATA)"
+
+  if content_type.endswith("image"):
+    return "(IMAGE-DATA)"
+
+  return None
+
+
 def log_level(level):
   """Return valid integer log level
 
@@ -101,7 +165,7 @@ def log_request(request, **kwargs):
     LOGGER.debug("REQUEST:")
     LOGGER.debug(" - URL: %s", request.url)
     LOGGER.debug(" - PATH: %s", request.path_url)
-    LOGGER.debug(" - METHOD: %s", request.method)
+    LOGGER.debug(" - METHOD: %s", request.method.upper())
     if request.headers:
       LOGGER.debug(" - HEADERS:")
       for header, value in iteritems(request.headers):
@@ -121,13 +185,14 @@ def log_request(request, **kwargs):
       LOGGER.debug("   - %s", text_type(request.body))
   except Exception as err:
     LOGGER.error("FAILED to log request: %r", err)
+  LOGGER.debug("--")
 
 
 def log_response(response, **kwargs):
   """Log HTTP Response
 
   Args:
-    response (requests.Response): Response Instance.
+    response (requests.models.Response): Response Instance.
 
   Keyword Args:
     log_content (bool): Log Response Body Content if True otherwise the
@@ -135,46 +200,20 @@ def log_response(response, **kwargs):
   """
   log_content = kwargs.setdefault("log_content", False)
   try:
-    LOGGER.debug("RESPONSE:")
-    LOGGER.debug(" - COOKIES: %s", response.cookies)
-    LOGGER.debug(" - ENCODING: %s", response.encoding)
-    if response.headers:
-      LOGGER.debug(" - HEADERS:")
-      for header, value in iteritems(response.headers):
-        LOGGER.debug("   -  %s: %s", header, value)
-    LOGGER.debug(" - REASON: %s", response.reason)
-    LOGGER.debug(" - STATUS CODE: %s", response.status_code)
-    header = response.headers.get("content-disposition")
-    if header and _CONTENT_DISPOSITION_RE.match(header):
-      filename = header.partition("=")[2]
-      LOGGER.debug(" - CONTENT:")
-      LOGGER.debug("   - (FILE-ATTACHMENT: %s)", filename)
-    elif response.headers.get("content-type", "").endswith("octet-stream"):
-      LOGGER.debug(" - CONTENT:")
-      LOGGER.debug("   - (BINARY-DATA)")
-    elif response.headers.get("content-type", "").endswith("image"):
-      LOGGER.debug(" - CONTENT:")
-      LOGGER.debug("   - (IMAGE-DATA)")
-    else:
-      if kwargs.get("stream", False):
-        LOGGER.debug(" - CONTENT:")
-        LOGGER.debug("   - (STREAM-DATA)")
-      else:
-        if not log_content:
-          return
-        try:
-          response_json = json.dumps(
-              response.json(),
-              indent=_getenv_json_indent(),
-              sort_keys=_getenv_json_sort_keys()
-          )
-          LOGGER.debug(" - CONTENT:")
-          for line in response_json.splitlines():
-            LOGGER.debug("   - %s", line)
-        except ValueError:
-          # Catch ValueError to handles simplejson.JSONDecoderError which
-          # inherits from ValueError.
-          LOGGER.debug(" - CONTENT:")
-          LOGGER.debug("   - %s", ensure_str(response.content or b'(NONE)'))
+    _log_one("", "RESPONSE", ignore_empty=False, prefix="")
+    _log_items(response.cookies, "COOKIES")
+    _log_one(response.encoding, "ENCODING")
+    _log_items(response.headers, "HEADERS")
+    _log_one(response.reason, "REASON")
+    _log_one(response.status_code, "STATUS CODE")
+    content_str = _response_content_str(response)
+    if content_str:
+      _log_list((content_str,), "CONTENT")
+    elif log_content:
+      try:
+        _log_json(response.json(), "CONTENT")
+      except ValueError:
+        _log_list((ensure_str(response.content or b'(NONE)'),), "CONTENT")
   except Exception as err:
     LOGGER.debug("FAILED to log response: %r", err)
+  LOGGER.debug("--")

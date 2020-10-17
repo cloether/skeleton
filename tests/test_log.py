@@ -3,6 +3,8 @@
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import json
+
 import pytest
 
 from skeleton.log import log_request, log_response
@@ -54,11 +56,10 @@ def response():
     status_code = 200
     url = "https://www.google.com/"
 
-    @staticmethod
-    def json():
+    def json(self):
       """Mock json method.
       """
-      return {}
+      return json.loads(self._content)
 
   return Response()
 
@@ -67,9 +68,18 @@ def test_log_request(prepared_request):
   """Test `skeleton.log_request`
 
   Args:
-    prepared_request (PreparedRequest):
+    prepared_request (PreparedRequest): PreparedRequest Instance
   """
   log_request(prepared_request)
+
+
+def test_log_request_content(prepared_request, log_content=True):
+  """Test `skeleton.log_request` with log_content set to True.
+
+  Args:
+    prepared_request (PreparedRequest): PreparedRequest Instance
+  """
+  log_request(prepared_request, log_content=log_content)
 
 
 def test_log_response(response):
@@ -79,3 +89,12 @@ def test_log_response(response):
     response (Response): Response Instance
   """
   log_response(response)
+
+
+def test_log_response_content(response, log_content=True):
+  """Test `skeleton.log_response` with log_content set to True.
+
+  Args:
+    response (Response): Response Instance
+  """
+  log_response(response, log_content=log_content)

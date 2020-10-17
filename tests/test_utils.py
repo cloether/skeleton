@@ -5,10 +5,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
-from skeleton.utils import (
-  to_valid_filename,
-  to_valid_module_name
-)
+from skeleton.utils import to_valid_filename, to_valid_module_name
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,8 +13,8 @@ LOGGER = logging.getLogger(__name__)
 def test_to_valid_filename():
   """Test skeleton.to_valid_filename
   """
-  bad_filename = "iceceqrbv\\dfvrv"
-  filename = to_valid_module_name("iceceqrbv\\dfvrv")
+  bad_filename = "bad\\module"
+  filename = to_valid_module_name(bad_filename)
   LOGGER.debug("input: %s output: %s", bad_filename, filename)
   return True
 
@@ -25,7 +22,7 @@ def test_to_valid_filename():
 def test_to_module_filename():
   """Test skeleton.to_valid_filename
   """
-  bad_module_name = "iceceqrbv\\dfvrv"
+  bad_module_name = "bad\\module"
   filename = to_valid_filename(bad_module_name)
   LOGGER.debug("input: %s output: %s", bad_module_name, filename)
   return True

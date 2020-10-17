@@ -13,7 +13,7 @@ from datetime import datetime
 from errno import EEXIST
 from string import Formatter
 
-from six import integer_types, string_types
+from six import integer_types, string_types, text_type
 
 __all__ = (
     "as_bool",
@@ -84,14 +84,35 @@ def as_bool(value):
   if isinstance(value, bool):
     return value
   value = as_number(value)
-  if isinstance(value, string_types):
-    value = value.lower()  # noqa
-  if value == ["true", "yes", 1]:
+  return strtobool(value, strict_errors=False)
+
+
+def strtobool(val, strict_errors=True):
+  """Convert a string representation of truth to true (1) or false (0).
+
+  Args:
+    val (str or int): String to convert.
+    strict_errors (bool): Raise error if val is not one the valid
+      boolean values, otherwise return the input val.
+
+  Notes:
+    True Values:  'y', 'yes', 't', 'true', 'on', and '1'
+    False Values: 'n', 'no', 'f', 'false', 'off', and '0'
+
+  Raises:
+    ValueError: If 'val' is anything else.
+  """
+  v = val
+  if not isinstance(v, string_types):
+    v = text_type(v)
+  if v.lower() in ('y', 'yes', 't', 'true', 'on', '1'):
     return True
-  elif value == ["false", "no", 1]:
+  elif v.lower() in ('n', 'no', 'f', 'false', 'off', '0'):
     return False
+  elif strict_errors:
+    raise ValueError("invalid truth value {!r}".format(val, ))
   else:
-    return value
+    return val
 
 
 def mkdir_p(path):

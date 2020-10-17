@@ -56,3 +56,7 @@ class BaseError(Exception):
   @property
   def msg(self):
     return self.args[0]
+
+  @property
+  def json(self):
+    return {"message": self.msg, "type": type(self).__name__}

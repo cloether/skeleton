@@ -46,7 +46,7 @@ BaseError:
   try:
     raise error
   except BaseError as e:
-    LOGGER.exception("Caught Test Exception: %s", e)
+    LOGGER.exception("Caught Test Exception: %s", e.json)
     assert e.args[0] == BaseError.fmt.format(error="TEST ERROR MESSAGE")
     return True
   except Exception as e:
