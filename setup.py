@@ -49,10 +49,13 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
   def _readme_content_type(_filename, _default=None):
     if _filename.endswith("rst"):
       return "text/x-rst"
+
     if _filename.endswith("md"):
       return "text/x-markdown"
+
     if _filename.endswith("txt"):
       return "text"
+
     return _default
 
   long_description = None

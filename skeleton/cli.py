@@ -22,7 +22,7 @@ __all__ = ("arg_parser", "main")
 
 LOGGER = logging.getLogger(__name__)
 
-_IS_PY2 = sys.version_info[0]
+_IS_PY2 = sys.version_info[0] == 2
 _IS_WIN32 = sys.platform == "Win32"
 
 if _IS_WIN32:
@@ -90,7 +90,7 @@ def arg_parser(**kwargs):
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
-      help="Enable DEBUG logging"
+      help="enable debug logging"
   )
   parser.add_argument(
       "-v", "--version",
@@ -101,12 +101,12 @@ def arg_parser(**kwargs):
       '-o', '--output',
       default="-",
       metavar="path",
-      help='Output Location (default: %(default)s)',
+      help='output location (default: %(default)s)',
       type=FileType("{0!s}+".format(_DEFAULT_FILE_WRITE_MODE))
   )
   parser.add_argument(
       '--logfile',
-      help='Log to File. (default: %(default)s)',
+      help='log to file. (default: %(default)s)',
       metavar='FILE',
       default=LOGGING_FILENAME
   )

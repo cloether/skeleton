@@ -36,7 +36,6 @@ if __name__ == "__main__":
   if os.name == 'nt':
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 
-  # noinspection PyBroadException
   try:
     status = main()
   except NotImplementedError as e:
