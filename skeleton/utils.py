@@ -22,6 +22,8 @@ __all__ = (
     "cwd",
     "EPOCH",
     "is_file_newer_than_file",
+    "ISO_DATETIME_FORMAT",
+    "ISO_DATETIME_STRING",
     "memoize",
     "mkdir_p",
     "run_in_separate_process",
@@ -33,6 +35,9 @@ __all__ = (
 )
 
 EPOCH = datetime(1970, 1, 1)
+
+ISO_DATETIME_STRING = "1970-01-01 00:00:00.000"
+ISO_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
 
 def _parse_format_str(s):
@@ -211,14 +216,15 @@ def run_in_separate_process(func, *args, **kwargs):
 
   if pid > 0:  # in child process
     # close write file descriptor.
-
     os.close(write_fd)
+
     # open read file descriptor.
     with os.fdopen(read_fd, 'rb') as f:
       status, result = pickle.load(f)
 
     # wait for completion of child process.
     os.waitpid(pid, 0)
+
     if status == 0:
       return result
 
@@ -240,6 +246,7 @@ def run_in_separate_process(func, *args, **kwargs):
         pickle.dump((status, result), f, pickle.HIGHEST_PROTOCOL)
       except pickle.PicklingError as exc:
         pickle.dump((2, exc), f, pickle.HIGHEST_PROTOCOL)
+
     os._exit(0)  # noqa
 
 
