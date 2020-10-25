@@ -17,17 +17,17 @@ __version__ = "0.0.2"
 
 LOGGER = logging.getLogger(__name__)
 
-BINARY_RE = re.compile(br'[\x00-\x08\x0E-\x1F\x7F]')
-BLANK_RE = re.compile(rb'^[ \t\f]*(?:[#\r\n]|$)')
-DECL_RE = re.compile(rb'^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)')  # noqa
+BINARY_RE = re.compile(br"[\x00-\x08\x0E-\x1F\x7F]")
+BLANK_RE = re.compile(rb"^[ \t\f]*(?:[#\r\n]|$)")
+DECL_RE = re.compile(rb"^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)")  # noqa
 
 if sys.platform == "Win32":
   # Binary mode is required for persistent mode on windows.
   # sys.stdout in Python is by default opened in text mode,
   # and writes to this stdout produce corrupted binary data
   # on Windows.
-  #   python -c "import sys; sys.stdout.write('_\n_')" > file
-  #   python -c "print(repr(open('file', 'rb').read()))"
+  #   python -c "import sys; sys.stdout.write(\"_\n_\")" > file
+  #   python -c "print(repr(open(\"file\", \"rb\").read()))"
   import msvcrt  # noqa
 
   msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
@@ -41,7 +41,7 @@ def get_declaration(line):
   match = DECL_RE.match(line)
   if match:
     return match.group(1)
-  return b''
+  return b""
 
 
 def has_python_ext(filepath):
@@ -76,15 +76,12 @@ def can_be_compiled(filepath):
   infile = _open(filepath)
   if infile is None:
     return False
-
   with infile:
     code = infile.read()
-
   try:
     compile(code, filepath, "exec")
   except Exception:  # noqa
     return False
-
   return True
 
 
@@ -94,17 +91,13 @@ def looks_like_python(filepath):
   infile = _open(filepath)
   if infile is None:
     return False
-
   with infile:
     line = infile.readline()
-
   if BINARY_RE.search(line):
     # file appears to be binary
     return False
-
   if has_python_ext(filepath):
     return True
-
   # disguised Python script (e.g. CGI)
   return b"python" in line
 
@@ -124,7 +117,7 @@ def needs_declaration(filepath):
   """Check if file at filepath needs a declaration.
   """
   try:
-    infile = open(filepath, 'rb')
+    infile = open(filepath, "rb")
   except IOError:
     # oops, the file was removed - ignore it
     return None
@@ -245,7 +238,7 @@ def handle_shutdown(func):
   def _f(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
-    if os.name == 'nt':
+    if os.name == "nt":
       signal.signal(signal.SIGBREAK, _shutdown_handler)
     result = func(*args, **kwargs)
     return result
@@ -299,11 +292,11 @@ def _parse_args():
   )
 
   parser.add_argument(
-      '-o', '--output',
+      "-o", "--output",
       default="-",
       metavar="path",
-      help='Output Location (default: %(default)s)',
-      type=FileType("{0!s}+".format('wb' if sys.version_info[0] == 2 else "w"))
+      help="Output Location (default: %(default)s)",
+      type=FileType("{0!s}+".format("wb" if sys.version_info[0] == 2 else "w"))
   )
 
   args = parser.parse_args()
@@ -327,5 +320,5 @@ def main():
   return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   sys.exit(main())

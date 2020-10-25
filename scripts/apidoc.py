@@ -68,7 +68,7 @@ def main():
   return docs_gen()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   import sys
 
   sys.exit(main())

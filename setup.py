@@ -79,14 +79,14 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
 
 
 def __iterlines(filepath, **kwargs):
-  kwargs.setdefault("encoding", 'utf8')
+  kwargs.setdefault("encoding", "utf8")
   with open(filepath, **kwargs) as f:
     for line in filter(None, (line.strip() for line in f)):
       yield line
 
 
 def __readfile(filepath, **kwargs):
-  kwargs.setdefault("encoding", 'utf8')
+  kwargs.setdefault("encoding", "utf8")
   with open(filepath, **kwargs) as f:
     return f.read()
 
@@ -106,27 +106,31 @@ AUTHOR = METADATA.get("author")
 AUTHOR_EMAIL = METADATA.get("author_email")
 
 CLASSIFIERS = [
-    'Development Status :: 1 - Planning',
-    'Natural Language :: English',
-    'Intended Audience :: Developers',
+    "Development Status :: 1 - Planning",
+    "Natural Language :: English",
+    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.6",
+    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3",
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.6',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Topic :: Internet',
+    "Programming Language :: Python :: 3.3",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Internet",
 ]
 
 DESCRIPTION = METADATA.get("description")
 
-ENTRY_POINTS = {'console_scripts': ['{0}={0}.__main__:main'.format(NAME)]}
+ENTRY_POINTS = {
+    "console_scripts": [
+        "{0}={0}.__main__:main".format(NAME)
+    ]
+}
 
 EXTRAS_REQUIRE = {
     "docs": [
@@ -145,18 +149,18 @@ EXTRAS_REQUIRE = {
         "tox-travis",
         "twine"
     ],
-    ':python_version=="2.6"': [
-        'ordereddict==1.1',
-        'simplejson==3.3.0'
+    ":python_version==\"2.6\"": [
+        "ordereddict==1.1",
+        "simplejson==3.3.0"
     ],
-    ':python_version=="2.7"': [
+    ":python_version==\"2.7\"": [
         "ipaddress"
     ],
 }
 
 INCLUDE_PACKAGE_DATA = False
 
-KEYWORDS = '{0} template'.format(NAME)
+KEYWORDS = "{0} template".format(NAME)
 
 LICENSE = METADATA.get("license")
 
@@ -164,7 +168,7 @@ LONG_DESCRIPTION, LONG_DESCRIPTION_CONTENT_TYPE = __find_readme()
 
 PACKAGE_DATA = {}
 
-PLATFORMS = 'Posix; MacOS X; Windows'
+PLATFORMS = "Posix; MacOS X; Windows"
 
 REQUIREMENTS = __readlines(path.join(ROOT, "requirements.txt"))
 
@@ -178,7 +182,10 @@ VERSION = METADATA["version"]
 
 ZIP_SAFE = False
 
-PROJECT_URLS = {'Source': URL, 'Tracker': '{0}/issues/'.format(URL)}
+PROJECT_URLS = {
+    "Source": URL,
+    "Tracker": "{0}/issues".format(URL)
+}
 
 setup_options = dict(
     author=AUTHOR,
@@ -204,33 +211,33 @@ setup_options = dict(
     zip_safe=ZIP_SAFE
 )
 
-if 'py2exe' in sys.argv:
+if "py2exe" in sys.argv:
   # TODO: Test
   # This will actually give us a py2exe command.
   # https://github.com/aws/aws-cli/blob/develop/setup.py
   import py2exe  # noqa
 
   # py2exe specific options.
-  setup_options['options'] = {
-      'py2exe': {
-          'optimize': 0,
-          'skip_archive': True,
-          'dll_excludes': [
-              'crypt32.dll'
+  setup_options["options"] = {
+      "py2exe": {
+          "optimize": 0,
+          "skip_archive": True,
+          "dll_excludes": [
+              "crypt32.dll"
           ],
-          'packages': [
-              'docutils',
-              'urllib',
-              'httplib',
-              'HTMLParser',
+          "packages": [
+              "docutils",
+              "urllib",
+              "httplib",
+              "HTMLParser",
               NAME,
-              'ConfigParser',
-              'xml.etree',
-              'pipes'
+              "ConfigParser",
+              "xml.etree",
+              "pipes"
           ],
       }
   }
-  setup_options['console'] = [path.join("bin", NAME)]
+  setup_options["console"] = [path.join("bin", NAME)]
 
 setup(
     author=AUTHOR,

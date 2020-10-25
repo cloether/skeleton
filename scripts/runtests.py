@@ -53,7 +53,7 @@ def touch(filepath):
   """Equivalent of Unix `touch` command
   """
   if not os.path.exists(filepath):
-    fh = open(filepath, 'a')
+    fh = open(filepath, "a")
     try:
       os.utime(filepath, None)
     finally:
@@ -72,7 +72,7 @@ def main():
   with cwd(repo_root):
     env_name = os.getenv("ENVNAME", "test")
 
-    tests_dir = os.path.join(repo_root, 'tests')
+    tests_dir = os.path.join(repo_root, "tests")
     tests_log_file = os.path.join(tests_dir, "pytest.log")
 
     touch(tests_log_file)  # prevent pytest errors
@@ -94,7 +94,7 @@ def main():
   return return_code
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   import sys
 
   sys.exit(main())

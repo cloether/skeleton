@@ -30,15 +30,15 @@ if _IS_WIN32:
   # sys.stdout in Python is by default opened in text mode,
   # and writes to this stdout produce corrupted binary data
   # on Windows.
-  #   python -c "import sys; sys.stdout.write('_\n_')" > file
-  #   python -c "print(repr(open('file', 'rb').read()))"
+  #   python -c "import sys; sys.stdout.write(\"_\n_\")" > file
+  #   python -c "print(repr(open(\"file\", \"rb\").read()))"
   import msvcrt  # noqa
 
   msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
   msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
   msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)
 
-_DEFAULT_FILE_WRITE_MODE = 'wb' if _IS_PY2 else "w"
+_DEFAULT_FILE_WRITE_MODE = "wb" if _IS_PY2 else "w"
 
 
 def epipe(func):
@@ -98,16 +98,16 @@ def arg_parser(**kwargs):
       version=__version__
   )
   parser.add_argument(
-      '-o', '--output',
+      "-o", "--output",
       default="-",
       metavar="path",
-      help='output location (default: %(default)s)',
+      help="output location (default: %(default)s)",
       type=FileType("{0!s}+".format(_DEFAULT_FILE_WRITE_MODE))
   )
   parser.add_argument(
-      '--logfile',
-      help='log to file. (default: %(default)s)',
-      metavar='FILE',
+      "--logfile",
+      help="log to file. (default: %(default)s)",
+      metavar="FILE",
       default=LOGGING_FILENAME
   )
   return parser

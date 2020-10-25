@@ -33,7 +33,7 @@ if __name__ == "__main__":
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
 
-  if os.name == 'nt':
+  if os.name == "nt":
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 
   try:

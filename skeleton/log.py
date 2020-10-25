@@ -108,30 +108,22 @@ def _response_content_str(response, **kwargs):
   Returns:
     str: Content type string
   """
-
   header = response.headers.get("content-disposition")
-
   if not header:
     return None
-
   if kwargs.get("stream", False):
     return "(STREAM-DATA)"
-
   if _CONTENT_DISPOSITION_RE.match(header):
     filename = header.partition("=")[2]
     return "(FILE-ATTACHMENT: {0})".format(filename)
 
   content_type = response.headers.get("content-type", "")
-
   if not content_type:
     return None
-
   if content_type.endswith("octet-stream"):
     return "(BINARY-DATA)"
-
   if content_type.endswith("image"):
     return "(IMAGE-DATA)"
-
   return None
 
 
@@ -213,7 +205,7 @@ def log_response(response, **kwargs):
       try:
         _log_json(response.json(), "CONTENT")
       except ValueError:
-        _log_list((ensure_str(response.content or b'(NONE)'),), "CONTENT")
+        _log_list((ensure_str(response.content or b"(NONE)"),), "CONTENT")
   except Exception as err:
     LOGGER.debug("FAILED to log response: %r", err)
   LOGGER.debug("--")

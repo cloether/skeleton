@@ -9,7 +9,7 @@ import subprocess
 from distutils import msvc9compiler  # noqa
 
 
-def win_compile(filename, output_filename, arch='x86', vc_ver=None):
+def win_compile(filename, output_filename, arch="x86", vc_ver=None):
   """Compile Windows Program
 
   Args:
@@ -20,8 +20,8 @@ def win_compile(filename, output_filename, arch='x86', vc_ver=None):
   """
   if vc_ver is None:
     vc_ver = (
-        float(os.getenv('MSVCVER'))
-        if os.getenv('MSVCVER')
+        float(os.getenv("MSVCVER"))
+        if os.getenv("MSVCVER")
         else msvc9compiler.get_build_version()
     )
 
@@ -31,16 +31,14 @@ def win_compile(filename, output_filename, arch='x86', vc_ver=None):
     # VS 2008 Standard Edition doesn't have vcvarsall.bat
     vs_base = msvc9compiler.VS_BASE % vc_ver
     reg_path = r"{0}\Setup\VC".format(vs_base)
-
     product_dir = msvc9compiler.Reg.get_value(reg_path, "productdir")
-
-    bat = 'vcvars%d.bat' % (arch == 'x86' and 32 or 64)
-    vcvars = os.path.join(product_dir, 'bin', bat)
+    bat = "vcvars%d.bat" % (arch == "x86" and 32 or 64)
+    vcvars = os.path.join(product_dir, "bin", bat)
 
   path = os.path.splitext(output_filename)
-  obj_filename = '{0}.obj'.format(path[0])
+  obj_filename = "{0}.obj".format(path[0])
   p = subprocess.Popen(
-      '"{0}" {1} & cl {2} /Fe{3} /Fo{4}'.format(
+      "\"{0}\" {1} & cl {2} /Fe{3} /Fo{4}".format(
           vcvars,
           arch,
           filename,

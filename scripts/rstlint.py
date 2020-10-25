@@ -34,122 +34,124 @@ from os.path import abspath, exists, join, splitext
 LOGGER = logging.getLogger(__name__)
 
 CHECKERS = {}
-CHECKER_PROPS = {'severity': 1, 'falsepositives': False}
+CHECKER_PROPS = {"severity": 1, "falsepositives": False}
 
-DEFAULT_ROLE_RE = re.compile(r'(?:^| )`\w(?P<default_role>[^`]*?\w)?`(?:$| )')
+DEFAULT_ROLE_RE = re.compile(r"(?:^| )`\w(?P<default_role>[^`]*?\w)?`(?:$| )")
 
 DIRECTIVES = [
     # standard docutils ones
-    'admonition',
-    'attention',
-    'caution',
-    'class',
-    'compound',
-    'container',
-    'contents',
-    'csv-table',
-    'danger',
-    'date',
-    'default-role',
-    'epigraph',
-    'error',
-    'figure',
-    'footer',
-    'header',
-    'highlights',
-    'hint',
-    'image',
-    'important',
-    'include',
-    'line-block',
-    'list-table',
-    'meta',
-    'note',
-    'parsed-literal',
-    'pull-quote',
-    'raw',
-    'replace',
-    'restructuredtext-test-directive',
-    'role',
-    'rubric',
-    'sectnum',
-    'sidebar',
-    'table',
-    'target-notes',
-    'tip',
-    'title',
-    'topic',
-    'unicode',
-    'warning',
+    "admonition",
+    "attention",
+    "caution",
+    "class",
+    "compound",
+    "container",
+    "contents",
+    "csv-table",
+    "danger",
+    "date",
+    "default-role",
+    "epigraph",
+    "error",
+    "figure",
+    "footer",
+    "header",
+    "highlights",
+    "hint",
+    "image",
+    "important",
+    "include",
+    "line-block",
+    "list-table",
+    "meta",
+    "note",
+    "parsed-literal",
+    "pull-quote",
+    "raw",
+    "replace",
+    "restructuredtext-test-directive",
+    "role",
+    "rubric",
+    "sectnum",
+    "sidebar",
+    "table",
+    "target-notes",
+    "tip",
+    "title",
+    "topic",
+    "unicode",
+    "warning",
     # Sphinx and Python docs custom ones
-    'acks',
-    'attribute',
-    'autoattribute',
-    'autoclass',
-    'autodata',
-    'autoexception',
-    'autofunction',
-    'automethod',
-    'automodule',
-    'centered',
-    'cfunction',
-    'class',
-    'classmethod',
-    'cmacro',
-    'cmdoption',
-    'cmember',
-    'code-block',
-    'confval',
-    'cssclass',
-    'ctype',
-    'currentmodule',
-    'cvar',
-    'data',
-    'decorator',
-    'decoratormethod',
-    'deprecated-removed',
-    'deprecated(?!-removed)',
-    'describe',
-    'directive',
-    'doctest',
-    'envvar',
-    'event',
-    'exception',
-    'function',
-    'glossary',
-    'highlight',
-    'highlightlang',
-    'impl-detail',
-    'index',
-    'literalinclude',
-    'method',
-    'miscnews',
-    'module',
-    'moduleauthor',
-    'opcode',
-    'pdbcommand',
-    'productionlist',
-    'program',
-    'role',
-    'sectionauthor',
-    'seealso',
-    'sourcecode',
-    'staticmethod',
-    'tabularcolumns',
-    'testcode',
-    'testoutput',
-    'testsetup',
-    'toctree',
-    'todo',
-    'todolist',
-    'versionadded',
-    'versionchanged',
+    "acks",
+    "attribute",
+    "autoattribute",
+    "autoclass",
+    "autodata",
+    "autoexception",
+    "autofunction",
+    "automethod",
+    "automodule",
+    "centered",
+    "cfunction",
+    "class",
+    "classmethod",
+    "cmacro",
+    "cmdoption",
+    "cmember",
+    "code-block",
+    "confval",
+    "cssclass",
+    "ctype",
+    "currentmodule",
+    "cvar",
+    "data",
+    "decorator",
+    "decoratormethod",
+    "deprecated-removed",
+    "deprecated(?!-removed)",
+    "describe",
+    "directive",
+    "doctest",
+    "envvar",
+    "event",
+    "exception",
+    "function",
+    "glossary",
+    "highlight",
+    "highlightlang",
+    "impl-detail",
+    "index",
+    "literalinclude",
+    "method",
+    "miscnews",
+    "module",
+    "moduleauthor",
+    "opcode",
+    "pdbcommand",
+    "productionlist",
+    "program",
+    "role",
+    "sectionauthor",
+    "seealso",
+    "sourcecode",
+    "staticmethod",
+    "tabularcolumns",
+    "testcode",
+    "testoutput",
+    "testsetup",
+    "toctree",
+    "todo",
+    "todolist",
+    "versionadded",
+    "versionchanged",
 ]
-ALL_DIRECTIVES = '(' + '|'.join(DIRECTIVES) + ')'
 
-LEAKED_MARKDOWN_RE = re.compile(r'[a-z]::\s|`|\.\.\s*\w+:')
+ALL_DIRECTIVES = "({0})".format("|".join(DIRECTIVES))
+
+LEAKED_MARKDOWN_RE = re.compile(r"[a-z]::\s|`|\.\.\s*\w+:")
+
 SEEMS_DIRECTIVE_RE = re.compile(
-    r'(?<!\.)\.\. %s(?P<directive>[^a-z:]|:(?!:))'
+    r"(?<!\.)\.\. %s(?P<directive>[^a-z:]|:(?!:))"
     % ALL_DIRECTIVES
 )
 
@@ -168,25 +170,25 @@ def checker(*suffixes, **kwargs):
   return deco
 
 
-@checker('.py', severity=4)
+@checker(".py", severity=4)
 def check_syntax(fn, lines):
   """Check Python examples for valid syntax.
 
   Yields:
     tuple[int,str]: Line Number and Message.
   """
-  code = ''.join(lines)
-  if '\r' in code:
-    if os.name != 'nt':
-      yield 0, '\\r in code file'
-    code = code.replace('\r', '')
+  code = "".join(lines)
+  if "\r" in code:
+    if os.name != "nt":
+      yield 0, "\\r in code file"
+    code = code.replace("\r", "")
   try:
-    compile(code, fn, 'exec')
+    compile(code, fn, "exec")
   except SyntaxError as err:
-    yield err.lineno, 'not compilable: %s' % err
+    yield err.lineno, "not compilable: %s" % err
 
 
-@checker('.rst', severity=2)
+@checker(".rst", severity=2)
 def check_suspicious_constructs(_, lines):
   """Check for suspicious reST constructs.
 
@@ -196,29 +198,29 @@ def check_suspicious_constructs(_, lines):
   in_prod = False
   for lno, line in enumerate(lines):
     if SEEMS_DIRECTIVE_RE.search(line):
-      yield lno + 1, 'comment seems to be intended as a directive'
-    if '.. productionlist::' in line:
+      yield lno + 1, "comment seems to be intended as a directive"
+    if ".. productionlist::" in line:
       in_prod = True
     elif not in_prod and DEFAULT_ROLE_RE.search(line):
-      yield lno + 1, 'default role used'
+      yield lno + 1, "default role used"
     elif in_prod and not line.strip():
       in_prod = False
 
 
-@checker('.py', '.rst')
+@checker(".py", ".rst")
 def check_whitespace(_, lines):
   """Check for whitespace and line length issues.
   """
   for lno, line in enumerate(lines):
-    if '\r' in line:
-      yield lno + 1, '\\r in line'
-    if '\t' in line:
-      yield lno + 1, 'OMG TABS!!!1'
-    if line[:-1].rstrip(' \t') != line[:-1]:
-      yield lno + 1, 'trailing whitespace'
+    if "\r" in line:
+      yield lno + 1, "\\r in line"
+    if "\t" in line:
+      yield lno + 1, "OMG TABS!!!1"
+    if line[:-1].rstrip(" \t") != line[:-1]:
+      yield lno + 1, "trailing whitespace"
 
 
-@checker('.rst', severity=0)
+@checker(".rst", severity=0)
 def check_line_length(_, lines):
   """Check for line length; this checker is not _run by default.
 
@@ -227,17 +229,18 @@ def check_line_length(_, lines):
   """
   for lno, line in enumerate(lines):
     if len(line) > 81:
-      # don't complain about tables, links and function signatures
+      # do not complain about tables, links and function signatures
       if (
-          line.lstrip()[0] not in '+|'
-          and 'http://' not in line
-          and not line.lstrip().startswith(('.. function', '.. method',
-                                            '.. cfunction'))
+          line.lstrip()[0] not in "+|"
+          and "http://" not in line
+          and not line.lstrip().startswith((".. function",
+                                            ".. method",
+                                            ".. cfunction"))
       ):
         yield lno + 1, "line too long"
 
 
-@checker('.html', severity=2, falsepositives=True)
+@checker(".html", severity=2, falsepositives=True)
 def check_leaked_markup(_, lines):
   """Check HTML files for leaked reST markup.
 
@@ -249,7 +252,7 @@ def check_leaked_markup(_, lines):
   """
   for lno, line in enumerate(lines):
     if LEAKED_MARKDOWN_RE.search(line):
-      yield lno + 1, 'possibly leaked markup: %r' % line
+      yield lno + 1, "possibly leaked markup: %r" % line
 
 
 def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
@@ -274,7 +277,7 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
       continue
     for fn in files:
       fn = join(root, fn)
-      if fn[:2] == './':
+      if fn[:2] == "./":
         fn = fn[2:]
       if abspath(fn) in ignore:
         continue  # ignore files in ignore list
@@ -282,12 +285,12 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
       if not checker_list:
         continue
       if verbose:
-        sys.stdout.write('[-] CHECKING: %s...\n' % fn)
+        sys.stdout.write("[-] CHECKING: %s...\n" % fn)
       try:
         with open(fn) as f:
           lines = list(f)
       except (UnicodeDecodeError, IOError, OSError) as err:
-        sys.stderr.write('[!] ERROR: %s: cannot open: %s\n' % (fn, err))
+        sys.stderr.write("[!] ERROR: %s: cannot open: %s\n" % (fn, err))
         count[4] += 1
         continue
       for _checker in checker_list:
@@ -296,18 +299,20 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
         c_sev = _checker.severity
         if c_sev >= severity:
           for n, msg in _checker(fn, lines):
-            sys.stdout.write('[%d] PROBLEMS: %s:%d: %s\n' % (c_sev, fn, n, msg))
+            sys.stdout.write("[%d] PROBLEMS: %s:%d: %s\n" % (c_sev, fn, n, msg))
             count[c_sev] += 1
   if not count:
     if severity > 1:
-      sys.stdout.write('No Problems With Severity >= %d Found.\n' % severity)
+      sys.stdout.write("No Problems With Severity >= %d Found.\n" % severity)
     else:
-      sys.stdout.write('No Problems Found.\n')
+      sys.stdout.write("No Problems Found.\n")
   else:
     for severity in sorted(count):
       number = count[severity]
-      sys.stdout.write('%d Problem%s With Severity %d Found.\n' % (
-          number, 's' if number > 1 else '', severity
+      sys.stdout.write("%d Problem%s With Severity %d Found.\n" % (
+          number,
+          "s" if number > 1 else "",
+          severity
       ))
   return count
 
@@ -316,7 +321,7 @@ def _parse_args(argv):
   """Parse CLI Arguments.
   """
   try:
-    opts, args = getopt.getopt(argv[1:], 'vfs:i:')
+    opts, args = getopt.getopt(argv[1:], "vfs:i:")
   except getopt.GetoptError:
     sys.stderr.write(__doc__)
     return 2
@@ -329,17 +334,17 @@ def _parse_args(argv):
   }
 
   for opt, val in opts:
-    if opt == '-v':
+    if opt == "-v":
       argd["verbose"] = True
-    elif opt == '-f':
+    elif opt == "-f":
       argd["false_pos"] = True
-    elif opt == '-s':
+    elif opt == "-s":
       argd["severity"] = int(val)
-    elif opt == '-i':
+    elif opt == "-i":
       argd["ignore"].append(abspath(val))
 
   if len(args) == 0:
-    argd["path"] = '.'
+    argd["path"] = "."
   elif len(args) == 1:
     argd["path"] = args[0]
   else:
@@ -347,7 +352,7 @@ def _parse_args(argv):
     return 2
 
   if not exists(argd["path"]):
-    sys.stderr.write('ERROR: path %s does not exist\n' % argd["path"])
+    sys.stderr.write("ERROR: path {0} does not exist\n".format(argd["path"]))
     return 2
 
   return argd
@@ -371,7 +376,7 @@ def main():
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
-  if os.name == 'nt':
+  if os.name == "nt":
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 
   argd = _parse_args(sys.argv)
@@ -383,5 +388,5 @@ def main():
   return int(bool(rstlint(**argd)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   sys.exit(main())

@@ -44,7 +44,7 @@ def response():
   class Response(object):
     """Mock requests.Response
     """
-    _content = b'{"TEST": "TEST"}'
+    _content = b"{\"TEST\": \"TEST\"}"
     cookies = {}
     encoding = "utf8"
     headers = {

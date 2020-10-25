@@ -33,7 +33,8 @@ __all__ = (
     "strtobool",
     "timestamp_from_datetime",
     "to_valid_filename",
-    "to_valid_module_name"
+    "to_valid_module_name",
+    "touch"
 )
 
 EPOCH = datetime(1970, 1, 1)
@@ -91,14 +92,17 @@ class DateRange(object):
 
   def __len__(self):
     if self.stop is None:
-      # it'd be nice if float('inf') could be returned
+      # it would be nice if float("inf") could be returned
       raise TypeError("infinite range")
     calc = (
         self.start - self.stop
         if self._has_neg_step
         else self.stop - self.start
     )
-    return int(ceil(abs(calc.total_seconds() / self.step.total_seconds())))
+    return int(ceil(abs(
+        calc.total_seconds()
+        / self.step.total_seconds())
+    ))
 
   def __contains__(self, x):
     if self.stop is not None:
@@ -172,7 +176,7 @@ class DateRange(object):
     if s == (None, None, None) or s == (None, None, 1):
       return DateRange(start=self.start, stop=self.stop, step=self.step)
     start, stop, step = s
-    # seems redundant but we're converting None -> 0
+    # seems redundant but we are converting None -> 0
     start = start or 0
     stop = stop or 0
     step = step or 1  # use 1 here because of multiplication
@@ -212,10 +216,10 @@ def as_number(value):
   """Coerced value to number.
 
   Args:
-    value (str or int or float): Value to coerce to number
+    value (str or int or float): Value to coerce to number.
 
   Returns:
-    int: Value coerced to number
+    int: Value coerced to number.
   """
   if isinstance(value, integer_types):
     return value
@@ -231,10 +235,10 @@ def as_bool(value):
   """Coerced value to boolean.
 
   Args:
-    value (str or int or bool): Value to coerce to number
+    value (str or int or bool): Value to coerce to boolean.
 
   Returns:
-    int: Value coerced to number
+    int: Value coerced to boolean.
   """
   if isinstance(value, bool):
     return value
@@ -276,8 +280,8 @@ class PathNotFound(Exception):
 def find_ancestor(start_dir, ancestor):
   """Finds an ancestor dir in a path.
 
-  For example, find_ancestor('c:\foo\bar\baz', 'bar') would return
-  'c:\foo\bar'.
+  For example, find_ancestor("c:\foo\bar\baz", "bar") would
+  return "c:\foo\bar".
 
   Unlike FindUpward*, this only looks at direct path ancestors.
   """
@@ -294,10 +298,10 @@ def find_ancestor(start_dir, ancestor):
 
 
 def is_file_newer_than_file(file_a, file_b):
-  """Returns True if file_a's mtime is newer than file_b's.
+  """Returns True if file_a mtime is newer than file_b mtime.
 
   Returns:
-    bool: True if file_a's mtime is newer than file_b's.
+    bool: True if file_a mtime is newer than file_b mtime.
   """
 
   def _getmtime(f):
@@ -327,7 +331,7 @@ def mkdir_p(path):
   """Create entire filepath.
 
   Notes:
-    Unix 'mkdir -p' equivalent.
+    Unix "mkdir -p" equivalent.
 
   Args:
     path (str): Filepath to create.
@@ -363,7 +367,7 @@ def run_in_separate_process(func, *args, **kwargs):
     os.close(write_fd)
 
     # open read file descriptor.
-    with os.fdopen(read_fd, 'rb') as f:
+    with os.fdopen(read_fd, "rb") as f:
       status, result = pickle.load(f)
 
     # wait for completion of child process.
@@ -384,7 +388,7 @@ def run_in_separate_process(func, *args, **kwargs):
     except Exception as exc:
       result, status = exc, 1
 
-    with os.fdopen(write_fd, 'wb') as f:
+    with os.fdopen(write_fd, "wb") as f:
       # dump results.
       try:
         pickle.dump((status, result), f, pickle.HIGHEST_PROTOCOL)
@@ -395,33 +399,35 @@ def run_in_separate_process(func, *args, **kwargs):
 
 
 def script_dir():
-  """Get the full path to the directory containing the current script.
+  """Get the full path to the directory containing the current
+  script.
   """
   script_filename = os.path.abspath(sys.argv[0])
   return os.path.dirname(script_filename)
 
 
 def strtobool(val, strict_errors=True):
-  """Convert a string representation of truth to true (1) or false (0).
+  """Convert a string representation of truth to true (1) or
+  false (0).
 
   Args:
     val (str or int): String to convert.
-    strict_errors (bool): Raise error if val is not one the valid
-      boolean values, otherwise return the input val.
+    strict_errors (bool): Raise error if val is not one the
+      valid boolean values, otherwise return the input val.
 
   Notes:
-    True Values:  'y', 'yes', 't', 'true', 'on', and '1'
-    False Values: 'n', 'no', 'f', 'false', 'off', and '0'
+    True Values:  "y", "yes", "t", "true", "on", and "1"
+    False Values: "n", "no", "f", "false", "off", and "0"
 
   Raises:
-    ValueError: If 'val' is anything else.
+    ValueError: If "val" is anything else.
   """
   v = val
   if not isinstance(v, string_types):
     v = text_type(v)
-  if v.lower() in ('y', 'yes', 't', 'true', 'on', '1'):
+  if v.lower() in ("y", "yes", "t", "true", "on", "1"):
     return True
-  elif v.lower() in ('n', 'no', 'f', 'false', 'off', '0'):
+  elif v.lower() in ("n", "no", "f", "false", "off", "0"):
     return False
   elif strict_errors:
     raise ValueError("invalid truth value {!r}".format(val))
@@ -449,9 +455,10 @@ def timestamp_from_datetime(dt, epoch=EPOCH):
 def to_valid_filename(filename):
   """Given any string, return a valid filename.
 
-  For this purpose, filenames are expected to be all lower-cased,
-  and we err on the side of being more restrictive with allowed characters,
-  including not allowing space.
+  For this purpose, filenames are expected to be all
+  lower-cased, and we err on the side of being more
+  restrictive with allowed characters, including not
+  allowing space.
 
   Args:
     filename (str): The input filename.
@@ -459,7 +466,7 @@ def to_valid_filename(filename):
   Returns:
     str: A valid filename.
   """
-  return re.compile(r'[^a-z0-9.$_-]+').sub('-', filename.lower())
+  return re.compile(r"[^a-z0-9.$_-]+").sub("-", filename.lower())
 
 
 def to_valid_module_name(module_name):
@@ -474,4 +481,15 @@ def to_valid_module_name(module_name):
   Returns:
     (str): A valid module name.
   """
-  return to_valid_filename(module_name).replace('-', '_')
+  return to_valid_filename(module_name).replace("-", "_")
+
+
+def touch(filepath):
+  """Equivalent of Unix `touch` command
+  """
+  if not os.path.exists(filepath):
+    fh = open(filepath, "a")
+    try:
+      os.utime(filepath, None)
+    finally:
+      fh.close()
