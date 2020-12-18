@@ -326,36 +326,35 @@ def _parse_args(argv):
     sys.stderr.write(__doc__)
     return 2
 
-  argd = {
+  arg_d = {
       "verbose": False,
       "severity": 1,
       "ignore": [],
       "false_pos": False,
   }
-
   for opt, val in opts:
     if opt == "-v":
-      argd["verbose"] = True
+      arg_d["verbose"] = True
     elif opt == "-f":
-      argd["false_pos"] = True
+      arg_d["false_pos"] = True
     elif opt == "-s":
-      argd["severity"] = int(val)
+      arg_d["severity"] = int(val)
     elif opt == "-i":
-      argd["ignore"].append(abspath(val))
+      arg_d["ignore"].append(abspath(val))
 
   if len(args) == 0:
-    argd["path"] = "."
+    arg_d["path"] = "."
   elif len(args) == 1:
-    argd["path"] = args[0]
+    arg_d["path"] = args[0]
   else:
     sys.stderr.write(__doc__)
     return 2
 
-  if not exists(argd["path"]):
-    sys.stderr.write("ERROR: path {0} does not exist\n".format(argd["path"]))
+  if not exists(arg_d["path"]):
+    sys.stderr.write("ERROR: path {0} does not exist\n".format(arg_d["path"]))
     return 2
 
-  return argd
+  return arg_d
 
 
 def main():
@@ -376,16 +375,19 @@ def main():
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
+
   if os.name == "nt":
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 
-  argd = _parse_args(sys.argv)
-  if not isinstance(argd, dict):
-    return argd
+  args_dict = _parse_args(sys.argv)
 
-  if argd["verbose"]:
+  if not isinstance(args_dict, dict):
+    return args_dict
+
+  if args_dict["verbose"]:
     logging.basicConfig(level=logging.DEBUG)
-  return int(bool(rstlint(**argd)))
+
+  return int(bool(rstlint(**args_dict)))
 
 
 if __name__ == "__main__":

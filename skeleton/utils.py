@@ -38,7 +38,6 @@ __all__ = (
 )
 
 EPOCH = datetime(1970, 1, 1)
-
 ISO_DATETIME_STRING = "1970-01-01 00:00:00.000"
 ISO_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
@@ -60,11 +59,10 @@ class DateRange(object):
 
   Examples:
     now = datetime.now().date()
-    for d in DateRange(
-        start=now - timedelta(weeks=1),
-        stop=now,
-        step=timedelta(days=1)
-    ):
+    one_day = timedelta(days=1)
+    one_week_ago = now - timedelta(weeks=1)
+
+    for d in DateRange(start=one_week_ago, stop=now, step=one_day):
       print(d)
   """
 
@@ -99,24 +97,15 @@ class DateRange(object):
         if self._has_neg_step
         else self.stop - self.start
     )
-    return int(ceil(abs(
-        calc.total_seconds()
-        / self.step.total_seconds())
-    ))
+    return int(ceil(abs(calc.total_seconds() / self.step.total_seconds())))
 
   def __contains__(self, x):
     if self.stop is not None:
-      check = (
-          self.start >= x > self.stop
-          if self._has_neg_step
-          else self.start <= x < self.stop
-      )
+      check = (self.start >= x > self.stop
+               if self._has_neg_step
+               else self.start <= x < self.stop)
     else:
-      check = (
-          self.start >= x
-          if self._has_neg_step
-          else self.start <= x
-      )
+      check = self.start >= x if self._has_neg_step else self.start <= x
     if not check:
       return False
     difference = x - self.start
@@ -188,28 +177,16 @@ class DateRange(object):
     return DateRange(start=new_start, stop=new_stop, step=new_step)
 
 
-def _parse_format_str(s):
+def _parse_fmt_str(s):
   return [
-      (
-          literal_text,
-          field_name,
-          format_spec,
-          conversion
-      ) for literal_text, field_name, format_spec, conversion in
+      (literal_text, field_name, fmt_spec, conversion)
+      for literal_text, field_name, fmt_spec, conversion in
       Formatter().parse(s)
   ]
 
 
 def _format_str_vars(s):
-  return list(
-      map(
-          as_number,
-          filter(None, (
-              parts[1]
-              for parts in _parse_format_str(s)
-          ))
-      )
-  )
+  return list(map(as_number, filter(None, (p[1] for p in _parse_fmt_str(s)))))
 
 
 def as_number(value):
@@ -313,10 +290,10 @@ def is_file_newer_than_file(file_a, file_b):
   return _getmtime(file_a) >= _getmtime(file_b)
 
 
-def memoize(fn):
+def memoize(fn, cls=dict):
   """Decorator to memoize.
   """
-  memory = {}
+  memory = cls()
 
   def impl(*args, **kwargs):
     full_args = args + tuple(iteritems(kwargs))
@@ -399,8 +376,7 @@ def run_in_separate_process(func, *args, **kwargs):
 
 
 def script_dir():
-  """Get the full path to the directory containing the current
-  script.
+  """Get the full path to the directory containing the current script.
   """
   script_filename = os.path.abspath(sys.argv[0])
   return os.path.dirname(script_filename)

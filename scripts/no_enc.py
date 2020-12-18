@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding=utf8
-"""List Python files that are missing a coding directive.
+"""no_enc.py
+
+List Python files that are missing a coding directive.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -57,11 +59,9 @@ def _open(filepath):
     # Permission denied - ignore the file
     LOGGER.debug("permission denied: %s. %r", filepath, err)
     return None
-
   if size > 1024 * 1024:  # too big
     LOGGER.debug("file too large (%d bytes): %s", size, filepath)
     return None
-
   try:
     return open(filepath, "rb")
   except IOError as err:
@@ -140,12 +140,10 @@ def needs_declaration(filepath):
 
 
 def walk_python_files(paths, is_python=looks_like_python, exclude_dirs=None):
-  """Recursively yield all Python source files below the given
-  paths.
+  """Recursively yield all Python source files below the given paths.
 
   Args:
-    paths (list): list of files and/or directories to be
-      checked.
+    paths (list): list of files and/or directories to be checked.
     is_python (Callable): function that takes a file name and
       checks whether it is a python source file.
     exclude_dirs (list or str): list of directory base names
@@ -153,22 +151,21 @@ def walk_python_files(paths, is_python=looks_like_python, exclude_dirs=None):
   """
   if exclude_dirs is None:
     exclude_dirs = []
-
   for path in map(os.path.abspath, paths):
     if os.path.isfile(path):
       if is_python(path):
         yield path
     elif os.path.isdir(path):
-      for dirpath, dirnames, filenames in os.walk(path):
+      for dir_path, dir_names, filenames in os.walk(path):
         for exclude in exclude_dirs:
-          if exclude in dirnames:
+          if exclude in dir_names:
             LOGGER.debug("excluded directory: %s",
-                         os.path.join(dirpath, exclude))
-            dirnames.remove(exclude)
+                         os.path.join(dir_path, exclude))
+            dir_names.remove(exclude)
         for filename in filenames:
-          fullpath = os.path.join(dirpath, filename)
-          if is_python(fullpath):
-            yield fullpath
+          full_path = os.path.join(dir_path, filename)
+          if is_python(full_path):
+            yield full_path
     else:
       LOGGER.debug("unknown: %s", path)
 
@@ -221,12 +218,13 @@ def handle_shutdown(func):
   """
   import signal
 
-  def _shutdown_handler(signum, _):
+  # noinspection PyUnusedLocal
+  def _shutdown_handler(signum, frame):
     """Handle Shutdown.
 
     Args:
       signum (int): Signal Number,
-      _ (types.FrameType): Interrupted Stack Frame.
+      frame (types.FrameType): Interrupted Stack Frame.
 
     Raises:
       (SystemExit): Calls sys.exit(), which raises a SystemExit exception.
@@ -240,8 +238,7 @@ def handle_shutdown(func):
     signal.signal(signal.SIGINT, _shutdown_handler)
     if os.name == "nt":
       signal.signal(signal.SIGBREAK, _shutdown_handler)
-    result = func(*args, **kwargs)
-    return result
+    return func(*args, **kwargs)
 
   return _f
 
@@ -258,39 +255,33 @@ def _parse_args():
     https://github.com/python/cpython/blob/master/Tools/scripts/findnocoding.py
   """
   )
-
   parser.add_argument(
       "paths",
       metavar="PATHS",
       nargs="+",
       help="search path(s)."
   )
-
   parser.add_argument(
       "-c", "--compile",
       action="store_true",
       help="recognize python files by trying to compile. (default: %(default)s)"
   )
-
   parser.add_argument(
       "-e", "--exclude",
       nargs="+",
       default=[".git", ".idea", "__pycache__"],
       help="directories to exclude while searching. (default: %(default)s)"
   )
-
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
       help="enable debug logging. (default: %(default)s)"
   )
-
   parser.add_argument(
       "-v", "--version",
       version=__version__,
       action="version"
   )
-
   parser.add_argument(
       "-o", "--output",
       default="-",
@@ -298,12 +289,9 @@ def _parse_args():
       help="Output Location (default: %(default)s)",
       type=FileType("{0!s}+".format("wb" if sys.version_info[0] == 2 else "w"))
   )
-
   args = parser.parse_args()
-
   if args.debug is True:
     logging.basicConfig(level=logging.DEBUG)
-
   return args
 
 
@@ -314,8 +302,8 @@ def main():
   """
   args = _parse_args()
   write = args.output.write
-  for fullpath in find_no_encoding(args.paths, args.compile, args.exclude):
-    write(ensure_str("{0}\n".format(fullpath)))
+  for full_path in find_no_encoding(args.paths, args.compile, args.exclude):
+    write(ensure_str("{0}\n".format(full_path)))
   args.output.flush()
   return 0
 

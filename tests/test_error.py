@@ -31,24 +31,19 @@ def test_base_error(error):
     bool: True if success, otherwise False
   """
   LOGGER.debug(
-      """
-BaseError:
+      """BaseError:
   fmt=%s
   msg=%s
   args=%s
   kwargs=%s
-""",
-      error.msg,
-      error.kwargs,
-      error.fmt,
-      error.args
-  )
+""", error.msg, error.kwargs, error.fmt, error.args)
   try:
     raise error
   except BaseError as e:
     LOGGER.exception("Caught Test Exception: %s", e.json)
     assert e.args[0] == BaseError.fmt.format(error="TEST ERROR MESSAGE")
     return True
+
   except Exception as e:
     LOGGER.debug("Caught Incorrect Exception: %r", e)
     return False

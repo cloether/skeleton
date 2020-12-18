@@ -56,19 +56,11 @@ def _getenv(name, default=None):
       value = int(float(value))
     elif value.isdigit():
       value = int(value)
-    elif value.lower() == ("true", "1"):
+    elif value.lower() == ("true", "yes", "1"):
       value = True
-    elif value.lower() == ("false", "0"):
+    elif value.lower() == ("false", "no", "0"):
       value = False
   return bool(value)
-
-
-def _getenv_json_sort_keys(default=_LOGGING_JSON_SORT_KEYS):
-  return _getenv("LOGGING_JSON_SORT_KEYS", default)
-
-
-def _getenv_json_indent(default=_LOGGING_JSON_INDENT):
-  return _getenv("LOGGING_JSON_SORT_KEYS", default)
 
 
 def _log_items(data, name, ignore_empty=True, prefix=" - "):
@@ -92,11 +84,10 @@ def _log_one(data, name, prefix=" - ", ignore_empty=True):
 
 def _log_json(data, name, prefix=" - ", ignore_empty=True):
   if not (ignore_empty and not data):
-    _log_list(json.dumps(
-        data,
-        indent=_getenv_json_indent(),
-        sort_keys=_getenv_json_sort_keys()
-    ).splitlines(), name, prefix=prefix, ignore_empty=ignore_empty)
+    _indent = _getenv("_LOGGING_JSON_INDENT", _LOGGING_JSON_INDENT)
+    _sort_keys = _getenv("LOGGING_JSON_SORT_KEYS", _LOGGING_JSON_SORT_KEYS)
+    _lines = json.dumps(data, indent=_indent, sort_keys=_sort_keys).splitlines()
+    _log_list(_lines, name, prefix=prefix, ignore_empty=ignore_empty)
 
 
 def _response_content_str(response, **kwargs):
@@ -109,21 +100,28 @@ def _response_content_str(response, **kwargs):
     str: Content type string
   """
   header = response.headers.get("content-disposition")
+
   if not header:
     return None
+
   if kwargs.get("stream", False):
     return "(STREAM-DATA)"
+
   if _CONTENT_DISPOSITION_RE.match(header):
     filename = header.partition("=")[2]
     return "(FILE-ATTACHMENT: {0})".format(filename)
 
   content_type = response.headers.get("content-type", "")
+
   if not content_type:
     return None
+
   if content_type.endswith("octet-stream"):
     return "(BINARY-DATA)"
+
   if content_type.endswith("image"):
     return "(IMAGE-DATA)"
+
   return None
 
 
@@ -153,6 +151,7 @@ def log_request(request, **kwargs):
       response body content will not be logged.
   """
   log_content = kwargs.setdefault("log_content", False)
+
   try:
     LOGGER.debug("REQUEST:")
     LOGGER.debug(" - URL: %s", request.url)

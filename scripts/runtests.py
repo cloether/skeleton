@@ -64,22 +64,15 @@ def main():
   """CLI Entry Point
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
   module = module_name(where=repo_root)
-
   return_code = -1  # noqa
-
   with cwd(repo_root):
     env_name = os.getenv("ENVNAME", "test")
-
     tests_dir = os.path.join(repo_root, "tests")
     tests_log_file = os.path.join(tests_dir, "pytest.log")
-
-    touch(tests_log_file)  # prevent pytest errors
-
+    touch(tests_log_file)  # prevent pytest error due to missing log file
     tests_html_filename = "{0!s}.html".format(env_name)
     tests_html_file = os.path.join(tests_dir, "reports", tests_html_filename)
-
     return_code = run(
         "pytest {posargs} "
         "--cov={module} "

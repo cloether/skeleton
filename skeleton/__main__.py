@@ -17,12 +17,13 @@ if __name__ == "__main__":
   import signal
   import sys
 
-  def _shutdown_handler(signum, _):
+
+  def _shutdown_handler(signum, frame):
     """Handle Shutdown.
 
     Args:
       signum (int): Signal Number,
-      _ (types.FrameType): Interrupted Stack Frame.
+      frame (types.FrameType): Interrupted Stack Frame.
 
     Raises:
       (SystemExit): Calls sys.exit(), which raises s SystemExit exception.
@@ -30,9 +31,9 @@ if __name__ == "__main__":
     sys.stderr.write("\b\b\b\bshutdown handler called, signal=%d" % signum)
     sys.exit(signum)
 
+
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
-
   if os.name == "nt":
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 

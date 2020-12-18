@@ -5,10 +5,11 @@ Command Line Interface (CLI)
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-import errno
 import logging
 import os
 import sys
+
+import errno
 
 from .__version__ import __description__, __title__, __version__
 from .log import (
@@ -38,7 +39,7 @@ if _IS_WIN32:
   msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
   msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)
 
-_DEFAULT_FILE_WRITE_MODE = "wb" if _IS_PY2 else "w"
+_DEFAULT_FILE_MODE_SUFFIX = "b" if _IS_PY2 else ""
 
 
 def epipe(func):
@@ -88,21 +89,21 @@ def arg_parser(**kwargs):
       prog=__title__,
   )
   parser.add_argument(
-      "-d", "--debug",
-      action="store_true",
-      help="enable debug logging"
-  )
-  parser.add_argument(
       "-v", "--version",
       action="version",
       version=__version__
+  )
+  parser.add_argument(
+      "-d", "--debug",
+      action="store_true",
+      help="enable debug logging"
   )
   parser.add_argument(
       "-o", "--output",
       default="-",
       metavar="path",
       help="output location (default: %(default)s)",
-      type=FileType("{0!s}+".format(_DEFAULT_FILE_WRITE_MODE))
+      type=FileType("w{0!s}+".format(_DEFAULT_FILE_MODE_SUFFIX))
   )
   parser.add_argument(
       "--logfile",

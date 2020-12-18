@@ -17,13 +17,16 @@ def run(command):
   """
   try:
     returncode = check_call(command, shell=True)
+
   except CalledProcessError as e:
     returncode = e.returncode
+
     LOGGER.error(
         "check_call returned non-zero exit code: "
         "command=%s returncode=%s args=%s stdout=%s stderr=%s",
         e.cmd, returncode, e.args, e.stdout, e.stderr
     )
+
   return returncode
 
 
@@ -35,18 +38,22 @@ def test_cli():
   """
   command = "{0!s} -m skeleton".format(sys.executable)
   LOGGER.debug("command: %s", command)
+
   # noinspection PyBroadException
   try:
     return_code = run(command)
+
     LOGGER.debug("return code: %s", return_code)
   except NotImplementedError:
     return False
+
   except Exception as e:
     LOGGER.exception(
         "cli command execution: status=failed command=%s error=%r",
         command, e
     )
     return False
+
   else:
     success = True if return_code == 0 else False
     LOGGER.debug(

@@ -49,13 +49,10 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
   def _readme_content_type(_filename, _default=None):
     if _filename.endswith("rst"):
       return "text/x-rst"
-
     if _filename.endswith("md"):
       return "text/x-markdown"
-
     if _filename.endswith("txt"):
       return "text"
-
     return _default
 
   long_description = None
@@ -67,7 +64,6 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
         if not ext or ext is None
         else "{0}.{1}".format(basename, ext)
     )
-
     filepath = path.join(ROOT, filename)
 
     if path.exists(filepath):
@@ -102,7 +98,6 @@ NAME = PACKAGES[0]
 METADATA = __find_meta(path.join(ROOT, NAME, "__version__.py"))
 
 AUTHOR = METADATA.get("author")
-
 AUTHOR_EMAIL = METADATA.get("author_email")
 
 CLASSIFIERS = [

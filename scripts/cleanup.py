@@ -17,7 +17,8 @@ FILES = [
     ("docs", "build"),
     ("tests", ".pytest_cache"),
     ("tests", "pytest.log"),
-    ("tests", "reports")
+    ("tests", "reports"),
+    ("tests", "tests")
 ]
 
 
