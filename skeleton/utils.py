@@ -38,6 +38,7 @@ __all__ = (
 )
 
 EPOCH = datetime(1970, 1, 1)
+
 ISO_DATETIME_STRING = "1970-01-01 00:00:00.000"
 ISO_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
@@ -201,7 +202,9 @@ def as_number(value):
   if isinstance(value, integer_types):
     return value
   if isinstance(value, string_types):
-    if value.isdecimal():
+    if value.isnumeric():
+      value = int(value)
+    elif value.isdecimal():
       value = float(value)
     elif value.isdigit():
       value = int(value)
