@@ -92,14 +92,11 @@ def __readlines(filepath, **kwargs):
 
 
 PACKAGES = find_packages(exclude=("test*", "script*", "example*"))
-
 NAME = PACKAGES[0]
-
 METADATA = __find_meta(path.join(ROOT, NAME, "__version__.py"))
 
 AUTHOR = METADATA.get("author")
 AUTHOR_EMAIL = METADATA.get("author_email")
-
 CLASSIFIERS = [
     "Development Status :: 1 - Planning",
     "Natural Language :: English",
@@ -118,15 +115,12 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.8",
     "Topic :: Internet",
 ]
-
 DESCRIPTION = METADATA.get("description")
-
 ENTRY_POINTS = {
     "console_scripts": [
         "{0}={0}.__main__:main".format(NAME)
     ]
 }
-
 EXTRAS_REQUIRE = {
     "docs": [
         "sphinx",
@@ -152,31 +146,18 @@ EXTRAS_REQUIRE = {
         "ipaddress"
     ],
 }
-
 INCLUDE_PACKAGE_DATA = False
-
 KEYWORDS = "{0} template".format(NAME)
-
 LICENSE = METADATA.get("license")
-
 LONG_DESCRIPTION, LONG_DESCRIPTION_CONTENT_TYPE = __find_readme()
-
 PACKAGE_DATA = {}
-
 PLATFORMS = "Posix; MacOS X; Windows"
-
 REQUIREMENTS = __readlines(path.join(ROOT, "requirements.txt"))
-
 SCRIPTS = None
-
 TITLE = METADATA.get("title")
-
 URL = METADATA.get("url")
-
 VERSION = METADATA["version"]
-
 ZIP_SAFE = False
-
 PROJECT_URLS = {
     "Source": URL,
     "Tracker": "{0}/issues".format(URL)
