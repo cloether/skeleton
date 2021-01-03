@@ -7,57 +7,48 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import sys
-from subprocess import CalledProcessError, check_call
+from argparse import ArgumentParser
+
+from skeleton.cli import arg_parser
+from .utils import run
 
 LOGGER = logging.getLogger(__name__)
 
 
-def run(command):
-  """Run Command.
+def test_arg_parser():
+  """Test cli.py argparser.
   """
-  try:
-    returncode = check_call(command, shell=True)
-
-  except CalledProcessError as e:
-    returncode = e.returncode
-
-    LOGGER.error(
-        "check_call returned non-zero exit code: "
-        "command=%s returncode=%s args=%s stdout=%s stderr=%s",
-        e.cmd, returncode, e.args, e.stdout, e.stderr
-    )
-
-  return returncode
+  parser = arg_parser()
+  is_argparser = isinstance(parser, ArgumentParser) is True
+  assert is_argparser, "Invalid argparser type: {0}".format(type(parser))
+  return is_argparser
 
 
-def test_cli():
+def test_main(module_name):
   """Test Command Line Interface (cli).
 
   Returns:
     bool: True if success, otherwise False.
   """
-  command = "{0!s} -m skeleton".format(sys.executable)
-  LOGGER.debug("command: %s", command)
-
-  # noinspection PyBroadException
+  command = "{0!s} -m {1!s}".format(sys.executable, module_name)
+  LOGGER.debug("test_cli command: %s", command)
+  ret = None
   try:
-    return_code = run(command)
-
-    LOGGER.debug("return code: %s", return_code)
+    ret = run(command)
+    LOGGER.debug("return code: %s", ret)
   except NotImplementedError:
-    return False
-
+    success = False
   except Exception as e:
     LOGGER.exception(
         "cli command execution: status=failed command=%s error=%r",
         command, e
     )
-    return False
-
+    success = False
   else:
-    success = True if return_code == 0 else False
+    success = True if ret == 0 else False
     LOGGER.debug(
         "cli command execution: status=%s command=%s error=%r",
         success, command, None
     )
-    return success
+  assert success is True, "CLI Test Failed with return_code: {0}".format(ret)
+  return success

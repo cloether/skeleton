@@ -1,0 +1,20 @@
+[html]
+directory = tests/reports
+
+[run]
+branch = True
+omit =
+  */tests/*
+  .eggs/*
+  setup.py
+  env/*
+  build/*
+  dist/*
+
+[report]
+ignore_errors = True
+omit = */tests/*, .tox/*
+exclude_lines =
+  raise NotImplementedError.*
+  pragma: NO COVER
+  def __repr__
