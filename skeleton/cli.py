@@ -9,8 +9,6 @@ import logging
 import os
 import sys
 
-import errno
-
 from .__version__ import __description__, __title__, __version__
 from .log import (
   LOGGING_DATEFMT,
@@ -19,49 +17,21 @@ from .log import (
   LOGGING_LEVEL
 )
 
-__all__ = ("arg_parser", "main")
+__all__ = (
+    "arg_parser",
+    "main"
+)
 
 LOGGER = logging.getLogger(__name__)
 
-_IS_PY2 = sys.version_info[0] == 2
-_IS_WIN32 = sys.platform == "Win32"
-
-if _IS_WIN32:
-  # Binary mode is required for persistent mode on windows.
-  # sys.stdout in Python is by default opened in text mode,
-  # and writes to this stdout produce corrupted binary data
-  # on Windows.
-  #   python -c "import sys; sys.stdout.write(\"_\n_\")" > file
-  #   python -c "print(repr(open(\"file\", \"rb\").read()))"
-  import msvcrt  # noqa
-
-  msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
-  msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-  msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)
-
-_DEFAULT_FILE_MODE_SUFFIX = "b" if _IS_PY2 else ""
+_DEFAULT_FILE_MODE_SUFFIX = "b" if sys.version_info[0] == 2 else ""
 
 
-def epipe(func):
-  """Decorator to Handle EPIPE Errors.
-
-  Raises:
-    IOError: Raised when non-EPIPE exceptions are encountered.
-  """
-
-  def _f(*args, **kwargs):
-    try:
-      return func(*args, **kwargs)
-    except IOError as e:
-      if e.errno == errno.EPIPE:
-        sys.exit(e.errno)
-      raise
-
-  return _f
-
-
-def arg_parser(**kwargs):
+def arg_parser(*args, **kwargs):
   """Build Argument Parser
+
+  Args:
+    args: Existing argparse.ArgumentParser instance.
 
   Keyword Args:
     prog (str): Program Name
@@ -79,7 +49,7 @@ def arg_parser(**kwargs):
     SUPPRESS
   )
 
-  parser = ArgumentParser(**kwargs)
+  parser = args[0] if args else ArgumentParser(**kwargs)
   parser.set_defaults(
       argument_default=SUPPRESS,
       conflict_handler="resolve",
@@ -99,6 +69,13 @@ def arg_parser(**kwargs):
       help="enable debug logging"
   )
   parser.add_argument(
+      "-i", "--input",
+      default="-",
+      metavar="path",
+      help="input location (default: %(default)s)",
+      type=FileType("r{0!s}+".format(_DEFAULT_FILE_MODE_SUFFIX))
+  )
+  parser.add_argument(
       "-o", "--output",
       default="-",
       metavar="path",
@@ -114,13 +91,13 @@ def arg_parser(**kwargs):
   return parser
 
 
-@epipe
 def main():
-  """Module CLI Entry Point
+  """Module CLI Entry Point.
   """
   # parse cli arguments
   parser = arg_parser()
   options = parser.parse_args()
+
   # setup logging
   logging.basicConfig(
       filename=options.logfile,
@@ -128,9 +105,11 @@ def main():
       format=LOGGING_FORMAT,
       datefmt=LOGGING_DATEFMT
   )
+
   # run
   LOGGER.warning("command line interface not implemented")
+
   if os.isatty(options.output.fileno()):
-    options.output.write("\n")
+    options.output.write(os.linesep)
     options.output.flush()
   return 0  # return exit code
