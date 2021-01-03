@@ -1,7 +1,7 @@
 # coding=utf8
 """__version__.py
 
-Module Attributes
+Module Metadata Attributes.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
