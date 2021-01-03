@@ -40,17 +40,40 @@ def cwd(dirname):
     os.chdir(orig)
 
 
-def module_name(exclude=("test*", "script*", "example*"), where="."):
+def module_name(
+    exclude=("doc*", "example*", "script*", "test*"),
+    where=".",
+    include=('*',),
+    default=None
+):
   """Get current module name.
 
+  Args:
+    exclude (tuple or list): sequence of package names to exclude; '*'
+      can be used as a wildcard in the names, such that 'foo.*' will
+      exclude all subpackages of 'foo' (but not 'foo' itself).
+    where (str): root directory which will be searched for packages.  It
+      should be supplied as a "cross-platform" (i.e. URL-style) path; it will
+      be converted to the appropriate local path syntax.
+    include (tuple or list): sequence of package names to include.
+      If it's specified, only the named packages will be included.
+      If it's not specified, all found packages will be included.
+      'include' can contain shell style wildcard patterns just like
+      'exclude'.
+    default: default value to return if module name is not found.
+
   Returns:
-    str or NoneType: Module name or None
+    str: Module name if found otherwise None.
   """
-  return next(iter(find_packages(exclude=exclude, where=where)), None)
+  packages = find_packages(exclude=exclude, where=where, include=include)
+  return next(iter(packages), default)
 
 
 def touch(filepath):
-  """Equivalent of Unix `touch` command
+  """Equivalent of Unix `touch` command.
+
+  Args:
+    filepath (str): Path to touch file.
   """
   if not os.path.exists(filepath):
     fh = open(filepath, "a")
@@ -61,18 +84,24 @@ def touch(filepath):
 
 
 def main():
-  """CLI Entry Point
+  """CLI Entry Point.
+
+  Returns:
+    int: Command return code.
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   module = module_name(where=repo_root)
   return_code = -1  # noqa
+
   with cwd(repo_root):
     env_name = os.getenv("ENVNAME", "test")
     tests_dir = os.path.join(repo_root, "tests")
     tests_log_file = os.path.join(tests_dir, "pytest.log")
     touch(tests_log_file)  # prevent pytest error due to missing log file
+
     tests_html_filename = "{0!s}.html".format(env_name)
     tests_html_file = os.path.join(tests_dir, "reports", tests_html_filename)
+
     return_code = run(
         "pytest {posargs} "
         "--cov={module} "
