@@ -117,7 +117,7 @@ def main():
 
     tests_dir = os.path.join(repo_root, "tests")
 
-    logs_dir = os.path.join(repo_root, "logs")
+    logs_dir = os.path.join(tests_dir, "logs")
     mkdir_p(logs_dir)
 
     tests_log_file = os.path.join(logs_dir, "pytest.log")
