@@ -11,6 +11,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 from contextlib import contextmanager
+from errno import EEXIST
 from subprocess import CalledProcessError, check_call
 
 from setuptools import find_packages
@@ -65,6 +66,26 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
   return next(iter(packages), default)
 
 
+def mkdir_p(path):
+  """Create entire filepath.
+
+  Notes:
+    Unix "mkdir -p" equivalent.
+
+  Args:
+    path (str): Filepath to create.
+
+  Raises:
+    OSError: Raised for exceptions unrelated to the
+      directory already existing.
+  """
+  try:
+    os.makedirs(path)
+  except OSError as exc:
+    if exc.errno != EEXIST:
+      raise
+
+
 def touch(filepath):
   """Equivalent of Unix `touch` command.
 
@@ -72,6 +93,7 @@ def touch(filepath):
     filepath (str): Path to touch file.
   """
   if not os.path.exists(filepath):
+    mkdir_p(os.path.dirname(filepath))
     fh = open(filepath, "a+")
     try:
       os.utime(filepath, None)
