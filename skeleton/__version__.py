@@ -18,9 +18,9 @@ __all__ = (
 
 __author__ = "Chad Loether"
 __author_email__ = "chad.loether@outlook.com"
-__copyright__ = "Copyright 2020 Chad Loether"
+__copyright__ = "Copyright 2021 Chad Loether"
 __description__ = "Template Python Module"
 __title__ = "skeleton"
 __license__ = "MIT"
 __url__ = "https://github.com/cloether/skeleton"
-__version__ = "0.0.5"
+__version__ = "0.0.6"
