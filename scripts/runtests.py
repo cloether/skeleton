@@ -46,12 +46,13 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
   """Get current module name.
 
   Args:
-    exclude (tuple or list): sequence of package names to exclude; '*'
-      can be used as a wildcard in the names, such that 'foo.*' will
-      exclude all subpackages of 'foo' (but not 'foo' itself).
-    where (str): root directory which will be searched for packages.  It
-      should be supplied as a "cross-platform" (i.e. URL-style) path; it will
-      be converted to the appropriate local path syntax.
+    exclude (tuple or list): sequence of package names to exclude;
+      '*' can be used as a wildcard in the names, such that 'foo.*'
+      will exclude all subpackages of 'foo' (but not 'foo' itself).
+    where (str): root directory which will be searched for packages.
+      It should be supplied as a "cross-platform" (i.e. URL-style)
+      path; it will be converted to the appropriate local path
+      syntax.
     include (tuple or list): sequence of package names to include.
       If it's specified, only the named packages will be included.
       If it's not specified, all found packages will be included.
