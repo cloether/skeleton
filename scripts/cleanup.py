@@ -5,6 +5,8 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
+import fnmatch
+import glob
 import os
 import sys
 
@@ -13,12 +15,13 @@ from six import next
 
 # TODO: Add support for globs/regex
 TARGETS = [
-    (".coverage",),
+    (".coverage*",),
     (".pytest_cache",),
     (".tox",),
     ("build",),
     ("dist",),
     ("docs", "build"),
+    ("logs",),
     ("tests", ".pytest_cache"),
     ("tests", "pytest.log"),
     ("tests", "logs"),
@@ -70,18 +73,19 @@ def main():
 
   def _handle_dir(value):
     sys.stdout.write("Removing Directory: {0!s}\n".format(value))
-    os.system("rm -rf %s" % value)
+    os.system("rm -rf {0}".format(value))
 
   def _handle_unknown(value):
     sys.stderr.write("Invalid Filepath: {0!s}\n".format(value))
 
   for file_or_dir in map(_join_repo, files):
-    if os.path.isdir(file_or_dir):
-      _handle_dir(file_or_dir)
-    elif os.path.isfile(file_or_dir):
-      _handle_file(file_or_dir)
-    else:
-      _handle_unknown(file_or_dir)
+    for item in glob.glob(file_or_dir):
+      if os.path.isdir(item):
+        _handle_dir(item)
+      elif os.path.isfile(item):
+        _handle_file(item)
+      else:
+        _handle_unknown(item)
   return 0
 
 
