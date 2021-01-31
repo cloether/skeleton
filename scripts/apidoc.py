@@ -14,7 +14,14 @@ from six import next
 
 @contextmanager
 def cwd(dirname):
-  """A context manager for operating in a different directory.
+  """Context manager for operating in a different directory.
+
+  Args:
+    dirname (str): Path to directory which will become
+      the current working directory.
+
+  Yields:
+    str: Original current working directory path.
   """
   orig = os.getcwd()
   os.chdir(dirname)
@@ -24,8 +31,9 @@ def cwd(dirname):
     os.chdir(orig)
 
 
-def _run(command):
-  """Run Command.
+def _run(command, **kwargs):
+  """Wrapper around subprocess.check_call with some
+  added (minimal) error handling.
 
   Args:
     command (str): Command to run.
@@ -33,8 +41,9 @@ def _run(command):
   Returns:
     int: Return Code.
   """
+  kwargs.setdefault("shell", True)
   try:
-    return_code = check_call(command, shell=True)
+    return_code = check_call(command, **kwargs)
   except CalledProcessError as e:
     sys.stderr.write("{0!r}\n".format(e))
     return_code = e.returncode
@@ -57,12 +66,8 @@ def run(command, location=None):
   return run(command)
 
 
-def module_name(
-    exclude=("doc*", "example*", "script*", "test*"),
-    where=".",
-    include=('*',),
-    default=None
-):
+def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
+                include=('*',), default=None):
   """Get current module name.
 
   Args:

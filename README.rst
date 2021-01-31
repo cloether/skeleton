@@ -1,3 +1,7 @@
+..
+  https://docutils.sourceforge.io/docs/user/rst/quickref.html
+  https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+
 Skeleton
 ========
 

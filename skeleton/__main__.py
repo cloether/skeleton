@@ -38,8 +38,10 @@ def handle_shutdown(func):
   def _f(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
+
     if os.name == "nt":
       signal.signal(signal.SIGBREAK, _shutdown_handler)
+
     return func(*args, **kwargs)
 
   return _f
@@ -50,6 +52,7 @@ def persistence_mode(func):
   mode on windows. sys.stdout in Python is by default opened in
   text mode, and writes to this stdout produce corrupted binary
   data on Windows.
+
     python -c "import sys; sys.stdout.write(\"_\n_\")" > file
     python -c "print(repr(open(\"file\", \"rb\").read()))"
   """
@@ -60,6 +63,7 @@ def persistence_mode(func):
       msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
       msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
       msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)
+
       return func(*args, **kwargs)
   else:
     def _inner(*args, **kwargs):
@@ -97,12 +101,15 @@ def handle_errors(func):
       sys.stderr.write("{0!r}".format(e))
       sys.stderr.flush()
       sys.exit(0)
+
     except KeyboardInterrupt as e:
       sys.exit(e)
+
     except Exception as e:
       sys.stderr.write("{0!r}".format(e))
       sys.stderr.flush()
       sys.exit(1)
+
     except:  # noqa
       import traceback
 

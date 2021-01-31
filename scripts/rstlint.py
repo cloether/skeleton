@@ -34,6 +34,7 @@ from os.path import abspath, exists, join, splitext
 LOGGER = logging.getLogger(__name__)
 
 CHECKERS = {}
+
 CHECKER_PROPS = {"severity": 1, "falsepositives": False}
 
 DEFAULT_ROLE_RE = re.compile(r"(?:^| )`\w(?P<default_role>[^`]*?\w)?`(?:$| )")
@@ -163,6 +164,7 @@ def checker(*suffixes, **kwargs):
   def deco(func):
     for suffix in suffixes:
       CHECKERS.setdefault(suffix, []).append(func)
+
     for prop in CHECKER_PROPS:
       setattr(func, prop, kwargs.get(prop, CHECKER_PROPS[prop]))
     return func
@@ -182,6 +184,7 @@ def check_syntax(fn, lines):
     if os.name != "nt":
       yield 0, "\\r in code file"
     code = code.replace("\r", "")
+
   try:
     compile(code, fn, "exec")
   except SyntaxError as err:
@@ -196,9 +199,11 @@ def check_suspicious_constructs(_, lines):
     tuple[int,str]: Line Number and Message.
   """
   in_prod = False
+
   for lno, line in enumerate(lines):
     if SEEMS_DIRECTIVE_RE.search(line):
       yield lno + 1, "comment seems to be intended as a directive"
+
     if ".. productionlist::" in line:
       in_prod = True
     elif not in_prod and DEFAULT_ROLE_RE.search(line):
@@ -214,8 +219,10 @@ def check_whitespace(_, lines):
   for lno, line in enumerate(lines):
     if "\r" in line:
       yield lno + 1, "\\r in line"
+
     if "\t" in line:
       yield lno + 1, "OMG TABS!!!1"
+
     if line[:-1].rstrip(" \t") != line[:-1]:
       yield lno + 1, "trailing whitespace"
 
@@ -229,7 +236,7 @@ def check_line_length(_, lines):
   """
   for lno, line in enumerate(lines):
     if len(line) > 81:
-      # do not complain about tables, links and function signatures
+      # do not complain about tables, links or function signatures
       if (
           line.lstrip()[0] not in "+|"
           and "http://" not in line
@@ -275,17 +282,22 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
     if abspath(root) in ignore:
       del dirs[:]
       continue
+
     for fn in files:
       fn = join(root, fn)
       if fn[:2] == "./":
         fn = fn[2:]
+
       if abspath(fn) in ignore:
         continue  # ignore files in ignore list
+
       checker_list = CHECKERS.get(splitext(fn)[1], None)
       if not checker_list:
         continue
+
       if verbose:
         sys.stdout.write("[-] CHECKING: %s...\n" % fn)
+
       try:
         with open(fn) as f:
           lines = list(f)
@@ -293,14 +305,17 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
         sys.stderr.write("[!] ERROR: %s: cannot open: %s\n" % (fn, err))
         count[4] += 1
         continue
+
       for _checker in checker_list:
         if _checker.falsepositives and not false_pos:
           continue
+
         c_sev = _checker.severity
         if c_sev >= severity:
           for n, msg in _checker(fn, lines):
             sys.stdout.write("[%d] PROBLEMS: %s:%d: %s\n" % (c_sev, fn, n, msg))
             count[c_sev] += 1
+
   if not count:
     if severity > 1:
       sys.stdout.write("No Problems With Severity >= %d Found.\n" % severity)
@@ -314,6 +329,7 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
           "s" if number > 1 else "",
           severity
       ))
+
   return count
 
 

@@ -112,4 +112,5 @@ def main():
   if os.isatty(options.output.fileno()):
     options.output.write(os.linesep)
     options.output.flush()
+
   return 0  # return exit code

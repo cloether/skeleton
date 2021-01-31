@@ -93,6 +93,7 @@ class DateRange(object):
     if self.stop is None:
       # it would be nice if float("inf") could be returned
       raise TypeError("infinite range")
+
     calc = (
         self.start - self.stop
         if self._has_neg_step
@@ -102,13 +103,17 @@ class DateRange(object):
 
   def __contains__(self, x):
     if self.stop is not None:
-      check = (self.start >= x > self.stop
-               if self._has_neg_step
-               else self.start <= x < self.stop)
+      check = (
+          self.start >= x > self.stop
+          if self._has_neg_step
+          else self.start <= x < self.stop
+      )
     else:
       check = self.start >= x if self._has_neg_step else self.start <= x
+
     if not check:
       return False
+
     difference = x - self.start
     return difference.total_seconds() % self.step.total_seconds() == 0
 
@@ -119,9 +124,11 @@ class DateRange(object):
 
   def __iter__(self):
     current, stopping = self.start, self.stop is not None
+
     while True:
       if stopping and self._check_stop(current):
         break
+
       yield current
       current += self.step
 
@@ -142,8 +149,10 @@ class DateRange(object):
   def __getitem__(self, idx_or_slice):
     if isinstance(idx_or_slice, int):
       return self._getidx(idx_or_slice)
+
     elif isinstance(idx_or_slice, slice):
       return self._getslice(idx_or_slice)
+
     raise TypeError(
         "DateRange indices must be integers or slices not {0}".format(
             idx_or_slice.__class__
@@ -153,28 +162,38 @@ class DateRange(object):
   def _getidx(self, idx):
     if not self.stop and 0 > idx:
       raise IndexError("Cannot negative index infinite range")
+
     if self.stop and abs(idx) > len(self) - 1:
       raise IndexError("DateRange index out of range")
+
     if idx == 0:
       return self.start
+
     elif 0 > idx:
       idx += len(self)
+
     return self.start + (self.step * idx)
 
   def _getslice(self, slice_):
     s = slice_.start, slice_.stop, slice_.step
+
     if s == (None, None, None) or s == (None, None, 1):
       return DateRange(start=self.start, stop=self.stop, step=self.step)
+
     start, stop, step = s
+
     # seems redundant but we are converting None -> 0
     start = start or 0
     stop = stop or 0
     step = step or 1  # use 1 here because of multiplication
+
     if not self.stop and (0 > start or 0 > stop):
       raise IndexError("cannot negative index infinite range")
+
     new_step = self.step * step
     new_start = self.start if not start else self[start]
     new_stop = self.stop if not stop else self[stop]
+
     return DateRange(start=new_start, stop=new_stop, step=new_step)
 
 
@@ -201,6 +220,7 @@ def as_number(value):
   """
   if isinstance(value, integer_types):
     return value
+
   if isinstance(value, string_types):
     if value.isnumeric():
       value = int(value)
@@ -208,6 +228,7 @@ def as_number(value):
       value = float(value)
     elif value.isdigit():
       value = int(value)
+
   return value
 
 
@@ -267,12 +288,16 @@ def find_ancestor(start_dir, ancestor):
   """
   start_dir = os.path.abspath(start_dir)
   path = start_dir
+
   while True:
     (parent, tail) = os.path.split(path)
+
     if tail == ancestor:
       return path
+
     if not tail:
       break
+
     path = parent
   raise PathNotFound(ancestor, start_dir)
 
@@ -296,12 +321,14 @@ def is_file_newer_than_file(file_a, file_b):
 def memoize(fn, cls=dict):
   """Decorator to memoize.
   """
-  memory = cls()
+  memory = cls() if callable(cls) else cls
 
   def impl(*args, **kwargs):
     full_args = args + tuple(iteritems(kwargs))
+
     if full_args not in memory:
       memory[full_args] = fn(*args, **kwargs)
+
     return memory[full_args]
 
   return impl
@@ -317,8 +344,8 @@ def mkdir_p(path):
     path (str): Filepath to create.
 
   Raises:
-    OSError: Raised for exceptions unrelated to the directory
-      already existing.
+    OSError: Raised for exceptions unrelated to the
+      directory already existing.
   """
   try:
     os.makedirs(path)
@@ -379,7 +406,8 @@ def run_in_separate_process(func, *args, **kwargs):
 
 
 def script_dir():
-  """Get the full path to the directory containing the current script.
+  """Get the full path to the directory containing the
+  current script.
   """
   script_filename = os.path.abspath(sys.argv[0])
   return os.path.dirname(script_filename)
@@ -404,12 +432,16 @@ def strtobool(val, strict_errors=True):
   v = val
   if not isinstance(v, string_types):
     v = text_type(v)
+
   if v.lower() in ("y", "yes", "t", "true", "on", "1"):
     return True
+
   elif v.lower() in ("n", "no", "f", "false", "off", "0"):
     return False
+
   elif strict_errors:
     raise ValueError("invalid truth value {!r}".format(val))
+
   else:
     return val
 

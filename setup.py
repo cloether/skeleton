@@ -1,6 +1,23 @@
 # coding=utf8
 """setup.py
 
+Examples:
+  from setuptools import setup
+
+  setup(
+      name="my_other_package",
+      version="1.0.0",
+      author="me",
+      author_email="my.self@example.com",
+      url="https://github.com/me/my_other_package",
+      description="Descriptive",
+      license="Open-Source-Baybeeeeee-1.0",
+      install_requires=["setuptools"],
+      packages=["my_other_package"],
+      package_data={"my_other_package": ["py.typed", "bar.pyi"]},
+      data_files=[],
+  )
+
 References:
   https://packaging.python.org/guides/distributing-packages-using-setuptools/
   https://setuptools.readthedocs.io/en/latest/setuptools.html
@@ -9,13 +26,13 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 import sys
-from io import open
 # io.open is needed for projects that support Python 2.7. It ensures open()
 # defaults to text mode with universal newlines, and accepts an argument to
 # specify the text encoding. Python 3 only  projects can skip this import.
 #
 # References:
 #   https://raw.githubusercontent.com/pypa/sampleproject/master/setup.py
+from io import open
 from os import path
 
 from setuptools import find_packages, setup
@@ -49,10 +66,13 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
   def _readme_content_type(_filename, _default=None):
     if _filename.endswith("rst"):
       return "text/x-rst"
+
     if _filename.endswith("md"):
       return "text/x-markdown"
+
     if _filename.endswith("txt"):
       return "text"
+
     return _default
 
   long_description = None
@@ -159,6 +179,7 @@ URL = METADATA.get("url")
 VERSION = METADATA["version"]
 ZIP_SAFE = False
 PROJECT_URLS = {
+    # currently only works for GitHub urls.
     "Source": URL,
     "Tracker": "{0}/issues".format(URL)
 }
@@ -189,7 +210,7 @@ setup_options = dict(
 
 if "py2exe" in sys.argv:
   # TODO: Test
-  # This will actually give us a py2exe command.
+  # py2exe command
   # https://github.com/aws/aws-cli/blob/develop/setup.py
   import py2exe  # noqa
 

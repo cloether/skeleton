@@ -40,12 +40,8 @@ def cwd(dirname):
     os.chdir(orig)
 
 
-def module_name(
-    exclude=("doc*", "example*", "script*", "test*"),
-    where=".",
-    include=('*',),
-    default=None
-):
+def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
+                include=('*',), default=None):
   """Get current module name.
 
   Args:
@@ -90,13 +86,15 @@ def main():
     int: Command return code.
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-  module = module_name(where=repo_root)
-  return_code = -1  # noqa
 
+  module = module_name(where=repo_root)
+
+  return_code = -1  # noqa
   with cwd(repo_root):
     env_name = os.getenv("ENVNAME", "test")
     tests_dir = os.path.join(repo_root, "tests")
     tests_log_file = os.path.join(tests_dir, "pytest.log")
+
     touch(tests_log_file)  # prevent pytest error due to missing log file
 
     tests_html_filename = "{0!s}.html".format(env_name)

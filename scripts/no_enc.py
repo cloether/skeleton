@@ -59,9 +59,11 @@ def _open(filepath):
     # Permission denied - ignore the file
     LOGGER.debug("permission denied: %s. %r", filepath, err)
     return None
+
   if size > 1024 * 1024:  # too big
     LOGGER.debug("file too large (%d bytes): %s", size, filepath)
     return None
+
   try:
     return open(filepath, "rb")
   except IOError as err:
@@ -74,14 +76,18 @@ def can_be_compiled(filepath):
   """Check if file at filepath can be compiled.
   """
   infile = _open(filepath)
+
   if infile is None:
     return False
+
   with infile:
     code = infile.read()
+
   try:
     compile(code, filepath, "exec")
   except Exception:  # noqa
     return False
+
   return True
 
 
@@ -91,13 +97,16 @@ def looks_like_python(filepath):
   infile = _open(filepath)
   if infile is None:
     return False
+
   with infile:
     line = infile.readline()
+
   if BINARY_RE.search(line):
-    # file appears to be binary
-    return False
+    return False  # file appears to be binary
+
   if has_python_ext(filepath):
     return True
+
   # disguised Python script (e.g. CGI)
   return b"python" in line
 
@@ -131,39 +140,51 @@ def needs_declaration(filepath):
         or BLANK_RE.match(line1)
         and get_declaration(line2)
     ):
-      # the file does have an encoding declaration, so trust it
+      # the file does have an encoding declaration so trust it
       return False
 
-    # check the whole file for non utf-8 characters
+    # check the whole file for non utf8 characters
     rest = infile.read()
+
   return has_correct_encoding(line1 + line2 + rest, "utf8")
 
 
 def walk_python_files(paths, is_python=looks_like_python, exclude_dirs=None):
-  """Recursively yield all Python source files below the given paths.
+  """Recursively yield all Python source files below the
+  given paths.
 
   Args:
-    paths (list): list of files and/or directories to be checked.
-    is_python (Callable): function that takes a file name and
-      checks whether it is a python source file.
-    exclude_dirs (list or str): list of directory base names
-      that should be excluded in the search.
+    paths (list): list of files and/or directories to be
+      checked.
+    is_python (Callable): function that takes a file name
+      and checks whether it is a python source file.
+    exclude_dirs (list or str): list of directory base
+      names that should be excluded in the search.
   """
   if exclude_dirs is None:
     exclude_dirs = []
+
   for path in map(os.path.abspath, paths):
+
     if os.path.isfile(path):
+
       if is_python(path):
         yield path
+
     elif os.path.isdir(path):
-      for dir_path, dir_names, filenames in os.walk(path):
+
+      for dirpath, dirnames, filenames in os.walk(path):
+
         for exclude in exclude_dirs:
-          if exclude in dir_names:
+
+          if exclude in dirnames:
             LOGGER.debug("excluded directory: %s",
-                         os.path.join(dir_path, exclude))
-            dir_names.remove(exclude)
+                         os.path.join(dirpath, exclude))
+            dirnames.remove(exclude)
+
         for filename in filenames:
-          full_path = os.path.join(dir_path, filename)
+          full_path = os.path.join(dirpath, filename)
+
           if is_python(full_path):
             yield full_path
     else:
@@ -171,8 +192,11 @@ def walk_python_files(paths, is_python=looks_like_python, exclude_dirs=None):
 
 
 def iter_check_decl(paths, is_python_func, exclude):
+  """Iteratively check files for missing declarations.
+  """
   for filepath in walk_python_files(paths, is_python_func, exclude):
     LOGGER.debug("python-file: %s", filepath)
+
     yield filepath, needs_declaration(filepath)
 
 
@@ -192,7 +216,8 @@ def find_no_encoding(paths, try_compile=False, exclude=None):
     LOGGER.debug("%s: %s", "missing-decl" if results[1] else "ok", results[0])
     return results[1]
 
-  return map(itemgetter(0), filter(_filter_ok, decl_checks))
+  get_0th = itemgetter(0)
+  return map(get_0th, filter(_filter_ok, decl_checks))
 
 
 def epipe(func):
@@ -244,6 +269,8 @@ def handle_shutdown(func):
 
 
 def _parse_args():
+  """Construct cli argument parser.
+  """
   from argparse import ArgumentParser, RawDescriptionHelpFormatter, FileType
 
   # noinspection PyTypeChecker
@@ -255,33 +282,39 @@ def _parse_args():
     https://github.com/python/cpython/blob/master/Tools/scripts/findnocoding.py
   """
   )
+
   parser.add_argument(
       "paths",
       metavar="PATHS",
       nargs="+",
       help="search path(s)."
   )
+
   parser.add_argument(
       "-c", "--compile",
       action="store_true",
       help="recognize python files by trying to compile. (default: %(default)s)"
   )
+
   parser.add_argument(
       "-e", "--exclude",
       nargs="+",
       default=[".git", ".idea", "__pycache__"],
       help="directories to exclude while searching. (default: %(default)s)"
   )
+
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
       help="enable debug logging. (default: %(default)s)"
   )
+
   parser.add_argument(
       "-v", "--version",
       version=__version__,
       action="version"
   )
+
   parser.add_argument(
       "-o", "--output",
       default="-",
@@ -289,9 +322,12 @@ def _parse_args():
       help="Output Location (default: %(default)s)",
       type=FileType("{0!s}+".format("wb" if sys.version_info[0] == 2 else "w"))
   )
+
   args = parser.parse_args()
+
   if args.debug is True:
     logging.basicConfig(level=logging.DEBUG)
+
   return args
 
 
@@ -301,9 +337,11 @@ def main():
   """Entry Point
   """
   args = _parse_args()
+
   write = args.output.write
   for full_path in find_no_encoding(args.paths, args.compile, args.exclude):
     write(ensure_str("{0}\n".format(full_path)))
+
   args.output.flush()
   return 0
 

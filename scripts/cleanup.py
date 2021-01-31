@@ -11,7 +11,8 @@ import sys
 from setuptools import find_packages
 from six import next
 
-FILES = [
+# TODO: Add support for globs/regex
+TARGETS = [
     (".coverage",),
     (".pytest_cache",),
     (".tox",),
@@ -26,12 +27,8 @@ FILES = [
 ]
 
 
-def module_name(
-    exclude=("doc*", "example*", "script*", "test*"),
-    where=".",
-    include=('*',),
-    default=None
-):
+def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
+                include=('*',), default=None):
   """Get current module name.
 
   Args:
@@ -60,7 +57,7 @@ def main():
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-  files = copy.copy(FILES)
+  files = copy.copy(TARGETS)
   files.append(("{0!s}.egg-info".format(module_name(where=repo_root)),))
 
   def _join_repo(parts):

@@ -48,19 +48,28 @@ _LOGGING_JSON_INDENT = 1
 
 def _getenv(name, default=None):
   value = getenv(name, default)
+
   if not value or value is None:
     return value
-  if isinstance(value, string_types):
-    value = value.strip()
-    if value.isdecimal():
-      value = int(float(value))
-    elif value.isdigit():
-      value = int(value)
-    elif value.lower() == ("true", "yes", "1"):
-      value = True
-    elif value.lower() == ("false", "no", "0"):
-      value = False
-  return bool(value)
+
+  if not isinstance(value, string_types):
+    return value
+
+  value = value.strip()
+
+  if value.isdecimal():
+    value = int(float(value))
+
+  elif value.isdigit():
+    value = int(value)
+
+  elif value.lower() == ("true", "1"):
+    value = True
+
+  elif value.lower() == ("false", "0"):
+    value = False
+
+  return value
 
 
 def _log_items(data, name, ignore_empty=True, prefix=" - "):
@@ -132,7 +141,7 @@ def log_level(level):
     level (str or int): Log level
 
   Returns:
-    int: Log level
+    int: Normalized log level.
   """
   level = as_number(level)
   if isinstance(level, string_types):
@@ -153,16 +162,19 @@ def log_request(request, **kwargs):
   log_content = kwargs.setdefault("log_content", False)
 
   try:
-    LOGGER.debug("REQUEST:")
+    LOGGER.debug("REQUEST:")  # start
+
     LOGGER.debug(" - URL: %s", request.url)
     LOGGER.debug(" - PATH: %s", request.path_url)
     LOGGER.debug(" - METHOD: %s", request.method.upper())
+
     if request.headers:
       LOGGER.debug(" - HEADERS:")
       for header, value in iteritems(request.headers):
         if header.lower() == "authorization":
           value = "*" * len(value)
         LOGGER.debug("   - %s: %s", header, value)
+
     if request.body is None:
       LOGGER.debug(" - BODY:")
       LOGGER.debug("   - (NO-BODY)")
@@ -174,9 +186,11 @@ def log_request(request, **kwargs):
         return
       LOGGER.debug(" - BODY:")
       LOGGER.debug("   - %s", text_type(request.body))
+
   except Exception as err:
     LOGGER.error("FAILED to log request: %r", err)
-  LOGGER.debug("--")
+
+  LOGGER.debug("--")  # end
 
 
 def log_response(response, **kwargs):
@@ -190,14 +204,18 @@ def log_response(response, **kwargs):
       response body content will not be logged.
   """
   log_content = kwargs.setdefault("log_content", False)
+
   try:
-    _log_one("", "RESPONSE", ignore_empty=False, prefix="")
+    _log_one("", "RESPONSE", ignore_empty=False, prefix="")  # start
+
     _log_items(response.cookies, "COOKIES")
     _log_one(response.encoding, "ENCODING")
     _log_items(response.headers, "HEADERS")
     _log_one(response.reason, "REASON")
     _log_one(response.status_code, "STATUS CODE")
+
     content_str = _response_content_str(response)
+
     if content_str:
       _log_list((content_str,), "CONTENT")
     elif log_content:
@@ -205,6 +223,8 @@ def log_response(response, **kwargs):
         _log_json(response.json(), "CONTENT")
       except ValueError:
         _log_list((ensure_str(response.content or b"(NONE)"),), "CONTENT")
+
   except Exception as err:
     LOGGER.debug("FAILED to log response: %r", err)
-  LOGGER.debug("--")
+
+  LOGGER.debug("--")  # end
