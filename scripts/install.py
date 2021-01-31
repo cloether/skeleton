@@ -57,6 +57,9 @@ def main():
   exe = sys.executable
   args = " ".join(sys.argv[1:])
 
+  # upgrade pip, setuptools, and wheel
+  run_in_root("{0} -m pip install --upgrade pip setuptools wheel".format(exe))
+
   # install requirements
   run_in_root("{0} -m pip install -r requirements.txt {1}".format(exe, args))
 
