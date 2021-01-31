@@ -93,7 +93,6 @@ def touch(filepath):
     filepath (str): Path to touch file.
   """
   if not os.path.exists(filepath):
-    mkdir_p(os.path.dirname(filepath))
     fh = open(filepath, "a+")
     try:
       os.utime(filepath, None)
@@ -114,13 +113,20 @@ def main():
   return_code = -1  # noqa
   with cwd(repo_root):
     env_name = os.getenv("ENVNAME", "test")
-    tests_dir = os.path.join(repo_root, "tests", "logs")
-    tests_log_file = os.path.join(tests_dir, "pytest.log")
 
+    tests_dir = os.path.join(repo_root, "tests")
+
+    logs_dir = os.path.join(repo_root, "logs")
+    mkdir_p(logs_dir)
+
+    tests_log_file = os.path.join(logs_dir, "pytest.log")
     touch(tests_log_file)  # prevent pytest error due to missing log file
 
+    reports_dir = os.path.join(tests_dir, "reports")
+    mkdir_p(reports_dir)
+
     tests_html_filename = "{0!s}.html".format(env_name)
-    tests_html_file = os.path.join(tests_dir, "reports", tests_html_filename)
+    tests_html_file = os.path.join(reports_dir, tests_html_filename)
 
     return_code = run(
         "pytest {posargs} "
