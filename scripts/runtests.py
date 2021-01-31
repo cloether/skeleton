@@ -72,7 +72,7 @@ def touch(filepath):
     filepath (str): Path to touch file.
   """
   if not os.path.exists(filepath):
-    fh = open(filepath, "a")
+    fh = open(filepath, "a+")
     try:
       os.utime(filepath, None)
     finally:
