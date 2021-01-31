@@ -92,7 +92,7 @@ def main():
   return_code = -1  # noqa
   with cwd(repo_root):
     env_name = os.getenv("ENVNAME", "test")
-    tests_dir = os.path.join(repo_root, "tests")
+    tests_dir = os.path.join(repo_root, "tests", "logs")
     tests_log_file = os.path.join(tests_dir, "pytest.log")
 
     touch(tests_log_file)  # prevent pytest error due to missing log file
