@@ -135,6 +135,7 @@ dmypy.json
 # MacOS
 .DS_Store
 
+# Testing Directories
 tests/.pytest_cache/
 tests/reports/
 tests/*.log

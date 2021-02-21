@@ -62,8 +62,8 @@ def run(command, location=None):
   """
   if location is not None:
     with cwd(location):
-      return run(command)
-  return run(command)
+      return _run(command)
+  return _run(command)
 
 
 def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",

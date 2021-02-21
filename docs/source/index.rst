@@ -1,5 +1,10 @@
-Skeleton Documentation
-======================
+..
+  https://docutils.sourceforge.io/docs/user/rst/quickref.html
+  https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+
+Skeleton
+========
+
 ``skeleton`` is a template used for creating Python modules.
 
 The official repo is `here`_.
@@ -11,10 +16,6 @@ Installation
 To install the library into the current virtual environment::
 
     $ pip install skeleton
-
-Requirements
-------------
-- six
 
 Running the Tests
 -----------------
@@ -30,13 +31,17 @@ Install dependencies and build::
     $ pip install skeleton[docs]
     $ python setup.py docs
 
+Requirements
+------------
+- six
+
 License
 -------
 MIT - See `LICENSE`_ for more information.
 
 Copyright
 ---------
-Copyright (c) 2020 Chad Loether
+Copyright (c) 2021 Chad Loether
 
 Reference
 =========

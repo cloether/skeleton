@@ -1,5 +1,5 @@
-skeleton package
-================
+Skeleton
+========
 
 Submodules
 ----------
@@ -8,6 +8,22 @@ skeleton.cli module
 -------------------
 
 .. automodule:: skeleton.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skeleton.config module
+----------------------
+
+.. automodule:: skeleton.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skeleton.const module
+---------------------
+
+.. automodule:: skeleton.const
    :members:
    :undoc-members:
    :show-inheritance:

@@ -41,7 +41,7 @@ MIT - See `LICENSE`_ for more information.
 
 Copyright
 ---------
-Copyright (c) 2020 Chad Loether
+Copyright (c) 2021 Chad Loether
 
 .. _here: https://github.com/cloether/skeleton
 .. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE.txt
