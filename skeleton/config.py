@@ -412,7 +412,6 @@ class Configuration(dict):
 if __name__ == "__main__":
   import sys
 
-
   def _test():
     """Test Configuration.
     """
@@ -435,6 +434,5 @@ if __name__ == "__main__":
     ccccc = Configuration.from_env()
     print(ccccc.dump(sys.stdout, indent=2, sort_keys=True, end="\n"))
     return 0
-
 
   sys.exit(_test())
