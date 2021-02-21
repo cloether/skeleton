@@ -38,7 +38,7 @@ from .error import ImportStringError
 LOGGER = logging.getLogger(__name__)
 
 
-def getenv(*keys, default=None, drop_null=True):
+def getenv(keys, default=None, drop_null=True):
   """Create Configuration from a environment variables.
   """
   config = {}
@@ -244,7 +244,7 @@ class Configuration(dict):
     """Create Configuration from a environment variables.
     """
     return cls(**getenv(
-        *cls.OPTIONS,
+        cls.OPTIONS,
         default=default,
         drop_null=drop_null
     ))
@@ -253,7 +253,7 @@ class Configuration(dict):
     """Update Configuration from environment variables.
     """
     dict.update(self, getenv(
-        *self.OPTIONS,
+        self.OPTIONS,
         default=default,
         drop_null=drop_null
     ))
