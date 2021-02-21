@@ -362,7 +362,7 @@ class Configuration(dict):
     # return new config with merged properties
     return Configuration(**config_options)
 
-  def merge_all(self, *others, reverse=True):
+  def merge_all(self, *others):
     """Merge current config with other configs.
 
     This will merge in all non-default values from the
@@ -370,9 +370,6 @@ class Configuration(dict):
 
     Args:
       others (Configuration): Configuration to merge with.
-      reverse (bool): If True, others will be reversed before
-        merging, otherwise merging is done in the order the
-        others are provided.
 
     Returns:
       Configuration: A config object built from the merged
@@ -380,7 +377,8 @@ class Configuration(dict):
     """
     # copy current attributes in config object.
     config_options = copy.copy(self._user_options)
-    for other in others if not reverse else reversed(others):
+    for other in reversed(others):
+      # noinspection PyProtectedMember
       config_options.update(other._user_options)
     return Configuration(**config_options)
 
@@ -422,7 +420,7 @@ if __name__ == "__main__":
     c = Configuration("a", proxies="B")
     cc = Configuration("b", proxies="C")
     ccc = Configuration("c", proxies="D")
-    cccc = c.merge_all(ccc, cc)
+    cccc = c.merge_all(cc, ccc)
     cccc.dump(sys.stdout, indent=2, sort_keys=True, end="\n")
     print("-" * 80)
 
