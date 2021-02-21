@@ -20,7 +20,7 @@ __version__ = "0.0.2"
 LOGGER = logging.getLogger(__name__)
 
 BINARY_RE = re.compile(br"[\x00-\x08\x0E-\x1F\x7F]")
-BLANK_RE = re.compile(rb"^[ \t\f]*(?:[#\r\n]|$)")
+BLANK_RE = re.compile(br"^[ \t\f]*(?:[#\r\n]|$)")
 DECL_RE = re.compile(rb"^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)")  # noqa
 
 if sys.platform == "Win32":
@@ -76,7 +76,6 @@ def can_be_compiled(filepath):
   """Check if file at filepath can be compiled.
   """
   infile = _open(filepath)
-
   if infile is None:
     return False
 
@@ -87,7 +86,6 @@ def can_be_compiled(filepath):
     compile(code, filepath, "exec")
   except Exception:  # noqa
     return False
-
   return True
 
 
@@ -142,10 +140,8 @@ def needs_declaration(filepath):
     ):
       # the file does have an encoding declaration so trust it
       return False
-
     # check the whole file for non utf8 characters
     rest = infile.read()
-
   return has_correct_encoding(line1 + line2 + rest, "utf8")
 
 
@@ -209,15 +205,13 @@ def find_no_encoding(paths, try_compile=False, exclude=None):
     exclude (list of str): directories to exclude while searching.
   """
   is_python = looks_like_python if not try_compile else can_be_compiled
-
   decl_checks = iter_check_decl(paths, is_python, exclude)
 
   def _filter_ok(results):
     LOGGER.debug("%s: %s", "missing-decl" if results[1] else "ok", results[0])
     return results[1]
 
-  get_0th = itemgetter(0)
-  return map(get_0th, filter(_filter_ok, decl_checks))
+  return map(itemgetter(0), filter(_filter_ok, decl_checks))
 
 
 def epipe(func):
@@ -282,39 +276,33 @@ def _parse_args():
     https://github.com/python/cpython/blob/master/Tools/scripts/findnocoding.py
   """
   )
-
   parser.add_argument(
       "paths",
       metavar="PATHS",
       nargs="+",
       help="search path(s)."
   )
-
   parser.add_argument(
       "-c", "--compile",
       action="store_true",
       help="recognize python files by trying to compile. (default: %(default)s)"
   )
-
   parser.add_argument(
       "-e", "--exclude",
       nargs="+",
       default=[".git", ".idea", "__pycache__"],
       help="directories to exclude while searching. (default: %(default)s)"
   )
-
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
       help="enable debug logging. (default: %(default)s)"
   )
-
   parser.add_argument(
       "-v", "--version",
       version=__version__,
       action="version"
   )
-
   parser.add_argument(
       "-o", "--output",
       default="-",
@@ -322,12 +310,9 @@ def _parse_args():
       help="Output Location (default: %(default)s)",
       type=FileType("{0!s}+".format("wb" if sys.version_info[0] == 2 else "w"))
   )
-
   args = parser.parse_args()
-
   if args.debug is True:
     logging.basicConfig(level=logging.DEBUG)
-
   return args
 
 
@@ -337,11 +322,9 @@ def main():
   """Entry Point
   """
   args = _parse_args()
-
-  write = args.output.write
+  write = args.output.dump
   for full_path in find_no_encoding(args.paths, args.compile, args.exclude):
     write(ensure_str("{0}\n".format(full_path)))
-
   args.output.flush()
   return 0
 

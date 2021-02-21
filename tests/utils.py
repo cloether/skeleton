@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from subprocess import CalledProcessError, check_call
 
 from setuptools import find_packages
+from six import next
 
 LOGGER = logging.getLogger(__name__)
 
@@ -51,8 +52,10 @@ def run(command, location=None):
   def _run(_command):
     try:
       ret = check_call(command, shell=True)
+
     except CalledProcessError as e:
       ret = e.returncode
+
       LOGGER.exception(
           "error occurred while running command: %s return_code: %s",
           _command, ret
@@ -69,7 +72,6 @@ def run(command, location=None):
       return_code = _run(command)
   else:
     return_code = _run(command)
-
   return return_code
 
 
@@ -82,7 +84,5 @@ def run_in_root(command):
   Returns:
     int: Command return code.
   """
-  return run(
-      command,
-      location=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-  )
+  location = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+  return run(command, location=location)

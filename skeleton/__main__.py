@@ -38,10 +38,8 @@ def handle_shutdown(func):
   def _f(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
-
     if os.name == "nt":
       signal.signal(signal.SIGBREAK, _shutdown_handler)
-
     return func(*args, **kwargs)
 
   return _f
@@ -114,6 +112,7 @@ def handle_errors(func):
       import traceback
 
       traceback.print_last()
+
       sys.exit(-1)
     else:
       sys.exit(ret)
@@ -128,4 +127,8 @@ def _wrap_func(func, wrappers=()):
 
 
 if __name__ == "__main__":
-  _wrap_func(main, (persistence_mode, handle_shutdown, handle_errors))()
+  _wrap_func(main, (
+      persistence_mode,
+      handle_shutdown,
+      handle_errors
+  ))()

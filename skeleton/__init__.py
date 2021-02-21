@@ -20,6 +20,8 @@ __all__ = (
     "__url__",
     "__version__",
     "cli",
+    "config",
+    "const",
     "error",
     "log",
     "utils"
@@ -38,7 +40,7 @@ from .__version__ import (
 
 __app_id__ = "-".join((__title__, __version__))
 
-from . import cli, error, log, utils
+from . import cli, config, const, error, log, utils
 
 try:
   from logging import NullHandler

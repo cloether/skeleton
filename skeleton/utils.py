@@ -17,6 +17,8 @@ from string import Formatter
 
 from six import integer_types, iteritems, string_types, text_type
 
+from .error import PathNotFound
+
 __all__ = (
     "as_bool",
     "as_number",
@@ -93,7 +95,6 @@ class DateRange(object):
     if self.stop is None:
       # it would be nice if float("inf") could be returned
       raise TypeError("infinite range")
-
     calc = (
         self.start - self.stop
         if self._has_neg_step
@@ -110,10 +111,8 @@ class DateRange(object):
       )
     else:
       check = self.start >= x if self._has_neg_step else self.start <= x
-
     if not check:
       return False
-
     difference = x - self.start
     return difference.total_seconds() % self.step.total_seconds() == 0
 
@@ -124,11 +123,9 @@ class DateRange(object):
 
   def __iter__(self):
     current, stopping = self.start, self.stop is not None
-
     while True:
       if stopping and self._check_stop(current):
         break
-
       yield current
       current += self.step
 
@@ -162,38 +159,28 @@ class DateRange(object):
   def _getidx(self, idx):
     if not self.stop and 0 > idx:
       raise IndexError("Cannot negative index infinite range")
-
     if self.stop and abs(idx) > len(self) - 1:
       raise IndexError("DateRange index out of range")
-
     if idx == 0:
       return self.start
-
     elif 0 > idx:
       idx += len(self)
-
     return self.start + (self.step * idx)
 
   def _getslice(self, slice_):
     s = slice_.start, slice_.stop, slice_.step
-
     if s == (None, None, None) or s == (None, None, 1):
       return DateRange(start=self.start, stop=self.stop, step=self.step)
-
     start, stop, step = s
-
     # seems redundant but we are converting None -> 0
     start = start or 0
     stop = stop or 0
     step = step or 1  # use 1 here because of multiplication
-
     if not self.stop and (0 > start or 0 > stop):
       raise IndexError("cannot negative index infinite range")
-
     new_step = self.step * step
     new_start = self.start if not start else self[start]
     new_stop = self.stop if not stop else self[stop]
-
     return DateRange(start=new_start, stop=new_stop, step=new_step)
 
 
@@ -220,7 +207,6 @@ def as_number(value):
   """
   if isinstance(value, integer_types):
     return value
-
   if isinstance(value, string_types):
     if value.isnumeric():
       value = int(value)
@@ -228,7 +214,6 @@ def as_number(value):
       value = float(value)
     elif value.isdigit():
       value = int(value)
-
   return value
 
 
@@ -259,25 +244,6 @@ def cwd(dirname):
     os.chdir(orig)
 
 
-class PathNotFound(Exception):
-  """Exception raised for errors in the input salary.
-
-  Attributes:
-    ancestor: input salary which caused the error
-    dirname: explanation of the error
-  """
-
-  def __init__(self, ancestor, dirname):
-    self.ancestor = ancestor
-    self.dirname = dirname
-    Exception.__init__(self.ancestor, self.dirname)
-
-  def __str__(self):
-    return "Unable to find ancestor {0} in {1}".format(
-        self.ancestor, self.dirname
-    )
-
-
 def find_ancestor(start_dir, ancestor):
   """Finds an ancestor dir in a path.
 
@@ -288,16 +254,12 @@ def find_ancestor(start_dir, ancestor):
   """
   start_dir = os.path.abspath(start_dir)
   path = start_dir
-
   while True:
     (parent, tail) = os.path.split(path)
-
     if tail == ancestor:
       return path
-
     if not tail:
       break
-
     path = parent
   raise PathNotFound(ancestor, start_dir)
 
@@ -323,15 +285,13 @@ def memoize(fn, cls=dict):
   """
   memory = cls() if callable(cls) else cls
 
-  def impl(*args, **kwargs):
+  def _impl(*args, **kwargs):
     full_args = args + tuple(iteritems(kwargs))
-
     if full_args not in memory:
       memory[full_args] = fn(*args, **kwargs)
-
     return memory[full_args]
 
-  return impl
+  return _impl
 
 
 def mkdir_p(path):
@@ -432,16 +392,13 @@ def strtobool(val, strict_errors=True):
   v = val
   if not isinstance(v, string_types):
     v = text_type(v)
-
-  if v.lower() in ("y", "yes", "t", "true", "on", "1"):
+  v = v.lower()
+  if v in ("y", "yes", "t", "true", "on", "1"):
     return True
-
-  elif v.lower() in ("n", "no", "f", "false", "off", "0"):
+  elif v in ("n", "no", "f", "false", "off", "0"):
     return False
-
   elif strict_errors:
     raise ValueError("invalid truth value {!r}".format(val))
-
   else:
     return val
 
@@ -504,3 +461,16 @@ def touch(filepath):
       os.utime(filepath, None)
     finally:
       fh.close()
+
+
+def is_a_tty():
+  """Check if stdout is connected to a terminal.
+
+  Returns:
+    bool: True if stdout connected to a terminal,
+      otherwise False.
+  """
+  try:
+    return os.isatty(sys.stdout.fileno())
+  except Exception:  # noqa
+    return False

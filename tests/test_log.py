@@ -3,7 +3,12 @@
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-from skeleton.log import log_request, log_response
+from skeleton.log import (
+  apply_session_hook,
+  log_request,
+  log_request_response,
+  log_response
+)
 
 
 def test_log_request(prepared_request):
@@ -40,3 +45,39 @@ def test_log_response_content(response, log_content=True):
     response (Response): Response Instance
   """
   log_response(response, log_content=log_content)
+
+
+def test_log_request_response(response, log_content=False):
+  """Test `skeleton.log_response` with log_content set to True.
+
+  Args:
+    response (Response): Response Instance
+  """
+  log_request_response(response, log_content=log_content)
+
+
+def test_log_request_response_content(response, log_content=True):
+  """Test `skeleton.log_response` with log_content set to True.
+
+  Args:
+    response (Response): Response Instance
+  """
+  log_request_response(response, log_content=log_content)
+
+
+def test_apply_session_hook(session, log_content=False):
+  """Test `skeleton.log_response` with log_content set to True.
+
+  Args:
+    session (requests.Session): Session Instance
+  """
+  apply_session_hook(session, log_content=log_content)
+
+
+def test_apply_session_hook_content(session, log_content=True):
+  """Test `skeleton.log_response` with log_content set to True.
+
+  Args:
+    session (requests.Session): Session Instance
+  """
+  apply_session_hook(session, log_content=log_content)

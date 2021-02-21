@@ -10,23 +10,21 @@ import os
 import sys
 
 from .__version__ import __description__, __title__, __version__
-from .log import (
+from .const import (
   LOGGING_DATEFMT,
   LOGGING_FILENAME,
   LOGGING_FORMAT,
   LOGGING_LEVEL
 )
 
-__all__ = (
-    "arg_parser",
-    "main"
-)
+__all__ = ("arg_parser", "main")
 
 LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_FILE_MODE_SUFFIX = "b" if sys.version_info[0] == 2 else ""
 
 
+# TODO: Create argparser from Configuration
 def arg_parser(*args, **kwargs):
   """Build Argument Parser
 
@@ -106,11 +104,13 @@ def main():
       datefmt=LOGGING_DATEFMT
   )
 
-  # run
-  LOGGER.warning("command line interface not implemented")
+  # run logic
+  LOGGER.warning("command line interface not yet implemented.")
 
+  # write newline if output is connected to a terminal
   if os.isatty(options.output.fileno()):
     options.output.write(os.linesep)
     options.output.flush()
 
-  return 0  # return exit code
+  # return exit code (0: success)
+  return 0

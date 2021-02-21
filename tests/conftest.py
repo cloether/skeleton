@@ -13,6 +13,7 @@ import json
 import os
 
 import pytest
+import requests
 
 from skeleton.error import BaseError
 from .utils import module_name as _modname
@@ -75,7 +76,6 @@ def response():
     """Mock requests.Response
     """
     _content = b"{\"TEST\": \"TEST\"}"
-
     cookies = {}
     encoding = "utf8"
     headers = {
@@ -86,6 +86,20 @@ def response():
     reason = "OK"
     status_code = 200
     url = "https://www.google.com/"
+
+    class PreparedRequest(object):
+      """Mock requests.PreparedRequest
+      """
+      body = b""
+      headers = {
+          "Accept": "application/json",
+          "Content-type": "application/json"
+      }
+      method = "get"
+      path_url = "?p1=param1&p2=param2"
+      url = "https://www.google.com/"
+
+    request = PreparedRequest()
 
     def json(self):
       """Mock json method.
@@ -153,3 +167,13 @@ def boolean():
     str: String boolean.
   """
   return "yes"
+
+
+@pytest.fixture(name="session")
+def session():
+  """Session.
+
+  Returns:
+    str: String boolean.
+  """
+  return requests.Session()

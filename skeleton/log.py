@@ -9,66 +9,47 @@ import json
 import logging
 import re
 import types
+from functools import partial
 from logging import _checkLevel as check_level  # noqa
 from os import getenv
 
 from six import ensure_str, iteritems, string_types, text_type
 
+from .utils import as_number
+
 __all__ = (
-    "LOGGING_DATEFMT",
-    "LOGGING_FILEMODE",
-    "LOGGING_FILENAME",
-    "LOGGING_FORMAT",
-    "LOGGING_LEVEL",
-    "LOGGING_STYLE",
     "log_level",
     "log_request",
-    "log_response"
+    "log_response",
+    "log_request_response",
+    "apply_session_hook"
 )
-
-from skeleton.utils import as_number
 
 LOGGER = logging.getLogger(__name__)
 
 _CONTENT_DISPOSITION_RE = re.compile(r"attachment;\s?filename=[\"\w.]+", re.I)
 
-# LOGGING OPTIONS
-LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
-LOGGING_FILEMODE = "a+"
-LOGGING_FILENAME = None
-LOGGING_FORMAT = (
-    "%(asctime)s:[%(levelname)s]:%(name)s:%(funcName)s(%(lineno)d):%(message)s"
-)
-LOGGING_LEVEL = "WARNING"
-LOGGING_STYLE = "%"
-
 _LOGGING_JSON_SORT_KEYS = 1
 _LOGGING_JSON_INDENT = 1
 
 
+# public functions
+
 def _getenv(name, default=None):
   value = getenv(name, default)
-
   if not value or value is None:
     return value
-
   if not isinstance(value, string_types):
     return value
-
   value = value.strip()
-
   if value.isdecimal():
     value = int(float(value))
-
   elif value.isdigit():
     value = int(value)
-
   elif value.lower() == ("true", "1"):
     value = True
-
   elif value.lower() == ("false", "0"):
     value = False
-
   return value
 
 
@@ -109,30 +90,24 @@ def _response_content_str(response, **kwargs):
     str: Content type string
   """
   header = response.headers.get("content-disposition")
-
   if not header:
     return None
-
   if kwargs.get("stream", False):
     return "(STREAM-DATA)"
-
   if _CONTENT_DISPOSITION_RE.match(header):
     filename = header.partition("=")[2]
     return "(FILE-ATTACHMENT: {0})".format(filename)
-
   content_type = response.headers.get("content-type", "")
-
   if not content_type:
     return None
-
   if content_type.endswith("octet-stream"):
     return "(BINARY-DATA)"
-
   if content_type.endswith("image"):
     return "(IMAGE-DATA)"
-
   return None
 
+
+# public functions
 
 def log_level(level):
   """Return valid integer log level
@@ -159,22 +134,20 @@ def log_request(request, **kwargs):
     log_content (bool): Log Response Body Content if True otherwise the
       response body content will not be logged.
   """
+  if not LOGGER.isEnabledFor(logging.DEBUG):
+    return
   log_content = kwargs.setdefault("log_content", False)
-
   try:
     LOGGER.debug("REQUEST:")  # start
-
     LOGGER.debug(" - URL: %s", request.url)
     LOGGER.debug(" - PATH: %s", request.path_url)
     LOGGER.debug(" - METHOD: %s", request.method.upper())
-
     if request.headers:
       LOGGER.debug(" - HEADERS:")
       for header, value in iteritems(request.headers):
         if header.lower() == "authorization":
           value = "*" * len(value)
         LOGGER.debug("   - %s: %s", header, value)
-
     if request.body is None:
       LOGGER.debug(" - BODY:")
       LOGGER.debug("   - (NO-BODY)")
@@ -186,10 +159,8 @@ def log_request(request, **kwargs):
         return
       LOGGER.debug(" - BODY:")
       LOGGER.debug("   - %s", text_type(request.body))
-
   except Exception as err:
     LOGGER.error("FAILED to log request: %r", err)
-
   LOGGER.debug("--")  # end
 
 
@@ -203,19 +174,17 @@ def log_response(response, **kwargs):
     log_content (bool): Log Response Body Content if True otherwise the
       response body content will not be logged.
   """
+  if not LOGGER.isEnabledFor(logging.DEBUG):
+    return
   log_content = kwargs.setdefault("log_content", False)
-
   try:
     _log_one("", "RESPONSE", ignore_empty=False, prefix="")  # start
-
     _log_items(response.cookies, "COOKIES")
     _log_one(response.encoding, "ENCODING")
     _log_items(response.headers, "HEADERS")
     _log_one(response.reason, "REASON")
     _log_one(response.status_code, "STATUS CODE")
-
     content_str = _response_content_str(response)
-
     if content_str:
       _log_list((content_str,), "CONTENT")
     elif log_content:
@@ -223,8 +192,24 @@ def log_response(response, **kwargs):
         _log_json(response.json(), "CONTENT")
       except ValueError:
         _log_list((ensure_str(response.content or b"(NONE)"),), "CONTENT")
-
   except Exception as err:
     LOGGER.debug("FAILED to log response: %r", err)
-
   LOGGER.debug("--")  # end
+
+
+def log_request_response(response, **kwargs):
+  """Log both the request and response.
+  """
+  log_request(response.request, **kwargs)
+  log_request(response, **kwargs)
+
+
+def apply_session_hook(session, **kwargs):
+  """Add a hook to a requests.Session which logs
+  requests and responses.
+
+  Args:
+    session (requests.Session): Session instance.
+  """
+  func = partial(log_request_response, **kwargs)
+  session.hooks.setdefault("response", []).append(func)
