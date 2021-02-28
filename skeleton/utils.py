@@ -9,14 +9,19 @@ import os
 import pickle
 import re
 import sys
+import zlib
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from errno import EEXIST
+from io import UnsupportedOperation
+from itertools import islice
 from math import ceil
 from string import Formatter
 
 from six import integer_types, iteritems, string_types, text_type
+from six.moves import zip
 
+from .const import DEFAULT_CHUNK_SIZE, EPOCH
 from .error import PathNotFound
 
 __all__ = (
@@ -24,10 +29,7 @@ __all__ = (
     "as_number",
     "cwd",
     "DateRange",
-    "EPOCH",
     "is_file_newer_than_file",
-    "ISO_DATETIME_FORMAT",
-    "ISO_DATETIME_STRING",
     "memoize",
     "mkdir_p",
     "run_in_separate_process",
@@ -36,13 +38,14 @@ __all__ = (
     "timestamp_from_datetime",
     "to_valid_filename",
     "to_valid_module_name",
-    "touch"
+    "touch",
+    "chunkify",
+    "fpchunk",
+    "apply_values",
+    "is_a_tty",
+    "advance",
+    "compress_file"
 )
-
-EPOCH = datetime(1970, 1, 1)
-
-ISO_DATETIME_STRING = "1970-01-01 00:00:00.000"
-ISO_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
 
 class DateRange(object):
@@ -474,3 +477,121 @@ def is_a_tty():
     return os.isatty(sys.stdout.fileno())
   except Exception:  # noqa
     return False
+
+
+def chunkify(iterable, chunksize):
+  """Splits an iterable into chunks of size chunksize.
+
+  Notes:
+    The last chunk may be smaller than the provided chunksize.
+    TODO: add option to fill the last chunk to the specified
+      chunksize.
+
+  Args:
+    iterable: Iterable of data.
+    chunksize (int): Chunksize.
+
+  Yields:
+    list: Chunk of data from iterable.
+  """
+  if hasattr(iterable, '__getitem__'):
+    # evaluate greedily for tuple, list, etc...
+    # greedily: consuming entire iterable into
+    # memory before iterating through it.
+    for i in range(0, len(iterable), chunksize):
+      yield iterable[i:i + chunksize]
+  else:
+    # generator, set, map, etc...
+    chunk = []
+    for i in iterable:
+      chunk.append(i)
+      if len(chunk) == chunksize:
+        yield chunk
+        chunk = []
+    if chunk:  # last chunk
+      # TODO: if the length of the last chunk,
+      #  does not equal the provided chunksize,
+      #  fill (append to the) chunk,
+      #  until its length is equal to chunksize
+      yield chunk
+
+
+def fpchunk(fp, chunksize=None):
+  """Read the file and yield chunks of `chunk_size` bytes.
+
+  Args:
+    fp (io.FileIO): File-like object.
+    chunksize (int): Byte chunksize (default: `const.DEFAULT_CHUNK_SIZE`)
+
+  Yields:
+    bytes: Chunk of bytes.
+  """
+  chunksize = chunksize or DEFAULT_CHUNK_SIZE
+  try:
+    # beginning of file
+    fp.seek(0)
+  except (AttributeError, UnsupportedOperation):
+    pass
+  while True:
+    data = fp.read(chunksize)
+    if not data:
+      break
+    yield data
+
+
+def compress_file(fp, level=6):
+  """Compress file
+
+  Args:
+    fp (io.FileIO): File
+    level: The compression level (an integer in the range 0-9 or -1;
+      default is currently equivalent to 6).  Higher compression
+      levels are slower, but produce smaller results.
+  """
+  compressor = zlib.compressobj(level)
+  z_chunks, chunks = [], []
+  for chunk in chunkify(fp, 512):
+    chunks.append(chunk)
+    z_chunks.append(compressor.compress(chunk))
+  return (
+      b"".join(z_chunks) + compressor.flush(),
+      b"".join(chunks)
+  )
+
+
+def apply_values(func, mapping):
+  # noinspection LongLine
+  """Applies ``function`` to a sequence containing all of
+  the values in the provided mapping, returning a new mapping
+  with the values replaced with the results of the provided
+  function.
+
+  Examples:
+    def _format(value):
+      return '{0} fish'.format(value)
+
+    print(apply_values(_format, {1: 'red', 2: 'blue'}))
+    # -> {1: 'red fish', 2: 'blue fish'}
+
+  Args:
+    func (callable): Callable to apply values to.
+    mapping (dict): Map object.
+
+  Returns:
+    dict: New mapping with the values replaced with the results
+      of the provided function.
+
+  References:
+    https://github.com/getsentry/sentry/blob/master/src/sentry/utils/functional.py#L19
+  """
+  if not mapping:
+    return {}
+  keys, values = zip(*iteritems(mapping))
+  return dict(zip(keys, func(values)))
+
+
+def advance(n, iterator):
+  """Advances an iterator n places.
+  """
+  next(islice(iterator, n, n), None)
+  return iterator
