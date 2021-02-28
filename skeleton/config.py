@@ -1,5 +1,7 @@
 # coding=utf8
-"""configf.py
+"""config.py
+
+Configuration
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -44,7 +46,7 @@ def getenv(keys, default=None, drop_null=True):
   config = {}
   for key in keys:
     value = os.getenv(key, default)
-    if not value or value is None and drop_null:
+    if drop_null and (not value or value is None):
       continue
     config[key] = value
   return config

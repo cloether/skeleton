@@ -3,7 +3,7 @@
 
 Skeleton
 ========
-Skeleton is an template for easily creating Python modules.
+``skeleton`` is a template used for creating Python modules.
 
 See the official repo [here](https://github.com/cloether/skeleton)
 """
@@ -51,7 +51,7 @@ except ImportError:
     """Needed for Backwards Compatibility (Python 2.6).
 
     Notes:
-      NullHandler was introduced in Python 2.7
+      NullHandler was introduced in Python 2.7.
     """
 
     def emit(self, record):

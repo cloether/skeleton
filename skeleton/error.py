@@ -57,6 +57,9 @@ class BaseError(Exception):
   def __reduce__(self):
     return _err_from_packed_args, (self.__class__, None, self.kwargs)
 
+  def __dict__(self):
+    return self.json
+
   @property
   def msg(self):
     """Return exception message.

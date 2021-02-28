@@ -28,7 +28,6 @@ __all__ = (
 LOGGER = logging.getLogger(__name__)
 
 _CONTENT_DISPOSITION_RE = re.compile(r"attachment;\s?filename=[\"\w.]+", re.I)
-
 _LOGGING_JSON_SORT_KEYS = 1
 _LOGGING_JSON_INDENT = 1
 

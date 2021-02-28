@@ -7,10 +7,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
-import sys
 
 from .__version__ import __description__, __title__, __version__
 from .const import (
+  DEFAULT_FILE_READ_MODE,
+  DEFAULT_FILE_WRITE_MODE,
   LOGGING_DATEFMT,
   LOGGING_FILENAME,
   LOGGING_FORMAT,
@@ -20,8 +21,6 @@ from .const import (
 __all__ = ("arg_parser", "main")
 
 LOGGER = logging.getLogger(__name__)
-
-_DEFAULT_FILE_MODE_SUFFIX = "b" if sys.version_info[0] == 2 else ""
 
 
 # TODO: Create argparser from Configuration
@@ -71,14 +70,14 @@ def arg_parser(*args, **kwargs):
       default="-",
       metavar="path",
       help="input location (default: %(default)s)",
-      type=FileType("r{0!s}+".format(_DEFAULT_FILE_MODE_SUFFIX))
+      type=FileType("{0!s}+".format(DEFAULT_FILE_READ_MODE))
   )
   parser.add_argument(
       "-o", "--output",
       default="-",
       metavar="path",
       help="output location (default: %(default)s)",
-      type=FileType("w{0!s}+".format(_DEFAULT_FILE_MODE_SUFFIX))
+      type=FileType("{0!s}+".format(DEFAULT_FILE_WRITE_MODE))
   )
   parser.add_argument(
       "--logfile",
