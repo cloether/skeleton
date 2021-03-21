@@ -1,11 +1,13 @@
 # coding=utf8
 """__init__.py
 
-Skeleton
-========
 ``skeleton`` is a template used for creating Python modules.
 
-See the official repo [here](https://github.com/cloether/skeleton)
+The official repo is `here`_.
+
+  .. note:: This library is under active development.
+
+.. _here: https://github.com/cloether/skeleton
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
