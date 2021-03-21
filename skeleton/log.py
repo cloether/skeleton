@@ -1,7 +1,7 @@
 # coding=utf8
 """log.py
 
-Logging Utilities
+Logging Utilities.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -130,8 +130,8 @@ def log_request(request, **kwargs):
     request (requests.PreparedRequest): PreparedRequest Instance.
 
   Keyword Args:
-    log_content (bool): Log Response Body Content if True otherwise the
-      response body content will not be logged.
+    log_content (bool): Log Response Body Content if True otherwise
+      the response body content will not be logged.
   """
   if not LOGGER.isEnabledFor(logging.DEBUG):
     return
@@ -212,3 +212,26 @@ def apply_session_hook(session, **kwargs):
   """
   func = partial(log_request_response, **kwargs)
   session.hooks.setdefault("response", []).append(func)
+
+
+def add_stderr_logger(level=logging.INFO, fmt=None, datefmt=None, style=None):
+  """Helper for quickly adding a StreamHandler to the logger.
+
+  Args:
+    level (str): Logging Level.
+    fmt (str): Logging Format.
+    datefmt (str): Logging Date Format.
+    style (str): Logging Style.
+
+  Returns:
+    logging.Handler: the handler after adding it.
+  """
+  from logging import StreamHandler, Formatter
+
+  logger = logging.getLogger(__name__)
+  handler = StreamHandler()
+  handler.setFormatter(Formatter(fmt, datefmt=datefmt, style=style))
+  logger.addHandler(handler)
+  logger.setLevel(level)
+  logger.debug("Added stderr logging handle to logger: %s", __name__)
+  return handler
