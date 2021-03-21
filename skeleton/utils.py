@@ -10,12 +10,14 @@ import pickle
 import re
 import sys
 import zlib
+from base64 import b64decode
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from errno import EEXIST
 from io import UnsupportedOperation
-from itertools import islice
+from itertools import groupby, islice
 from math import ceil
+from operator import itemgetter
 from string import Formatter
 
 from six import integer_types, iteritems, string_types, text_type
@@ -29,10 +31,13 @@ __all__ = (
     "as_number",
     "cwd",
     "DateRange",
+    "get_file_size",
     "is_file_newer_than_file",
+    "make_executable",
     "memoize",
     "mkdir_p",
     "run_in_separate_process",
+    "safe_b64decode",
     "script_dir",
     "strtobool",
     "timestamp_from_datetime",
@@ -42,10 +47,65 @@ __all__ = (
     "chunkify",
     "fpchunk",
     "apply_values",
-    "is_a_tty",
+    "isatty",
     "advance",
-    "compress_file"
+    "compress_file",
+    "group_continuous"
 )
+
+
+def group_continuous(iterable, key=None, start=0):
+  """Group continuous entries in an iterable.
+
+  Examples:
+    >> list(group_continuous([1, 2, 4, 5, 7, 8, 10]))
+    [[1, 2], [4, 5], [7, 8], [10]]
+
+    >> list(group_continuous(range(5)))
+    [[0, 1, 2, 3, 4]]
+  """
+  if key is None:
+    def key(x):
+      """noop key function."""
+      return x
+
+  def grouper(i, x):
+    """grouper function."""
+    return i - key(x)
+
+  for n, chunk in groupby(enumerate(iterable, start), grouper):
+    yield map(itemgetter(1), chunk)
+
+
+def make_executable(path):
+  """Make file executable.
+
+  Args:
+    path (str): Path to file.
+
+  References:
+    http://stackoverflow.com/a/30463972
+  """
+  mode = os.stat(path).st_mode
+  mode |= (mode & 0o444) >> 2  # copy R bits to X
+  os.chmod(path, mode)
+
+
+def safe_b64decode(data):
+  """Incoming base64-encoded data is not always padded to a
+  multiple of 4.
+
+  Python's parser is more strict and requires padding, so we
+  add padding if it's needed.
+  """
+  overflow = len(data) % 4
+  if overflow:
+    if isinstance(data, string_types):
+      padding = '=' * (4 - overflow)
+    else:
+      padding = b'=' * (4 - overflow)
+    data += padding
+  return b64decode(data)
 
 
 class DateRange(object):
@@ -466,26 +526,31 @@ def touch(filepath):
       fh.close()
 
 
-def is_a_tty():
+def isatty(fd=None):
   """Check if stdout is connected to a terminal.
 
   Returns:
-    bool: True if stdout connected to a terminal,
+    bool: True if stdout is connected to a terminal
       otherwise False.
   """
+  if fd is None:
+    fd = sys.stdout
+
+  if hasattr(fd, "fileno"):
+    fd = fd.fileno()
+
   try:
-    return os.isatty(sys.stdout.fileno())
+    return os.isatty(fd)
   except Exception:  # noqa
     return False
 
 
+# TODO: add option to fill the last chunk to the specified chunksize.
 def chunkify(iterable, chunksize):
   """Splits an iterable into chunks of size chunksize.
 
   Notes:
     The last chunk may be smaller than the provided chunksize.
-    TODO: add option to fill the last chunk to the specified
-      chunksize.
 
   Args:
     iterable: Iterable of data.
@@ -496,23 +561,25 @@ def chunkify(iterable, chunksize):
   """
   if hasattr(iterable, '__getitem__'):
     # evaluate greedily for tuple, list, etc...
-    # greedily: consuming entire iterable into
-    # memory before iterating through it.
+    # greedily: consuming entire iterable into memory
+    # before iterating through it.
     for i in range(0, len(iterable), chunksize):
       yield iterable[i:i + chunksize]
   else:
     # generator, set, map, etc...
     chunk = []
+
     for i in iterable:
       chunk.append(i)
+
       if len(chunk) == chunksize:
         yield chunk
         chunk = []
-    if chunk:  # last chunk
-      # TODO: if the length of the last chunk,
-      #  does not equal the provided chunksize,
-      #  fill (append to the) chunk,
-      #  until its length is equal to chunksize
+
+    # TODO: if the length of the last chunk does not
+    #   equal the provided chunksize, then fill (append to)
+    #   chunk until its length is equal to chunksize.
+    if chunk:  # handle last chunk
       yield chunk
 
 
@@ -540,13 +607,14 @@ def fpchunk(fp, chunksize=None):
 
 
 def compress_file(fp, level=6):
-  """Compress file
+  """Compress file.
 
   Args:
     fp (io.FileIO): File
-    level: The compression level (an integer in the range 0-9 or -1;
-      default is currently equivalent to 6).  Higher compression
-      levels are slower, but produce smaller results.
+    level (int): The compression level (an integer in the
+      range 0-9 or -1; default is currently equivalent to 6).
+      Higher compression levels are slower, but produce
+      smaller results.
   """
   compressor = zlib.compressobj(level)
   z_chunks, chunks = [], []
@@ -595,3 +663,16 @@ def advance(n, iterator):
   """
   next(islice(iterator, n, n), None)
   return iterator
+
+
+def get_file_size(path):
+  """Get a files size in bytes.
+
+  Args:
+    path (str): Path to file.
+
+  Returns:
+    int: Size of the specified file (int bytes).
+  """
+  st = os.lstat(path)
+  return st.st_size
