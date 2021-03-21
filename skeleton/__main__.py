@@ -44,8 +44,10 @@ def handle_shutdown(func):
   def _f(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
+
     if os.name == "nt":
       signal.signal(signal.SIGBREAK, _shutdown_handler)
+
     result = func(*args, **kwargs)
     # TODO: Remove signal handlers?
     return result
@@ -54,12 +56,13 @@ def handle_shutdown(func):
 
 
 def persistence_mode(func):
-  """Decorator for when binary mode is required for persistent
-  mode on windows.
+  """Decorator for when binary mode is required for
+  persistent mode on windows.
 
   Notes:
-    sys.stdout in Python is by default opened in text mode, and
-    writes to this stdout produce corrupted binary data on Windows.
+    sys.stdout in Python is by default opened in text
+    mode, and writes to this stdout produce corrupted
+    binary data on Windows.
 
     Examples:
       python -c "import sys; sys.stdout.write(\"_\n_\")" > file
@@ -158,8 +161,10 @@ def wrap_func(func, wrappers=()):
   """
   if not wrappers or wrappers is None:
     return func
+
   if callable(wrappers):
     wrappers = (wrappers,)
+
   for wrapper in wrappers:
     func = wrapper(func)
   return func
