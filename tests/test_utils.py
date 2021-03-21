@@ -5,16 +5,27 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
-from six import integer_types
+from six import binary_type, integer_types
 
 from skeleton.utils import (
   as_bool,
   as_number,
+  safe_b64decode,
   to_valid_filename,
   to_valid_module_name
 )
 
 LOGGER = logging.getLogger(__name__)
+
+
+def test_safe_b64decode():
+  """Test Safe Base64 Decode
+  """
+  value = "Q2hhZAo="
+  decoded = safe_b64decode(value)
+  LOGGER.debug("input: %s output: %s", value, decoded)
+  assert isinstance(decoded, binary_type), "invalid decoded base64 return type"
+  return True
 
 
 def test_as_number(number):

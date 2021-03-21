@@ -13,6 +13,13 @@ from six import next
 
 LOGGER = logging.getLogger(__name__)
 
+PARENT = os.path.abspath(os.path.dirname(__file__))
+ROOT = os.path.abspath(os.path.dirname(PARENT))
+
+LOG_DIR = os.path.join(ROOT, "log")
+DATA_DIR = os.path.join(ROOT, "data")
+TEST_DIR = os.path.join(ROOT, 'tests')
+
 
 @contextmanager
 def cwd(dirname):
