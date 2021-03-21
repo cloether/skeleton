@@ -40,7 +40,7 @@ def _err_from_packed_args(exception_cls, args=None, kwargs=None):
 class BaseError(Exception):
   """Base Exception Class for Module.
 
-  Attributes:
+  Keyword Args:
     fmt (str): Error Message Format String
     msg (str): The descriptive message associated with the error.
 
