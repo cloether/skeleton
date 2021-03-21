@@ -1,0 +1,13 @@
+name: Cleanup
+on:
+  push:
+  pull_request:
+jobs:
+  validate-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cleanup temporary files/directories
+        run: |
+          ./scripts/cleanup.py
+        working-directory: .
