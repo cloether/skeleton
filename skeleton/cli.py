@@ -90,6 +90,9 @@ def arg_parser(*args, **kwargs):
 
 def main():
   """Module CLI Entry Point.
+
+  Returns:
+    int: 0 if successful, otherwise any other integer.
   """
   # parse cli arguments
   parser = arg_parser()
@@ -110,6 +113,4 @@ def main():
   if os.isatty(options.output.fileno()):
     options.output.write(os.linesep)
     options.output.flush()
-
-  # return exit code (0: success)
   return 0
