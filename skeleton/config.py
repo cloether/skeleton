@@ -236,9 +236,6 @@ class Configuration(dict):
         new[key] = getattr(value, key)
     return new
 
-  from_code = from_object
-  from_code.__doc__ = """Create Configuration from a python object"""
-
   @classmethod
   def from_dict(cls, value):
     """Create Configuration from a python dictionary.
