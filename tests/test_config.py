@@ -72,16 +72,14 @@ def test_configuration_from_object():
   class CONFIG:
     """Config Object
     """
-    client_cert = "b"
+    CLIENT_CERT = "b"
 
   config = Configuration.from_object(CONFIG)
-
-  assert config.client_cert == CONFIG.client_cert, "invalid client cert"
-
   LOGGER.debug(
       "(from_object) Configuration: %s",
       config.as_string(indent=2, sort_keys=True)
   )
+  assert config.get("client_cert") == CONFIG.CLIENT_CERT, "invalid client cert"
   return True
 
 

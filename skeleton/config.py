@@ -230,11 +230,11 @@ class Configuration(dict):
     """
     if isinstance(value, string_types):
       value = import_string(value)
-    new = cls()
+    options = {}
     for key in dir(value):
       if key.isupper():
-        new[key] = getattr(value, key)
-    return new
+        options[key.lower()] = getattr(value, key, None)
+    return cls(**options)
 
   @classmethod
   def from_dict(cls, value):
@@ -248,10 +248,10 @@ class Configuration(dict):
     """
     if isinstance(value, string_types):
       value = json.loads(value)
-    new = cls()
+    options = {}
     for key in value:
-      new[key] = value[key]
-    return new
+      options[key] = value[key]
+    return cls(**options)
 
   @classmethod
   def from_file(cls, value):
