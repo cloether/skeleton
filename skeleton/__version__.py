@@ -2,6 +2,11 @@
 """__version__.py
 
 Module Metadata Attributes.
+
+Notes:
+  Attributes in this file are used within `setup.py` to
+  partially (and automatically) populate module build
+  parameters.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -23,4 +28,4 @@ __description__ = "Template Python Module"
 __title__ = "skeleton"
 __license__ = "MIT"
 __url__ = "https://github.com/cloether/skeleton"
-__version__ = "0.0.8"
+__version__ = "0.0.9"
