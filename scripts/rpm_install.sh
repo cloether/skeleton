@@ -9,8 +9,13 @@
 touch DIRS
 
 for i in $(cat INSTALLED_FILES); do
-  if [ -f "${RPM_BUILD_ROOT}/$i" ]; then echo "$i" >>FILES; fi
-  if [ -d "${RPM_BUILD_ROOT}/$i" ]; then echo %dir "$i" >>DIRS; fi
+  if [ -f "${RPM_BUILD_ROOT}/$i" ]; then
+    echo "$i" >>FILES
+  fi
+
+  if [ -d "${RPM_BUILD_ROOT}/$i" ]; then
+    echo %dir "$i" >>DIRS
+  fi
 done
 
 # Make sure we match foo.pyo and foo.pyc along with

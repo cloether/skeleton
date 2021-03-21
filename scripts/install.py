@@ -2,6 +2,8 @@
 # coding=utf8
 """install.py
 """
+from __future__ import absolute_import, print_function, unicode_literals
+
 import os
 import shutil
 import sys
@@ -13,6 +15,12 @@ from subprocess import CalledProcessError, check_call
 @contextmanager
 def cwd(dirname):
   """A context manager for operating in a different directory.
+
+  Args:
+    dirname (str): Directory to cd into.
+
+  Yields:
+    str: Original directory path.
   """
   orig = os.getcwd()
   os.chdir(dirname)
@@ -24,6 +32,12 @@ def cwd(dirname):
 
 def _run(command):
   """Run Command.
+
+  Args:
+    command (str): Command to run.
+
+  Returns:
+    int: Command return code.
   """
   try:
     return_code = check_call(command, shell=True)
@@ -35,15 +49,35 @@ def _run(command):
 
 def run(command, directory=None):
   """Run Command.
+
+  Args:
+    command (str): Command to run.
+    directory (str): Directory to run command from.
+      Defaults to current working directory.
+
+  Returns:
+    int: Command return code.
   """
   if not directory or directory is None:
     return _run(command)
+
   with cwd(directory):
     return_code = _run(command)
+
   return return_code
 
 
 def run_factory(directory):
+  """Create a `run` function which will always run from
+  the provided directory.
+
+  Args:
+    directory (str): Directory to run commands from.
+
+  Returns:
+    callable: Run function which will run from the
+      provided directory.
+  """
   return partial(run, directory=directory)
 
 

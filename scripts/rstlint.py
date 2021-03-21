@@ -2,8 +2,8 @@
 # coding=utf8
 """rstlint.py
 
-Check for stylistic and formal issues in .rst and .py files included
-in the documentation.
+Check for stylistic and formal issues in .rst and .py files
+included in the documentation.
 
 Usage:
   rstlint.py [-vf] [-s SEVERITY] [-i IGNORED_PATH*] PATH
@@ -152,8 +152,9 @@ ALL_DIRECTIVES = "({0})".format("|".join(DIRECTIVES))
 LEAKED_MARKDOWN_RE = re.compile(r"[a-z]::\s|`|\.\.\s*\w+:")
 
 SEEMS_DIRECTIVE_RE = re.compile(
-    r"(?<!\.)\.\. %s(?P<directive>[^a-z:]|:(?!:))"
-    % ALL_DIRECTIVES
+    r"(?<!\.)\.\. {0}(?P<directive>[^a-z:]|:(?!:))".format(
+        ALL_DIRECTIVES
+    )
 )
 
 
@@ -161,15 +162,14 @@ def checker(*suffixes, **kwargs):
   """Decorator to register a function as a checker.
   """
 
-  def deco(func):
+  def _deco(func):
     for suffix in suffixes:
       CHECKERS.setdefault(suffix, []).append(func)
-
     for prop in CHECKER_PROPS:
       setattr(func, prop, kwargs.get(prop, CHECKER_PROPS[prop]))
     return func
 
-  return deco
+  return _deco
 
 
 @checker(".py", severity=4)
@@ -188,7 +188,7 @@ def check_syntax(fn, lines):
   try:
     compile(code, fn, "exec")
   except SyntaxError as err:
-    yield err.lineno, "not compilable: %s" % err
+    yield err.lineno, "not compilable: {0}".format(err)
 
 
 @checker(".rst", severity=2)
@@ -259,7 +259,7 @@ def check_leaked_markup(_, lines):
   """
   for lno, line in enumerate(lines):
     if LEAKED_MARKDOWN_RE.search(line):
-      yield lno + 1, "possibly leaked markup: %r" % line
+      yield lno + 1, "possibly leaked markup: {0!r}".format(line)
 
 
 def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
@@ -296,13 +296,13 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
         continue
 
       if verbose:
-        sys.stdout.write("[-] CHECKING: %s...\n" % fn)
+        sys.stdout.write("[-] CHECKING: {0}...\n".format(fn))
 
       try:
         with open(fn) as f:
           lines = list(f)
       except (UnicodeDecodeError, IOError, OSError) as err:
-        sys.stderr.write("[!] ERROR: %s: cannot open: %s\n" % (fn, err))
+        sys.stderr.write("[!] ERROR: {0}: cannot open: {1}\n".format(fn, err))
         count[4] += 1
         continue
 
@@ -313,23 +313,24 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
         c_sev = _checker.severity
         if c_sev >= severity:
           for n, msg in _checker(fn, lines):
-            sys.stdout.write("[%d] PROBLEMS: %s:%d: %s\n" % (c_sev, fn, n, msg))
+            sys.stdout.write(
+                "[{0:d}] PROBLEMS: {1}:{2:d}: {3}\n".format(c_sev, fn, n, msg)
+            )
             count[c_sev] += 1
 
   if not count:
     if severity > 1:
-      sys.stdout.write("No Problems With Severity >= %d Found.\n" % severity)
+      sys.stdout.write(
+          "No Problems With Severity >= {0:d} Found.\n".format(severity)
+      )
     else:
       sys.stdout.write("No Problems Found.\n")
   else:
     for severity in sorted(count):
       number = count[severity]
-      sys.stdout.write("%d Problem%s With Severity %d Found.\n" % (
-          number,
-          "s" if number > 1 else "",
-          severity
+      sys.stdout.write("{0:d} Problem{1} With Severity {2:d} Found.\n".format(
+          number, "s" if number > 1 else "", severity
       ))
-
   return count
 
 
@@ -369,7 +370,6 @@ def _parse_args(argv):
   if not exists(arg_d["path"]):
     sys.stderr.write("ERROR: path {0} does not exist\n".format(arg_d["path"]))
     return 2
-
   return arg_d
 
 
@@ -391,18 +391,14 @@ def main():
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
-
   if os.name == "nt":
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 
   args_dict = _parse_args(sys.argv)
-
   if not isinstance(args_dict, dict):
     return args_dict
-
   if args_dict["verbose"]:
     logging.basicConfig(level=logging.DEBUG)
-
   return int(bool(rstlint(**args_dict)))
 
 

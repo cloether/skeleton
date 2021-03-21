@@ -2,10 +2,13 @@
 # coding=utf8
 """run_tests.py
 
-Don not run tests from the root repo dir.
+Run tests for python module.
 
-We want to ensure we're importing from the installed binary package not
-from the CWD.
+Warnings:
+  Do not run tests from the root repo dir.
+
+  We want to ensure we're importing from the installed binary package not
+  from the CWD.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -32,6 +35,12 @@ def run(command):
 @contextmanager
 def cwd(dirname):
   """A context manager for operating in a different directory.
+
+  Args:
+    dirname (str): Directory to cd into.
+
+  Yields:
+    str: Original directory path.
   """
   orig = os.getcwd()
   os.chdir(dirname)

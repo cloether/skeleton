@@ -5,7 +5,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import copy
-import fnmatch
 import glob
 import os
 import sys
@@ -57,7 +56,7 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
 
 
 def main():
-  """Script Entry Point
+  """Script Entry Point.
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

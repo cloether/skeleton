@@ -5,6 +5,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import inspect
+import logging
 import os
 import re
 from contextlib import contextmanager
@@ -12,6 +13,8 @@ from subprocess import CalledProcessError, check_call
 
 from setuptools import find_packages
 from six import next, text_type
+
+LOGGER = logging.getLogger(__name__)
 
 
 @contextmanager
@@ -38,16 +41,24 @@ def _run(command, **kwargs):
   added (minimal) error handling.
 
   Args:
-    command (str): Command to run.
+    command (str or list): Command to run.
+
+  Keyword Args:
+    shell (bool): If true, the command will be executed
+      through the shell.
 
   Returns:
     int: Return Code.
   """
   kwargs.setdefault("shell", True)
+
   try:
     return_code = check_call(command, **kwargs)
   except CalledProcessError as e:
-    sys.stderr.write("{0!r}\n".format(e))
+    LOGGER.exception(
+        "error occurred while running command: "
+        "command=\"{0}\" returncode={1}".format(command, e.returncode)
+    )
     return_code = e.returncode
   return return_code
 
@@ -62,6 +73,10 @@ def run(command, location=None):
   Returns:
     int: Return Code.
   """
+  LOGGER.debug(
+      'running command: command="%s" location="%s"',
+      command, location
+  )
   if location is not None:
     with cwd(location):
       return _run(command)
@@ -98,9 +113,9 @@ def docs_gen():
   """Generate Project Documentation Files using sphinx-apidoc.
 
   Returns:
-    int: Return code.
+    int: Sphinx command return code.
   """
-  repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+  repo_root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
   docs_source = os.path.join(repo_root, "docs", "source")
   module_path = os.path.join(repo_root, module_name(where=repo_root))
   return run(" ".join(["sphinx-apidoc", "-f", "-o", docs_source, module_path]))
@@ -108,21 +123,26 @@ def docs_gen():
 
 def docs_build():
   """Build Project Documentation.
+
+  Returns:
+    int: Sphinx command return code.
   """
-  repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-  return run("make html", os.path.join(repo_root, "docs"))
+  repo_root = os.path.abspath((os.path.dirname(os.path.dirname(__file__))))
+  return run("make html", os.path.abspath(os.path.join(repo_root, "docs")))
 
 
 # EXPERIMENTAL
 
 def extract_full_summary_from_signature(operation):
   """Extract the summary from the docstring of the command.
+
+  Returns:
+    str: Full summary information.
   """
   lines = inspect.getdoc(operation)
-  regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
   summary = ''
   if lines:
-    match = re.search(regex, lines)
+    match = re.search(r'\s*(:param)\s+(.+?)\s*:(.*)', lines)
     summary = lines[:match.regs[0][0]] if match else lines
   summary = summary.replace('\n', ' ').replace('\r', '')
   return summary
@@ -130,6 +150,9 @@ def extract_full_summary_from_signature(operation):
 
 def option_descriptions(operation):
   """Extract parameter help from docstring of the command.
+
+  Returns:
+    dict: Dictionary of argument names and description.
   """
   lines = inspect.getdoc(operation)
   if not lines:
@@ -143,30 +166,23 @@ def option_descriptions(operation):
 
   while index < len(lines):
     line = lines[index]
-
-    regex = r'\s*(:param)\s+(.+?)\s*:(.*)'
-    match = re.search(regex, line)
+    match = re.search(r'\s*(:param)\s+(.+?)\s*:(.*)', line)
     if not match:
       index += 1
       continue
-
     # 'arg name' portion might have type info, we don't need it
     arg_name = text_type.split(match.group(2))[-1]
     arg_desc = match.group(3).strip()
 
     # look for more descriptions on subsequent lines
     index += 1
-
     while index < len(lines):
       temp = lines[index].strip()
       if any(temp.startswith(x) for x in param_breaks):
         break
-
       if temp:
         arg_desc += (' ' + temp)
-
       index += 1
-
     descriptions[arg_name] = arg_desc
   return descriptions
 
@@ -182,6 +198,10 @@ def extract_args_from_signature(operation, excluded_params=None):
 
   Notes:
     By default we ignore ['self', 'kwargs'].
+
+  Yields:
+    tuple of str,dict: Tuple containing argument name and
+      arguments information as a dictionary.
   """
   # noinspection PyUnusedLocal
   args = []
@@ -197,7 +217,6 @@ def extract_args_from_signature(operation, excluded_params=None):
     args = sig.args
 
   arg_docstring_help = option_descriptions(operation)
-
   excluded_params = excluded_params or ['self', 'kwargs']
 
   for arg_name in [a for a in args if a not in excluded_params]:
@@ -230,9 +249,7 @@ def extract_args_from_signature(operation, excluded_params=None):
       pass
 
     options_list = ['--' + arg_name.replace('_', '-')]
-
     help_str = arg_docstring_help.get(arg_name)
-
     yield (arg_name, dict(
         arg_name=arg_name,
         options_list=options_list,
@@ -248,11 +265,24 @@ def extract_args_from_signature(operation, excluded_params=None):
 def main():
   """CLI Entry Point
   """
-  return (
-      docs_build
-      if "-b" in sys.argv or "--build" in sys.argv
-      else docs_gen
-  )()
+  from argparse import ArgumentParser
+
+  parser = ArgumentParser()
+  parser.add_argument(
+      "action",
+      default="generate",
+      choices=["build", "generate"],
+      help="build documentation"
+  )
+  parser.add_argument(
+      "-d", "--debug",
+      action="store_true",
+      help="debug logging"
+  )
+  args = parser.parse_args()
+  if args.debug:
+    logging.basicConfig(level=logging.DEBUG)
+  return (docs_build if args.action == "build" else docs_gen)()
 
 
 if __name__ == "__main__":

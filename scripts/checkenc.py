@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding=utf8
-"""no_enc.py
+"""checkenc.py
 
-List Python files that are missing a coding directive.
+Find Python files that are missing a coding directive.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
