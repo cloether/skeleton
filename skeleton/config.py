@@ -9,6 +9,7 @@ import copy
 import json
 import logging
 import os
+import sys
 from collections import OrderedDict
 
 from six import (
@@ -83,6 +84,7 @@ def import_string(import_name, silent=False):
       return sys.modules[import_name]
 
     module_name, obj_name = import_name.rsplit(".", 1)
+
     module = __import__(module_name, globals(), locals(), [obj_name])
 
     try:
@@ -155,9 +157,11 @@ class Configuration(dict):
   def __init__(self, *args, **kwargs):
     # record user provided options
     self._user_options = self._make_options(*args, **kwargs)
+
     # Merge the user_provided options onto the default options
     config_vars = copy.copy(self.OPTIONS)
     config_vars.update(self._user_options)
+
     # Set the attributes based on the config_vars
     dict.update(self, config_vars)
 
@@ -165,16 +169,21 @@ class Configuration(dict):
     """Set configuration values.
     """
     config = {}
-    keys = self.keylist()
     for key, value in iteritems(kwargs):
       if key not in self.OPTIONS:
         raise ValueError("invalid key: {0}".format(key))
       config[key] = value
+
+    keys = self.keylist()
+
     # number of args should not be longer than allowed options
     if len(args) > len(keys):
-      raise TypeError('takes at most {0} arguments ({1} given)'.format(
-          len(keys), len(args)
-      ))
+      raise TypeError(
+          "takes at most {0} arguments ({1} given)".format(
+              len(keys), len(args)
+          )
+      )
+
     # iterate through args passed through to the constructor
     # and map them tp their corresponding keys.
     for i, arg in enumerate(args):
@@ -227,11 +236,25 @@ class Configuration(dict):
         new[key] = getattr(value, key)
     return new
 
+  from_code = from_object
+  from_code.__doc__ = """Create Configuration from a python object"""
+
   @classmethod
-  def from_code(cls, value):
-    """Create configuration from a python file..
+  def from_dict(cls, value):
+    """Create Configuration from a python dictionary.
+
+    Args:
+      value (dict or str): Configuration dictionary.
+
+    Returns:
+      Configuration: Configuration instance.
     """
-    return cls.from_object(value)
+    if isinstance(value, string_types):
+      value = json.loads(value)
+    new = cls()
+    for key in value:
+      new[key] = value[key]
+    return new
 
   @classmethod
   def from_file(cls, value):
@@ -288,7 +311,6 @@ class Configuration(dict):
 
   # conversion
 
-  # noinspection PyUnusedLocal
   def as_dict(self, **kwargs):
     """Return configuration as a dict.
 
@@ -297,7 +319,6 @@ class Configuration(dict):
     """
     return {k: v for k, v in self.items()}
 
-  # noinspection PyUnusedLocal
   def as_list(self, **kwargs):
     """Return configuration as list of tuples.
     """
@@ -321,7 +342,7 @@ class Configuration(dict):
     errors = kwargs.pop("errors", None)
     return ensure_binary(self.as_string(**kwargs), encoding, errors)
 
-  # get/set/merge
+  # set
 
   def set(self, key, value):
     """Set configuration value.
@@ -329,6 +350,8 @@ class Configuration(dict):
     if key not in self.OPTIONS:
       raise ValueError("non-existent option: {0}".format(key))
     dict.__setitem__(self, key, value)
+
+  # get
 
   def get(self, key, default=None, strict=False):
     """Get configuration value.
@@ -343,6 +366,8 @@ class Configuration(dict):
     """Get configuration value.
     """
     return [self.get(key, default=default, strict=strict) for key in keys]
+
+  # merge
 
   def merge(self, other):
     """Merge current config with another config.
@@ -384,9 +409,12 @@ class Configuration(dict):
       config_options.update(other._user_options)
     return Configuration(**config_options)
 
-  def dump(self, fd, **kwargs):
+  # dump
+
+  def dump(self, *args, **kwargs):
     """Write configuration to buffer.
     """
+    fd = args[0] if args else sys.stdout
     end = kwargs.pop("end", None)
     json.dump(self, fd, **kwargs)
     if end and end is not None:
@@ -394,45 +422,8 @@ class Configuration(dict):
 
   # builtin
 
-  def __repr__(self):
-    return self.as_string()
-
-  __str__ = __repr__
-
-  def __setitem__(self, key, value):
-    self.set(key, value)
-
-  def __getitem__(self, key, default=None, strict=False):
-    return self.get(key, default=default, strict=strict)
-
-  def __dir__(self):
-    return self.keylist()
-
-
-if __name__ == "__main__":
-  import sys
-
-  def _test():
-    """Test Configuration.
-    """
-    os.environ["client_cert"] = "bbb"
-    os.environ["max_pool_connections"] = "20"
-    print("-" * 80)
-
-    c = Configuration("a", proxies="B")
-    cc = Configuration("b", proxies="C")
-    ccc = Configuration("c", proxies="D")
-    cccc = c.merge_all(cc, ccc)
-    cccc.dump(sys.stdout, indent=2, sort_keys=True, end="\n")
-    print("-" * 80)
-
-    cccc.dump(sys.stdout, indent=2, sort_keys=True, end="\n")
-    cccc.update_from_env()
-    cccc.dump(sys.stdout, indent=2, sort_keys=True, end="\n")
-    print("-" * 80)
-
-    ccccc = Configuration.from_env()
-    print(ccccc.dump(sys.stdout, indent=2, sort_keys=True, end="\n"))
-    return 0
-
-  sys.exit(_test())
+  __str__ = __repr__ = as_string
+  __bytes__ = as_bytes
+  __dir__ = keylist
+  __setitem__ = set
+  __getitem__ = get
