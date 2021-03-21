@@ -17,7 +17,6 @@ import time
 # directory, add these directories to sys.path here. If the directory
 # is relative to the documentation root, use os.path.abspath to make
 # it absolute, like shown here.
-
 sys.path.insert(0, os.path.abspath(__file__))
 
 from skeleton.__version__ import (
@@ -25,7 +24,7 @@ from skeleton.__version__ import (
   __title__,
   __version__,
   __description__
-)
+)  # noqa
 
 # -- Project information --------------------------------------------
 
@@ -41,9 +40,16 @@ release = __version__  # Full version, including alpha/beta/rc tags
 # Add any Sphinx extension module names here, as strings. They can
 # be extensions coming with Sphinx (named "sphinx.ext.*") or your
 # custom ones.
+#
+# References:
+#   https://www.sphinx-doc.org/en/master/usage/extensions
+#   https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+#   https://www.sphinx-doc.org/en/master/usage/extensions/viewcode.html
+#   https://www.sphinx-doc.org/en/master/usage/extensions/todo.html
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
+    "sphinx.ext.todo",
     "sphinxcontrib.napoleon",
     "guzzle_sphinx_theme"
 ]
