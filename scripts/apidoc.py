@@ -176,7 +176,7 @@ def docs_update_index():
   index_hash = _hash_md5(index_content)
   LOGGER.debug("index: filepath=\"%s\" md5=\"%s\"", index_rst, index_hash)
 
-  should_update = readme_hash == index_hash
+  should_update = not readme_hash == index_hash
   LOGGER.debug("needs-update: %s", should_update)
   if not should_update:
     return 0

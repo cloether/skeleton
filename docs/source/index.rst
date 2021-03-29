@@ -37,7 +37,11 @@ Requirements
 
 Support
 -------
-Create a `new issue`_ on GitHub.
+- Submit an `Issue`_.
+- Submit a `Bug Report`_.
+- Submit a `Feature Request`_.
+- Ask a `Question`_.
+- Request `Assistance`_.
 
 License
 -------
@@ -48,7 +52,11 @@ Copyright
 Copyright (c) 2021 Chad Loether
 
 .. _here: https://github.com/cloether/skeleton
-.. _new issue: https://github.com/cloether/skeleton/issues/new
+.. _Issue: https://github.com/cloether/skeleton/issues/new?template=blank-issue.md
+.. _Bug Report: https://github.com/cloether/skeleton/issues/new?template=bug-report.md
+.. _Feature Request: https://github.com/cloether/skeleton/issues/new?template=feature-request.md
+.. _Question: https://github.com/cloether/skeleton/issues/new?template=question.md
+.. _Assistance: https://github.com/cloether/skeleton/issues/new?template=need-help.md
 .. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE.txt
 
 Reference

@@ -1,5 +1,8 @@
+# https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests
+# https://docs.github.com/en/github/managing-your-work-on-github
 # https://docs.github.com/en/github/building-a-strong-community/about-issue-and-pull-request-templates#issue-templates
 # https://docs.github.com/en/github/building-a-strong-community/configuring-issue-templates-for-your-repository#configuring-the-template-chooser
+# https://docs.github.com/en/github/managing-your-work-on-github/about-automation-for-issues-and-pull-requests-with-query-parameters
 blank_issues_enabled: false
 # contact_links:
 #   - name: GitHub Community Support
