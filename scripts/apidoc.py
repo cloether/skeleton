@@ -4,17 +4,47 @@
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-import inspect
 import logging
 import os
-import re
 from contextlib import contextmanager
+from hashlib import md5
 from subprocess import CalledProcessError, check_call
 
 from setuptools import find_packages
-from six import next, text_type
+from six import next
 
 LOGGER = logging.getLogger(__name__)
+
+INDEX_TEMPLATE = """Reference
+=========
+``{0}`` module reference.
+
+..  toctree::
+    :maxdepth: 3
+
+    modules
+
+Indices and tables
+------------------
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+"""
+
+
+def _readfile(filepath, **kwargs):
+  if "b" not in kwargs.get("mode", ""):
+    kwargs.setdefault("encoding", "utf8")
+  with open(filepath, **kwargs) as f:
+    return f.read()
+
+
+def _hash_md5(content):
+  """Calculate md5 hash of content.
+  """
+  h = md5()
+  h.update(content)
+  return h.hexdigest()
 
 
 @contextmanager
@@ -131,136 +161,36 @@ def docs_build():
   return run("make html", os.path.abspath(os.path.join(repo_root, "docs")))
 
 
-# EXPERIMENTAL
-
-def extract_full_summary_from_signature(operation):
-  """Extract the summary from the docstring of the command.
-
-  Returns:
-    str: Full summary information.
+def docs_update_index():
+  """Update index.rst to match the project README.rst
   """
-  lines = inspect.getdoc(operation)
-  summary = ''
-  if lines:
-    match = re.search(r'\s*(:param)\s+(.+?)\s*:(.*)', lines)
-    summary = lines[:match.regs[0][0]] if match else lines
-  summary = summary.replace('\n', ' ').replace('\r', '')
-  return summary
+  repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+  readme_rst = os.path.join(repo_root, "README.rst")
+  readme_content = _readfile(readme_rst, mode="rb")
+  readme_hash = _hash_md5(readme_content)
+  LOGGER.debug("readme: filepath=\"%s\" md5=\"%s\"", readme_rst, readme_hash)
 
-def option_descriptions(operation):
-  """Extract parameter help from docstring of the command.
+  index_rst = os.path.join(repo_root, "docs", "source", "index.rst")
+  index_content = _readfile(index_rst, mode="rb")[:len(readme_content) + 1]
+  index_hash = _hash_md5(index_content)
+  LOGGER.debug("index: filepath=\"%s\" md5=\"%s\"", index_rst, index_hash)
 
-  Returns:
-    dict: Dictionary of argument names and description.
-  """
-  lines = inspect.getdoc(operation)
-  if not lines:
-    return {}
+  should_update = readme_hash == index_hash
+  LOGGER.debug("needs-update: %s", should_update)
+  if not should_update:
+    return 0
 
-  # param_breaks = ["'''", '"""', ':param', ':type', ':return', ':rtype']
-  param_breaks = ["'''", '"""', ':param', ':type', ':return', ':rtype']
-  descriptions = {}
-  lines = lines.splitlines()
-  index = 0
+  readme_content = _readfile(readme_rst)
+  readme_content += (
+      os.linesep + INDEX_TEMPLATE.format(module_name(where=repo_root))
+  )
+  with open(index_rst, "w+") as f:
+    f.write(readme_content)
 
-  while index < len(lines):
-    line = lines[index]
-    match = re.search(r'\s*(:param)\s+(.+?)\s*:(.*)', line)
-    if not match:
-      index += 1
-      continue
-    # 'arg name' portion might have type info, we don't need it
-    arg_name = text_type.split(match.group(2))[-1]
-    arg_desc = match.group(3).strip()
+  LOGGER.debug("updated index.rst: filepath=\"%s\"", index_rst)
+  return 0
 
-    # look for more descriptions on subsequent lines
-    index += 1
-    while index < len(lines):
-      temp = lines[index].strip()
-      if any(temp.startswith(x) for x in param_breaks):
-        break
-      if temp:
-        arg_desc += (' ' + temp)
-      index += 1
-    descriptions[arg_name] = arg_desc
-  return descriptions
-
-
-def extract_args_from_signature(operation, excluded_params=None):
-  """Extracts basic argument data from an operation's
-  signature and docstring
-
-  Args:
-    operation: Object to extract signature from.
-    excluded_params (list of str): List of params to
-      ignore and not extract.
-
-  Notes:
-    By default we ignore ['self', 'kwargs'].
-
-  Yields:
-    tuple of str,dict: Tuple containing argument name and
-      arguments information as a dictionary.
-  """
-  # noinspection PyUnusedLocal
-  args = []
-
-  try:
-    # only supported in python3
-    # - falling back to argspec if not available
-    sig = inspect.signature(operation)
-    args = sig.parameters
-  except AttributeError:
-    # noinspection PyDeprecation
-    sig = inspect.getargspec(operation)
-    args = sig.args
-
-  arg_docstring_help = option_descriptions(operation)
-  excluded_params = excluded_params or ['self', 'kwargs']
-
-  for arg_name in [a for a in args if a not in excluded_params]:
-    try:  # this works in python3
-      default = args[arg_name].default
-      required = default == inspect.Parameter.empty
-    except TypeError:
-      arg_defaults = (
-          dict(zip(sig.args[-len(sig.defaults):], sig.defaults))
-          if sig.defaults
-          else {}
-      )
-      default = arg_defaults.get(arg_name)
-      required = arg_name not in arg_defaults
-
-    action = (
-        'store_{0}'.format(text_type(not default).lower())
-        if isinstance(default, bool)
-        else None
-    )
-
-    try:
-      # noinspection PyUnresolvedReferences,PyProtectedMember
-      default = (
-          default
-          if default != inspect._empty
-          else None
-      )
-    except AttributeError:
-      pass
-
-    options_list = ['--' + arg_name.replace('_', '-')]
-    help_str = arg_docstring_help.get(arg_name)
-    yield (arg_name, dict(
-        arg_name=arg_name,
-        options_list=options_list,
-        required=required,
-        default=default,
-        help=help_str,
-        action=action
-    ))
-
-
-# END EXPERIMENTAL
 
 def main():
   """CLI Entry Point
@@ -271,8 +201,8 @@ def main():
   parser.add_argument(
       "action",
       default="generate",
-      choices=["build", "generate"],
-      help="build documentation"
+      choices=["build", "generate", "update-index"],
+      help="Documentation action"
   )
   parser.add_argument(
       "-d", "--debug",
@@ -280,9 +210,19 @@ def main():
       help="debug logging"
   )
   args = parser.parse_args()
+
   if args.debug:
     logging.basicConfig(level=logging.DEBUG)
-  return (docs_build if args.action == "build" else docs_gen)()
+
+  if args.action == "build":
+    return docs_build()
+  elif args.action == "generate":
+    return docs_gen()
+  elif args.action == "update-index":
+    return docs_update_index()
+  else:
+    LOGGER.error("unknown command: %s", args.action)
+    return 1
 
 
 if __name__ == "__main__":

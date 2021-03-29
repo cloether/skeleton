@@ -26,7 +26,7 @@ Install test dependencies and run `tox`::
 
 Building the Docs
 -----------------
-Install dependencies and build::
+Install documentation dependencies and build::
 
     $ pip install skeleton[docs]
     $ python setup.py docs
@@ -34,6 +34,10 @@ Install dependencies and build::
 Requirements
 ------------
 - six
+
+Support
+-------
+Create a `new issue`_ on GitHub.
 
 License
 -------
@@ -44,4 +48,5 @@ Copyright
 Copyright (c) 2021 Chad Loether
 
 .. _here: https://github.com/cloether/skeleton
+.. _new issue: https://github.com/cloether/skeleton/issues/new
 .. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE.txt

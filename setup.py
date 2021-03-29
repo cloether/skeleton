@@ -102,14 +102,16 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
 
 
 def __iterlines(filepath, **kwargs):
-  kwargs.setdefault("encoding", "utf8")
+  if "b" not in kwargs.get("mode", ""):
+    kwargs.setdefault("encoding", "utf8")
   with open(filepath, **kwargs) as f:
     for line in filter(None, (line.strip() for line in f)):
       yield line
 
 
 def __readfile(filepath, **kwargs):
-  kwargs.setdefault("encoding", "utf8")
+  if "b" not in kwargs.get("mode", ""):
+    kwargs.setdefault("encoding", "utf8")
   with open(filepath, **kwargs) as f:
     return f.read()
 

@@ -26,7 +26,7 @@ Install test dependencies and run `tox`::
 
 Building the Docs
 -----------------
-Install dependencies and build::
+Install documentation dependencies and build::
 
     $ pip install skeleton[docs]
     $ python setup.py docs
@@ -35,6 +35,10 @@ Requirements
 ------------
 - six
 
+Support
+-------
+Create a `new issue`_ on GitHub.
+
 License
 -------
 MIT - See `LICENSE`_ for more information.
@@ -42,6 +46,10 @@ MIT - See `LICENSE`_ for more information.
 Copyright
 ---------
 Copyright (c) 2021 Chad Loether
+
+.. _here: https://github.com/cloether/skeleton
+.. _new issue: https://github.com/cloether/skeleton/issues/new
+.. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE.txt
 
 Reference
 =========
@@ -57,6 +65,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. _here: https://github.com/cloether/skeleton
-.. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE.txt
