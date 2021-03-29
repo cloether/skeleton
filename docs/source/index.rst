@@ -53,10 +53,10 @@ Copyright (c) 2021 Chad Loether
 
 .. _here: https://github.com/cloether/skeleton
 .. _Issue: https://github.com/cloether/skeleton/issues/new?template=blank-issue.md
-.. _Bug Report: https://github.com/cloether/skeleton/issues/new?template=bug-report.md
-.. _Feature Request: https://github.com/cloether/skeleton/issues/new?template=feature-request.md
-.. _Question: https://github.com/cloether/skeleton/issues/new?template=question.md
-.. _Assistance: https://github.com/cloether/skeleton/issues/new?template=need-help.md
+.. _Bug Report: https://github.com/cloether/skeleton/issues/new?template=bug-report.md&labels=bug
+.. _Feature Request: https://github.com/cloether/skeleton/issues/new?template=feature-request.md&labels=enhancement
+.. _Question: https://github.com/cloether/skeleton/issues/new?template=question.md&labels=question
+.. _Assistance: https://github.com/cloether/skeleton/issues/new?template=need-help.md&labels=help+wanted
 .. _LICENSE: https://github.com/cloether/skeleton/blob/master/LICENSE.txt
 
 Reference
