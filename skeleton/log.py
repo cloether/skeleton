@@ -200,7 +200,7 @@ def log_request_response(response, **kwargs):
   """Log both the request and response.
   """
   log_request(response.request, **kwargs)
-  log_request(response, **kwargs)
+  log_response(response, **kwargs)
 
 
 def apply_session_hook(session, **kwargs):
