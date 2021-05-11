@@ -2,6 +2,8 @@ include CHANGELOG*
 include LICENSE*
 include README*
 include requirements.txt
+include Dockerfile
+exclude .pylintrc
 exclude .travis.yaml
 exclude pytest.ini
 exclude tox.ini
@@ -15,6 +17,7 @@ recursive-include docs source _templates *.html
 recursive-include scripts *.py
 recursive-include scripts *.sh
 recursive-include tests *.py
+recursive-include tests *.coveragerc
 global-exclude *~
 global-exclude .DS_Store
 global-exclude __pycache__
