@@ -53,6 +53,7 @@ def getenv(keys, default=None, drop_null=True):
   return config
 
 
+# pylint: disable=inconsistent-return-statements
 def import_string(import_name, silent=False):
   """Imports an object based on a string.  This is useful if you want to
   use import paths as endpoints or something similar.  An import path can
@@ -84,13 +85,13 @@ def import_string(import_name, silent=False):
       return sys.modules[import_name]
 
     module_name, obj_name = import_name.rsplit(".", 1)
-
     module = __import__(module_name, globals(), locals(), [obj_name])
 
     try:
       return getattr(module, obj_name)
     except AttributeError as e:
-      raise ImportError(e)
+      traceback = sys.exc_info()[2]
+      reraise(ImportError, e, traceback)
 
   except ImportError as e:
     if not silent:
@@ -99,8 +100,10 @@ def import_string(import_name, silent=False):
           value=ImportStringError(import_name, e),
           tb=sys.exc_info()[2]
       )
+      raise
 
 
+# pylint: disable=useless-object-inheritance
 class ConfigAttribute(object):
   """Makes an attribute forward to the config.
   """
@@ -109,8 +112,7 @@ class ConfigAttribute(object):
     self.__name__ = name
     self.get_converter = get_converter
 
-  # noinspection PyShadowingBuiltins
-  def __get__(self, instance, type=None):
+  def __get__(self, instance, owner=None):
     if instance is None:
       return self
     value = instance.config[self.__name__]
@@ -154,14 +156,13 @@ class Configuration(dict):
   ])
 
   # noinspection PyMissingConstructor
+  # pylint: disable=super-init-not-called
   def __init__(self, *args, **kwargs):
     # record user provided options
     self._user_options = self._make_options(*args, **kwargs)
-
     # Merge the user_provided options onto the default options
     config_vars = copy.copy(self.OPTIONS)
     config_vars.update(self._user_options)
-
     # Set the attributes based on the config_vars
     dict.update(self, config_vars)
 
@@ -173,7 +174,6 @@ class Configuration(dict):
       if key not in self.OPTIONS:
         raise ValueError("invalid key: {0}".format(key))
       config[key] = value
-
     keys = self.keylist()
 
     # number of args should not be longer than allowed options
@@ -257,8 +257,8 @@ class Configuration(dict):
   def from_file(cls, value):
     """Create Configuration from a file.
     """
-    with open(value) as f:
-      content = json.load(f)
+    with open(value) as fd:
+      content = json.load(fd)
     return cls(**content)
 
   @classmethod
@@ -271,7 +271,7 @@ class Configuration(dict):
         drop_null=drop_null
     ))
 
-  def update_from_env(self, default=None, drop_null=True):
+  def _update_from_env(self, default=None, drop_null=True):
     """Update Configuration from environment variables.
     """
     dict.update(self, getenv(
@@ -308,14 +308,19 @@ class Configuration(dict):
 
   # conversion
 
+  # noinspection PyUnusedLocal
+  # pylint: disable=unused-argument
   def as_dict(self, **kwargs):
     """Return configuration as a dict.
 
     Returns:
       dict: Configuration dict.
     """
+    # pylint: disable=unnecessary-comprehension
     return {k: v for k, v in self.items()}
 
+  # noinspection PyUnusedLocal
+  # pylint: disable=unused-argument
   def as_list(self, **kwargs):
     """Return configuration as list of tuples.
     """
@@ -380,8 +385,10 @@ class Configuration(dict):
         values of both config objects.
     """
     # copy current attributes in config object.
+    # pylint: disable=protected-access
     config_options = copy.copy(self._user_options)
     # merge user options from other config
+    # pylint: disable=protected-access
     config_options.update(other._user_options)
     # return new config with merged properties
     return Configuration(**config_options)
@@ -400,9 +407,10 @@ class Configuration(dict):
         values of both config objects.
     """
     # copy current attributes in config object.
+    # pylint: disable=protected-access
     config_options = copy.copy(self._user_options)
     for other in reversed(others):
-      # noinspection PyProtectedMember
+      # pylint: disable=protected-access
       config_options.update(other._user_options)
     return Configuration(**config_options)
 

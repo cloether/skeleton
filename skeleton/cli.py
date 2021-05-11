@@ -39,6 +39,7 @@ def arg_parser(*args, **kwargs):
   Returns:
     (argparse.ArgumentParser): ArgumentParser Instance
   """
+  # pylint: disable=import-outside-toplevel
   from argparse import (
     ArgumentDefaultsHelpFormatter,
     ArgumentParser,

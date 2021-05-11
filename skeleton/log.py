@@ -55,8 +55,8 @@ def _getenv(name, default=None):
 def _log_items(data, name, ignore_empty=True, prefix=" - "):
   if not (ignore_empty and not data):
     LOGGER.debug("%s%s:", prefix, name.upper())
-    for k, v in iteritems(data):
-      LOGGER.debug("   -  %s: %s", k, v)
+    for key, value in iteritems(data):
+      LOGGER.debug("   -  %s: %s", key, value)
 
 
 def _log_list(data, name, ignore_empty=True, prefix=" - "):
@@ -79,6 +79,7 @@ def _log_json(data, name, prefix=" - ", ignore_empty=True):
     _log_list(_lines, name, prefix=prefix, ignore_empty=ignore_empty)
 
 
+# pylint: disable=too-many-return-statements
 def _response_content_str(response, **kwargs):
   """Get Response Content String
 
@@ -88,21 +89,28 @@ def _response_content_str(response, **kwargs):
   Returns:
     str: Content type string
   """
-  header = response.headers.get("content-disposition")
-  if not header:
+  response_headers = response.headers
+  if "content-disposition" not in response_headers:
     return None
+
   if kwargs.get("stream", False):
     return "(STREAM-DATA)"
-  if _CONTENT_DISPOSITION_RE.match(header):
-    filename = header.partition("=")[2]
+
+  content_disposition = response_headers["content-disposition"]
+  if content_disposition and _CONTENT_DISPOSITION_RE.match(content_disposition):
+    filename = content_disposition.partition("=")[2]
     return "(FILE-ATTACHMENT: {0})".format(filename)
-  content_type = response.headers.get("content-type", "")
+
+  content_type = response_headers.get("content-type", "")
   if not content_type:
     return None
+
   if content_type.endswith("octet-stream"):
     return "(BINARY-DATA)"
+
   if content_type.endswith("image"):
     return "(IMAGE-DATA)"
+
   return None
 
 
@@ -158,8 +166,8 @@ def log_request(request, **kwargs):
         return
       LOGGER.debug(" - BODY:")
       LOGGER.debug("   - %s", text_type(request.body))
-  except Exception as err:
-    LOGGER.error("FAILED to log request: %r", err)
+  except Exception as e:  # pylint: disable=broad-except
+    LOGGER.error("FAILED to log request: %r", e)
   LOGGER.debug("--")  # end
 
 
@@ -191,8 +199,8 @@ def log_response(response, **kwargs):
         _log_json(response.json(), "CONTENT")
       except ValueError:
         _log_list((ensure_str(response.content or b"(NONE)"),), "CONTENT")
-  except Exception as err:
-    LOGGER.debug("FAILED to log response: %r", err)
+  except Exception as e:  # pylint: disable=broad-except
+    LOGGER.debug("FAILED to log response: %r", e)
   LOGGER.debug("--")  # end
 
 
@@ -226,6 +234,7 @@ def add_stderr_logger(level=logging.INFO, fmt=None, datefmt=None, style=None):
   Returns:
     logging.Handler: the handler after adding it.
   """
+  # pylint: disable=import-outside-toplevel
   from logging import StreamHandler, Formatter
 
   logger = logging.getLogger(__name__)

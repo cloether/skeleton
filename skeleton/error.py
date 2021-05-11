@@ -47,7 +47,7 @@ class BaseError(Exception):
   References:
     https://github.com/boto/botocore/blob/develop/botocore/exceptions.py
   """
-  fmt = "An unspecified error occurred: {error}"
+  fmt = "an unexpected error occurred: {error}"
 
   def __init__(self, **kwargs):
     msg = self.fmt.format(**kwargs)
@@ -83,14 +83,14 @@ class ImportStringError(BaseError):
   """Import String Exception.
   """
   fmt = (
-      "import_string() failed for {import_name}. Possible reasons are:\n\n"
+      "import_string() failed for {import_name}. possible reasons are:\n\n"
       "- missing __init__.py in a package;\n"
       "- package or module path not included in sys.path;\n"
       "- duplicated package or module name taking precedence in "
       "sys.path;\n"
       "- missing module, class, function or variable;\n\n"
-      "Debugged import:\n\n{exception_name}\n\n"
-      "Original exception:\n\n{exception}"
+      "debugged import:\n\n{exception_name}\n\n"
+      "original exception:\n\n{exception}"
   )
 
   def __init__(self, import_name, exception):
@@ -111,13 +111,9 @@ class PathNotFound(BaseError):
     ancestor: input salary which caused the error
     dirname: explanation of the error
   """
-  fmt = "Unable to find ancestor {ancestor} in {dirname}"
+  fmt = "unable to find ancestor {ancestor} in {dirname}"
 
   def __init__(self, ancestor, dirname):
     self.ancestor = ancestor
     self.dirname = dirname
-    BaseError.__init__(
-        self,
-        ancestor=self.ancestor,
-        dirname=self.dirname
-    )
+    BaseError.__init__(self, ancestor=self.ancestor, dirname=self.dirname)

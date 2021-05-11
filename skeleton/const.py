@@ -31,7 +31,7 @@ DEFAULT_FILE_WRITE_MODE = "w{0}".format(DEFAULT_FILE_MODE_SUFFIX)
 DEFAULT_FILE_READ_MODE = "r{0}".format(DEFAULT_FILE_MODE_SUFFIX)
 
 # LOGGING DEFAULTS
-DEFAULT_LOGGER_NAME = ""
+DEFAULT_LOGGER_NAME = __title__
 
 # LOGGING OPTIONS
 LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
@@ -42,7 +42,6 @@ LOGGING_FORMAT = (
 )
 LOGGING_LEVEL = "ERROR"
 LOGGING_STYLE = "%"
-
 LOGGING_LEVELS = {
     logging.NOTSET: "sample",
     logging.DEBUG: "debug",
@@ -50,14 +49,12 @@ LOGGING_LEVELS = {
     logging.WARNING: "warning",
     logging.ERROR: "error",
     logging.FATAL: "fatal",
-}  # type: dict[int,str]
+}
 LOGGING_LEVELS_MAP = {
     LOGGING_LEVELS[level]: level
     for level in LOGGING_LEVELS
 }
-
-# TODO: test initializing logger from dict
-LOGGING_DICT = {
+LOGGING_DICT = {  # TODO: implement test(s)
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
@@ -69,22 +66,22 @@ LOGGING_DICT = {
     },
     "handlers": {
         "console": {
-            "level": 'INFO',
-            "class": 'logging.StreamHandler',
-            "formatter": 'standard',
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
         },
         "file": {
-            "class": 'logging.FileHandler',
-            "level": 'INFO',
-            "formatter": 'standard',
-            "filename": '{0}.log'.format(__title__),
+            "class": "logging.FileHandler",
+            "level": "INFO",
+            "formatter": "standard",
+            "filename": "{0}.log".format(DEFAULT_LOGGER_NAME),
             "mode": LOGGING_FILEMODE,
         },
     },
     "loggers": {
-        __title__: {
-            "handlers": ['console'],
-            "level": 'INFO',
+        DEFAULT_LOGGER_NAME: {
+            "handlers": ["console"],
+            "level": "INFO",
             "propagate": False
         }
     }
