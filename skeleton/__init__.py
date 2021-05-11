@@ -42,8 +42,6 @@ from .__version__ import (
 
 __app_id__ = "-".join((__title__, __version__))
 
-from . import cli, config, const, error, log, utils
-
 try:
   from logging import NullHandler
 except ImportError:
@@ -57,9 +55,8 @@ except ImportError:
     """
 
     def emit(self, record):
-      """Emit Nothing
-      """
+      """Emit Nothing."""
 
-from logging import getLogger
+from logging import getLogger  # pylint: disable=wrong-import-order
 
 getLogger(__name__).addHandler(NullHandler())
