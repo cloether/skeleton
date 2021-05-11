@@ -52,7 +52,7 @@ def test_configuration_update_from_env():
   os.environ["max_pool_connections"] = "20"
 
   config = Configuration()
-  config.update_from_env()
+  config._update_from_env()
 
   assert os.environ["max_pool_connections"] == "20", "Failed to update from env"
   assert os.environ["client_cert"] == "bbb", "Failed to update from env"

@@ -10,6 +10,7 @@ of modules which will be passed to all tests.
 from __future__ import absolute_import, print_function, unicode_literals
 
 import json
+import logging
 import os
 
 import pytest
@@ -28,6 +29,15 @@ __all__ = (
     "number",
     "boolean"
 )
+
+
+@pytest.fixture(autouse=True)
+def reset_log_level():
+  """Automatically reset log level verbosity between tests.
+
+  Generally want test output the Unix way: silence is golden.
+  """
+  logging.getLogger().setLevel(logging.WARN)
 
 
 @pytest.fixture(name="module_name")
