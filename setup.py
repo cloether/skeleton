@@ -104,16 +104,16 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
 def __iterlines(filepath, **kwargs):
   if "b" not in kwargs.get("mode", ""):
     kwargs.setdefault("encoding", "utf8")
-  with open(filepath, **kwargs) as f:
-    for line in filter(None, (line.strip() for line in f)):
+  with open(filepath, **kwargs) as fd:
+    for line in filter(None, (line.strip() for line in fd)):
       yield line
 
 
 def __readfile(filepath, **kwargs):
   if "b" not in kwargs.get("mode", ""):
     kwargs.setdefault("encoding", "utf8")
-  with open(filepath, **kwargs) as f:
-    return f.read()
+  with open(filepath, **kwargs) as fd:
+    return fd.read()
 
 
 def __readlines(filepath, **kwargs):
@@ -233,7 +233,7 @@ EXTRAS_REQUIRE = {
         "guzzle_sphinx_theme"
     ],
     "tests": [
-        "wheel",
+        "check-manifest",
         "coverage",
         "pycodestyle",
         "pytest",
@@ -241,7 +241,8 @@ EXTRAS_REQUIRE = {
         "pytest-html",
         "tox",
         "tox-travis",
-        "twine"
+        "twine",
+        "wheel"
     ],
     ":python_version==\"2.6\"": [
         "ordereddict==1.1",
