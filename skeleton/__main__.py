@@ -9,9 +9,7 @@ import errno
 import os
 import sys
 
-from .cli import main
-
-# Force absolute path on Python 2.
+# force absolute path when running on python 2.
 # https://github.com/microsoft/debugpy/blob/master/src/debugpy/__main__.py
 __file__ = os.path.abspath(__file__)  # noqa
 
@@ -25,9 +23,9 @@ def handle_shutdown(func):
   Returns:
     callable: Decorated function.
   """
-  import signal
+  import signal  # pylint: disable=import-outside-toplevel
 
-  def _shutdown_handler(signum, frame):  # noqa
+  def _shutdown_handler(signum, frame):  # pylint: disable=unused-argument
     """Handle Shutdown.
 
     Args:
@@ -38,16 +36,18 @@ def handle_shutdown(func):
       (SystemExit): Calls sys.exit(), which raises a SystemExit exception.
     """
     sys.stderr.write("\b\b")  # write 2 backspaces to stderr
-    sys.stderr.write("interrupt detected: signal={0:d}\n".format(signum))
+    sys.stderr.write(
+        "interrupt detected: "
+        "signal={0:d} frame=\"{1:s}\"\n".format(signum, frame)
+    )
     sys.exit(signum)
 
   def _f(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
-
     if os.name == "nt":
+      # pylint: disable=no-member
       signal.signal(signal.SIGBREAK, _shutdown_handler)
-
     result = func(*args, **kwargs)
     # TODO: Remove signal handlers?
     return result
@@ -76,12 +76,12 @@ def persistence_mode(func):
   """
   if sys.platform == "Win32":
     def _inner(*args, **kwargs):
-      import msvcrt  # noqa
+      # noinspection PyUnresolvedReferences
+      import msvcrt  # pylint: disable=import-error,import-outside-toplevel
 
-      msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
-      msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-      msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)
-
+      msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)  # pylint: disable=E1101
+      msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)  # pylint: disable=E1101
+      msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)  # pylint: disable=E1101
       return func(*args, **kwargs)
   else:
     def _inner(*args, **kwargs):
@@ -103,7 +103,7 @@ def epipe(func):
     IOError: Raised when non-EPIPE exceptions are encountered.
   """
 
-  def _f(*args, **kwargs):
+  def _inner(*args, **kwargs):
     try:
       return func(*args, **kwargs)
     except IOError as e:
@@ -111,7 +111,7 @@ def epipe(func):
         sys.exit(e.errno)
       raise
 
-  return _f
+  return _inner
 
 
 def handle_errors(func):
@@ -125,6 +125,7 @@ def handle_errors(func):
   """
 
   def _inner(*args, **kwargs):
+    # noinspection PyBroadException
     try:
       ret = func(*args, **kwargs)
     except NotImplementedError as e:
@@ -133,12 +134,12 @@ def handle_errors(func):
       sys.exit(0)
     except KeyboardInterrupt as e:
       sys.exit(e)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
       sys.stderr.write("{0!r}".format(e))
       sys.stderr.flush()
       sys.exit(1)
-    except:  # noqa
-      import traceback
+    except:  # noqa # pylint: disable=bare-except
+      import traceback  # pylint: disable=import-outside-toplevel
 
       traceback.print_last()
       sys.exit(-1)
@@ -161,16 +162,16 @@ def wrap_func(func, wrappers=()):
   """
   if not wrappers or wrappers is None:
     return func
-
   if callable(wrappers):
     wrappers = (wrappers,)
-
   for wrapper in wrappers:
     func = wrapper(func)
   return func
 
 
 if __name__ == "__main__":
-  # Module CLI Entry Point
-  # python -m <module-name> [options...]
+  # module cli entry point
+  # usage: python -m <module-name> [options...]
+  from .cli import main  # pylint: disable=import-outside-toplevel
+
   wrap_func(main, (persistence_mode, handle_shutdown, handle_errors))()
