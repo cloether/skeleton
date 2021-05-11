@@ -12,7 +12,6 @@ for i in $(cat INSTALLED_FILES); do
   if [ -f "${RPM_BUILD_ROOT}/$i" ]; then
     echo "$i" >>FILES
   fi
-
   if [ -d "${RPM_BUILD_ROOT}/$i" ]; then
     echo %dir "$i" >>DIRS
   fi
@@ -21,11 +20,8 @@ done
 # Make sure we match foo.pyo and foo.pyc along with
 # foo.py (but only once each)
 sed -e "/\.py[co]$/d" -e "s/\.py$/.py*/" DIRS FILES >INSTALLED_FILES
-
 mkdir -p "${RPM_BUILD_ROOT}/%{_mandir}/man1/"
-
 cp docs/man/* "${RPM_BUILD_ROOT}/%{_mandir}/man1/"
-
 cat <<EOF >>INSTALLED_FILES
 %doc %{_mandir}/man1/*"
 EOF

@@ -23,19 +23,6 @@ BINARY_RE = re.compile(br"[\x00-\x08\x0E-\x1F\x7F]")
 BLANK_RE = re.compile(br"^[ \t\f]*(?:[#\r\n]|$)")
 DECL_RE = re.compile(rb"^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)")  # noqa
 
-if sys.platform == "Win32":
-  # Binary mode is required for persistent mode on windows.
-  # sys.stdout in Python is by default opened in text mode,
-  # and writes to this stdout produce corrupted binary data
-  # on Windows.
-  #   python -c "import sys; sys.stdout.write(\"_\n_\")" > file
-  #   python -c "print(repr(open(\"file\", \"rb\").read()))"
-  import msvcrt  # noqa
-
-  msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
-  msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-  msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)
-
 
 def get_declaration(line):
   """Get encoding declaration from line.
@@ -78,10 +65,8 @@ def can_be_compiled(filepath):
   infile = _open(filepath)
   if infile is None:
     return False
-
   with infile:
     code = infile.read()
-
   try:
     compile(code, filepath, "exec")
   except Exception:  # noqa
@@ -95,16 +80,12 @@ def looks_like_python(filepath):
   infile = _open(filepath)
   if infile is None:
     return False
-
   with infile:
     line = infile.readline()
-
   if BINARY_RE.search(line):
     return False  # file appears to be binary
-
   if has_python_ext(filepath):
     return True
-
   # disguised Python script (e.g. CGI)
   return b"python" in line
 
@@ -128,11 +109,9 @@ def needs_declaration(filepath):
   except IOError:
     # oops, the file was removed - ignore it
     return None
-
   with infile:
     line1 = infile.readline()
     line2 = infile.readline()
-
     if (
         get_declaration(line1)
         or BLANK_RE.match(line1)
@@ -159,28 +138,19 @@ def walk_python_files(paths, is_python=looks_like_python, exclude_dirs=None):
   """
   if exclude_dirs is None:
     exclude_dirs = []
-
   for path in map(os.path.abspath, paths):
-
     if os.path.isfile(path):
-
       if is_python(path):
         yield path
-
     elif os.path.isdir(path):
-
       for dirpath, dirnames, filenames in os.walk(path):
-
         for exclude in exclude_dirs:
-
           if exclude in dirnames:
             LOGGER.debug("excluded directory: %s",
                          os.path.join(dirpath, exclude))
             dirnames.remove(exclude)
-
         for filename in filenames:
           full_path = os.path.join(dirpath, filename)
-
           if is_python(full_path):
             yield full_path
     else:
@@ -192,7 +162,6 @@ def iter_check_decl(paths, is_python_func, exclude):
   """
   for filepath in walk_python_files(paths, is_python_func, exclude):
     LOGGER.debug("python-file: %s", filepath)
-
     yield filepath, needs_declaration(filepath)
 
 
@@ -232,10 +201,35 @@ def epipe(func):
   return _f
 
 
+def msvcrt_setmode():
+  """Binary mode is required for persistent mode on windows.
+  sys.stdout in Python is by default opened in text mode,
+  and writes to this stdout produce corrupted binary data
+  on Windows.
+
+  Examples:
+    python -c "import sys; sys.stdout.write(\"_\n_\")" > file
+    python -c "print(repr(open(\"file\", \"rb\").read()))"
+    
+  Returns:
+    bool: True if running on windows otherwise False.
+  """
+  if sys.platform != "Win32":
+    return False
+
+  import msvcrt  # noqa
+
+  # pylint: disable=no-member
+  msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+  msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+  msvcrt.setmode(sys.stderr.fileno(), os.O_BINARY)
+  return True
+
+
 def handle_shutdown(func):
   """Decorator to various shutdown signals.
   """
-  import signal
+  import signal  # pylint: disable=import-outside-toplevel
 
   # noinspection PyUnusedLocal
   def _shutdown_handler(signum, frame):
@@ -246,16 +240,19 @@ def handle_shutdown(func):
       frame (types.FrameType): Interrupted Stack Frame.
 
     Raises:
-      (SystemExit): Calls sys.exit(), which raises a SystemExit exception.
+      (SystemExit): Calls sys.exit(), which raises a
+        SystemExit exception.
     """
     sys.stderr.write("\b\b")  # write 2 backspaces to stderr
-    logging.debug("shutdown handler called: signal=%d", signum)
+    logging.debug("shutdown handler: signal=%d frame=\"%s\"",
+                  signum, frame)
     sys.exit(signum)
 
   def _f(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
     if os.name == "nt":
+      # pylint: disable=no-member
       signal.signal(signal.SIGBREAK, _shutdown_handler)
     return func(*args, **kwargs)
 
@@ -265,6 +262,7 @@ def handle_shutdown(func):
 def _parse_args():
   """Construct cli argument parser.
   """
+  # pylint: disable=import-outside-toplevel
   from argparse import ArgumentParser, RawDescriptionHelpFormatter, FileType
 
   # noinspection PyTypeChecker

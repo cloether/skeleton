@@ -4,12 +4,15 @@
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
 import os
 import shutil
 import sys
 from contextlib import contextmanager
 from functools import partial
 from subprocess import CalledProcessError, check_call
+
+LOGGER = logging.getLogger(__name__)
 
 
 @contextmanager
@@ -60,10 +63,8 @@ def run(command, directory=None):
   """
   if not directory or directory is None:
     return _run(command)
-
   with cwd(directory):
     return_code = _run(command)
-
   return return_code
 
 
@@ -90,15 +91,16 @@ def main():
   # full path of the currently running python interpreter
   exe = sys.executable
   args = " ".join(sys.argv[1:])
+  pip = "{0} -m pip".format(exe)
 
   # upgrade pip, setuptools, and wheel
-  run_in_root("{0} -m pip install --upgrade pip setuptools wheel".format(exe))
+  run_in_root("{0} install --upgrade pip setuptools wheel".format(pip))
 
   # install requirements
-  run_in_root("{0} -m pip install -r requirements.txt {1}".format(exe, args))
+  run_in_root("{0} install -r requirements.txt {1}".format(pip, args))
 
   # install module with docs and test extras
-  run_in_root("{0} -m pip install .[docs,tests] {1}".format(exe, args))
+  run_in_root("{0} install .[docs,tests] {1}".format(pip, args))
 
   # cleanup generated distribution
   if os.path.isdir("dist") and os.listdir("dist"):
@@ -111,7 +113,7 @@ def main():
   dist = os.path.join(repo_root, "dist")
   dist = os.path.join(dist, os.listdir(dist)[0])
 
-  run_in_root("{0} -m pip install {1} {2}".format(exe, dist, args))
+  run_in_root("{0} install {1} {2}".format(pip, dist, args))
   return 0
 
 

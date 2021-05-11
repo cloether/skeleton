@@ -178,6 +178,7 @@ def docs_update_index():
 
   should_update = not readme_hash == index_hash
   LOGGER.debug("needs-update: %s", should_update)
+
   if not should_update:
     return 0
 
@@ -216,13 +217,15 @@ def main():
 
   if args.action == "build":
     return docs_build()
-  elif args.action == "generate":
+
+  if args.action == "generate":
     return docs_gen()
-  elif args.action == "update-index":
+
+  if args.action == "update-index":
     return docs_update_index()
-  else:
-    LOGGER.error("unknown command: %s", args.action)
-    return 1
+
+  LOGGER.error("unknown command: %s", args.action)
+  return 1
 
 
 if __name__ == "__main__":

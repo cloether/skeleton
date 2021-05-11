@@ -27,8 +27,7 @@ import sys
 from collections import defaultdict
 from os.path import abspath, exists, join, splitext
 
-# TODO:
-#  Wrong versions in versionadded/changed.
+# TODO: Wrong versions in versionadded/changed.
 #  Wrong markup after versionchanged directive.
 
 LOGGER = logging.getLogger(__name__)
@@ -150,7 +149,6 @@ DIRECTIVES = [
 ALL_DIRECTIVES = "({0})".format("|".join(DIRECTIVES))
 
 LEAKED_MARKDOWN_RE = re.compile(r"[a-z]::\s|`|\.\.\s*\w+:")
-
 SEEMS_DIRECTIVE_RE = re.compile(
     r"(?<!\.)\.\. {0}(?P<directive>[^a-z:]|:(?!:))".format(
         ALL_DIRECTIVES
@@ -162,14 +160,14 @@ def checker(*suffixes, **kwargs):
   """Decorator to register a function as a checker.
   """
 
-  def _deco(func):
+  def _inner(func):
     for suffix in suffixes:
       CHECKERS.setdefault(suffix, []).append(func)
     for prop in CHECKER_PROPS:
       setattr(func, prop, kwargs.get(prop, CHECKER_PROPS[prop]))
     return func
 
-  return _deco
+  return _inner
 
 
 @checker(".py", severity=4)
@@ -177,14 +175,13 @@ def check_syntax(fn, lines):
   """Check Python examples for valid syntax.
 
   Yields:
-    tuple[int,str]: Line Number and Message.
+    (tuple of int,str): Line Number and Message.
   """
   code = "".join(lines)
   if "\r" in code:
     if os.name != "nt":
       yield 0, "\\r in code file"
     code = code.replace("\r", "")
-
   try:
     compile(code, fn, "exec")
   except SyntaxError as err:
@@ -193,17 +190,15 @@ def check_syntax(fn, lines):
 
 @checker(".rst", severity=2)
 def check_suspicious_constructs(_, lines):
-  """Check for suspicious reST constructs.
+  """Check for suspicious restructured text constructs.
 
   Yields:
-    tuple[int,str]: Line Number and Message.
+    (tuple of int,str): Line Number and Message.
   """
   in_prod = False
-
   for lno, line in enumerate(lines):
     if SEEMS_DIRECTIVE_RE.search(line):
       yield lno + 1, "comment seems to be intended as a directive"
-
     if ".. productionlist::" in line:
       in_prod = True
     elif not in_prod and DEFAULT_ROLE_RE.search(line):
@@ -215,28 +210,33 @@ def check_suspicious_constructs(_, lines):
 @checker(".py", ".rst")
 def check_whitespace(_, lines):
   """Check for whitespace and line length issues.
+
+  Yields:
+    (tuple of int,str): Line Number and Message.
   """
   for lno, line in enumerate(lines):
     if "\r" in line:
       yield lno + 1, "\\r in line"
-
     if "\t" in line:
       yield lno + 1, "OMG TABS!!!1"
-
     if line[:-1].rstrip(" \t") != line[:-1]:
       yield lno + 1, "trailing whitespace"
 
 
 @checker(".rst", severity=0)
 def check_line_length(_, lines):
-  """Check for line length; this checker is not _run by default.
+  """Check for line length.
+
+  Notes:
+    This checker is NOT run by default.
 
   Yields:
-    tuple[int,str]: Line Number and Message.
+    (tuple of int,str): Line Number and Message.
   """
   for lno, line in enumerate(lines):
     if len(line) > 81:
       # do not complain about tables, links or function signatures
+      # noinspection HttpUrlsUsage
       if (
           line.lstrip()[0] not in "+|"
           and "http://" not in line
@@ -255,7 +255,7 @@ def check_leaked_markup(_, lines):
     This only works if the HTML files have been built.
 
   Yields:
-    tuple[int,str]: Line Number and Message.
+    (tuple of int,str): Line Number and Message.
   """
   for lno, line in enumerate(lines):
     if LEAKED_MARKDOWN_RE.search(line):
@@ -274,7 +274,7 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
     verbose (bool): Verbose (print all checked file names)
 
   Returns:
-    defaultdict[int,int]: Severity and Error Hit Count.
+    (defaultdict of int,int): Severity and Error Hit Count.
   """
   count = defaultdict(int)
   for root, dirs, files in os.walk(path):
@@ -298,10 +298,13 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
       if verbose:
         sys.stdout.write("[-] CHECKING: {0}...\n".format(fn))
 
+      # LOGGER.debug("checking: %s", fn)
+
       try:
         with open(fn) as f:
           lines = list(f)
       except (UnicodeDecodeError, IOError, OSError) as err:
+        # LOGGER.error("%s cannot open %s", fn, err)
         sys.stderr.write("[!] ERROR: {0}: cannot open: {1}\n".format(fn, err))
         count[4] += 1
         continue
@@ -309,7 +312,6 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
       for _checker in checker_list:
         if _checker.falsepositives and not false_pos:
           continue
-
         c_sev = _checker.severity
         if c_sev >= severity:
           for n, msg in _checker(fn, lines):
@@ -370,6 +372,7 @@ def _parse_args(argv):
   if not exists(arg_d["path"]):
     sys.stderr.write("ERROR: path {0} does not exist\n".format(arg_d["path"]))
     return 2
+
   return arg_d
 
 
@@ -386,19 +389,22 @@ def main():
       _ (types.FrameType): Interrupted Stack Frame.
     """
     sys.stderr.write("\b\b\n")
-    LOGGER.debug("Received Shutdown Signal: signum=%d", signum)
+    LOGGER.debug("received shutdown signal: signum=%d", signum)
     sys.exit(signum)
 
   signal.signal(signal.SIGTERM, _shutdown_handler)
   signal.signal(signal.SIGINT, _shutdown_handler)
+
   if os.name == "nt":
     signal.signal(signal.SIGBREAK, _shutdown_handler)
 
   args_dict = _parse_args(sys.argv)
   if not isinstance(args_dict, dict):
     return args_dict
+
   if args_dict["verbose"]:
     logging.basicConfig(level=logging.DEBUG)
+
   return int(bool(rstlint(**args_dict)))
 
 

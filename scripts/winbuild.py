@@ -32,9 +32,11 @@ def win_compile(filename, output_filename, arch=DEFAULT_ARCH,
     vc_ver = float(msvc_ver) if msvc_ver else msvc9compiler.get_build_version()
 
   vcvars = msvc9compiler.find_vcvarsall(vc_ver)
+
   if not vcvars:
     # VS 2008 Standard Edition doesn't have vcvarsall.bat
     reg_path = r"{0}\Setup\VC".format(msvc9compiler.VS_BASE % vc_ver)
+
     vcvars = os.path.join(
         msvc9compiler.Reg.get_value(reg_path, "productdir"),
         "bin", "vcvars{0:d}.bat".format(arch == "x86" and 32 or 64)

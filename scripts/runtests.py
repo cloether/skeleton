@@ -117,7 +117,6 @@ def main():
     int: Command return code.
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
   module = module_name(where=repo_root)
 
   return_code = -1  # noqa
@@ -125,7 +124,6 @@ def main():
     env_name = os.getenv("ENVNAME", "test")
 
     tests_dir = os.path.join(repo_root, "tests")
-
     logs_dir = os.path.join(tests_dir, "logs")
     mkdir_p(logs_dir)
 

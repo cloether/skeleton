@@ -12,8 +12,8 @@ import sys
 from setuptools import find_packages
 from six import next
 
-# TODO: Add support for globs/regex
 TARGETS = [
+    # TODO: Add support for globs/regex
     (".coverage*",),
     (".pytest_cache",),
     (".tox",),
@@ -67,15 +67,15 @@ def main():
     return os.path.join(repo_root, *parts)
 
   def _handle_file(value):
-    sys.stdout.write("Removing File: {0!s}\n".format(value))
+    sys.stdout.write("removing File: {0!s}\n".format(value))
     os.remove(value)
 
   def _handle_dir(value):
-    sys.stdout.write("Removing Directory: {0!s}\n".format(value))
+    sys.stdout.write("removing directory: {0!s}\n".format(value))
     os.system("rm -rf {0}".format(value))
 
   def _handle_unknown(value):
-    sys.stderr.write("Invalid Filepath: {0!s}\n".format(value))
+    sys.stderr.write("invalid filepath: {0!s}\n".format(value))
 
   for file_or_dir in map(_join_repo, files):
     for item in glob.glob(file_or_dir):

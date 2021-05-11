@@ -48,11 +48,12 @@ import subprocess
 import sys
 from tempfile import NamedTemporaryFile
 
-ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-CHANGES_DIR = os.path.abspath(os.path.join(ROOT_DIR, '.changes'))
+_VALID_CHARS = set(string.ascii_letters + string.digits)
+_ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-VALID_CHARS = set(string.ascii_letters + string.digits)
-TEMPLATE = """\
+CHANGE_DIR = os.path.abspath(os.path.join(_ROOT_DIR, '.changes'))
+CHANGE_TYPES = ('bugfix', 'feature', 'enhancement', 'api-change')
+CHANGE_TEMPLATE = """\
 # Type should be one of: feature, bugfix, enhancement, api-change
 #   feature:      A larger feature or change in behavior, usually resulting in a
 #                 minor version bump.
@@ -134,7 +135,7 @@ def all_values_provided(args):
   )
 
 
-def get_values_from_editor(args, template=TEMPLATE):
+def get_values_from_editor(args, template=CHANGE_TEMPLATE):
   """Get values from editor.
   """
   with NamedTemporaryFile('w') as f:
@@ -145,12 +146,16 @@ def get_values_from_editor(args, template=TEMPLATE):
     )
     f.write(contents)
     f.flush()
+
     env = os.environ
     editor = env.get('VISUAL', env.get('EDITOR', 'vim'))
+
     p = subprocess.Popen('{0} {1}'.format(editor, f.name), shell=True)
     p.communicate()
+
     with open(f.name) as _f:
       filled_in_contents = _f.read()
+
       parsed_values = parse_filled_in_contents(filled_in_contents)
     return parsed_values
 
@@ -190,11 +195,11 @@ def write_new_change(parsed_values):
   Args:
     parsed_values (dict): Change entry dictionary.
   """
-  if not os.path.isdir(CHANGES_DIR):
-    os.makedirs(CHANGES_DIR)
+  if not os.path.isdir(CHANGE_DIR):
+    os.makedirs(CHANGE_DIR)
 
   # Assume that new changes go into the next release.
-  dirname = os.path.join(CHANGES_DIR, 'next-release')
+  dirname = os.path.join(CHANGE_DIR, 'next-release')
   if not os.path.isdir(dirname):
     os.makedirs(dirname)
 
@@ -202,12 +207,12 @@ def write_new_change(parsed_values):
   # We'll try a couple things until we get a unique match.
   category = parsed_values['category']
 
-  def _valid_chars(x):
-    return x in VALID_CHARS
+  def _valid_char(x):
+    return x in _VALID_CHARS
 
   filename = '{type_name}-{summary}'.format(
       type_name=parsed_values['type'],
-      summary=''.join(filter(_valid_chars, category))
+      summary=''.join(filter(_valid_char, category))
   )
 
   possible_filename = os.path.join(
@@ -241,11 +246,13 @@ def parse_filled_in_contents(contents):
     return {}
 
   parsed = {}
+
   lines = iter(contents.splitlines())
 
   for line in (line.strip() for line in lines):
     if line.startswith('#'):
       continue
+
     if 'type' not in parsed and line.startswith('type:'):
       parsed['type'] = line.split(':')[1].strip()
     elif 'category' not in parsed and line.startswith('category:'):
@@ -274,12 +281,7 @@ def main():
       '-t', '--type',
       dest='change_type',
       default='',
-      choices=(
-          'bugfix',
-          'feature',
-          'enhancement',
-          'api-change'
-      )
+      choices=CHANGE_TYPES
   )
   parser.add_argument(
       '-c', '--category',
