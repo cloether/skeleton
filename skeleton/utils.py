@@ -12,16 +12,16 @@ import sys
 import zlib
 from base64 import b64decode
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import timedelta
 from errno import EEXIST
 from io import UnsupportedOperation
 from itertools import groupby, islice
-from math import ceil
+from math import ceil  # pylint: disable=no-name-in-module
 from operator import itemgetter
 from string import Formatter
 
 from six import integer_types, iteritems, string_types, text_type
-from six.moves import zip
+from six.moves import filter, map, zip
 
 from .const import DEFAULT_CHUNK_SIZE, EPOCH
 from .error import PathNotFound
@@ -65,15 +65,16 @@ def group_continuous(iterable, key=None, start=0):
     [[0, 1, 2, 3, 4]]
   """
   if key is None:
-    def key(x):
+    def key(value):
       """noop key function."""
-      return x
+      return value
 
-  def grouper(i, x):
+  def grouper(i, value):
     """grouper function."""
-    return i - key(x)
+    return i - key(value)
 
-  for n, chunk in groupby(enumerate(iterable, start), grouper):
+  # pylint: disable=unused-variable
+  for _, chunk in groupby(enumerate(iterable, start), grouper):
     yield map(itemgetter(1), chunk)
 
 
@@ -84,7 +85,7 @@ def make_executable(path):
     path (str): Path to file.
 
   References:
-    http://stackoverflow.com/a/30463972
+    https://stackoverflow.com/a/30463972
   """
   mode = os.stat(path).st_mode
   mode |= (mode & 0o444) >> 2  # copy R bits to X
@@ -108,7 +109,7 @@ def safe_b64decode(data):
   return b64decode(data)
 
 
-class DateRange(object):
+class DateRange(object):  # pylint: disable=useless-object-inheritance
   """Creates a lazy range of date or datetime objects.
 
   Modeled after the Python 3 range type and has fast path
@@ -119,15 +120,14 @@ class DateRange(object):
   provided.
 
   Args:
-    start (datetime or date): Range Start Time.
-    stop (datetime or date): Range End Time.
-    step (datetime or date): Range Step Time.
+    start (datetime.datetime or datetime.date): Range Start Time.
+    stop (datetime.datetime or datetime.date): Range End Time.
+    step (datetime.timedelta): Range Step Time.
 
   Examples:
     now = datetime.now().date()
     one_day = timedelta(days=1)
     one_week_ago = now - timedelta(weeks=1)
-
     for d in DateRange(start=one_week_ago, stop=now, step=one_day):
       print(d)
   """
@@ -151,6 +151,7 @@ class DateRange(object):
 
   def __reversed__(self):
     if self.stop:
+      # pylint: disable=invalid-unary-operand-type
       return DateRange(self.stop, self.start, -self.step)
     raise ValueError("cannot reverse infinite range")
 
@@ -165,18 +166,18 @@ class DateRange(object):
     )
     return int(ceil(abs(calc.total_seconds() / self.step.total_seconds())))
 
-  def __contains__(self, x):
+  def __contains__(self, value):
     if self.stop is not None:
       check = (
-          self.start >= x > self.stop
+          self.start >= value > self.stop
           if self._has_neg_step
-          else self.start <= x < self.stop
+          else self.start <= value < self.stop
       )
     else:
-      check = self.start >= x if self._has_neg_step else self.start <= x
+      check = self.start >= value if self._has_neg_step else self.start <= value
     if not check:
       return False
-    difference = x - self.start
+    difference = value - self.start
     return difference.total_seconds() % self.step.total_seconds() == 0
 
   def _check_stop(self, current):
@@ -209,10 +210,8 @@ class DateRange(object):
   def __getitem__(self, idx_or_slice):
     if isinstance(idx_or_slice, int):
       return self._getidx(idx_or_slice)
-
-    elif isinstance(idx_or_slice, slice):
+    if isinstance(idx_or_slice, slice):
       return self._getslice(idx_or_slice)
-
     raise TypeError(
         "DateRange indices must be integers or slices not {0}".format(
             idx_or_slice.__class__
@@ -220,26 +219,27 @@ class DateRange(object):
     )
 
   def _getidx(self, idx):
-    if not self.stop and 0 > idx:
+    if not self.stop and idx < 0:
       raise IndexError("Cannot negative index infinite range")
     if self.stop and abs(idx) > len(self) - 1:
       raise IndexError("DateRange index out of range")
     if idx == 0:
       return self.start
-    elif 0 > idx:
+    if idx < 0:
       idx += len(self)
     return self.start + (self.step * idx)
 
   def _getslice(self, slice_):
-    s = slice_.start, slice_.stop, slice_.step
-    if s == (None, None, None) or s == (None, None, 1):
+    sss = slice_.start, slice_.stop, slice_.step
+    # if s == (None, None, None) or s == (None, None, 1):
+    if sss in [(None, None, None), (None, None, 1)]:
       return DateRange(start=self.start, stop=self.stop, step=self.step)
-    start, stop, step = s
+    start, stop, step = sss
     # seems redundant but we are converting None -> 0
     start = start or 0
     stop = stop or 0
     step = step or 1  # use 1 here because of multiplication
-    if not self.stop and (0 > start or 0 > stop):
+    if not self.stop and (start < 0 or stop < 0):
       raise IndexError("cannot negative index infinite range")
     new_step = self.step * step
     new_start = self.start if not start else self[start]
@@ -247,16 +247,14 @@ class DateRange(object):
     return DateRange(start=new_start, stop=new_stop, step=new_step)
 
 
-def _parse_fmt_str(s):
-  return [
-      (literal_text, field_name, fmt_spec, conversion)
-      for literal_text, field_name, fmt_spec, conversion in
-      Formatter().parse(s)
-  ]
+def _parse_fmt_str(value):
+  # (literal_text, field_name, fmt_spec, conversion) = f.parse(value)
+  return Formatter().parse(value)
 
 
-def _format_str_vars(s):
-  return list(map(as_number, filter(None, (p[1] for p in _parse_fmt_str(s)))))
+def _format_str_vars(value):
+  parsed = (p[1] for p in _parse_fmt_str(value))
+  return list(map(as_number, filter(None, parsed)))
 
 
 def as_number(value):
@@ -334,27 +332,27 @@ def is_file_newer_than_file(file_a, file_b):
     bool: True if file_a mtime is newer than file_b mtime.
   """
 
-  def _getmtime(f):
+  def _getmtime(filepath):
     try:
-      return os.path.getmtime(f)
+      return os.path.getmtime(filepath)
     except os.error:
       return 0
 
   return _getmtime(file_a) >= _getmtime(file_b)
 
 
-def memoize(fn, cls=dict):
+def memoize(func, cls=dict):
   """Decorator to memoize.
   """
   memory = cls() if callable(cls) else cls
 
-  def _impl(*args, **kwargs):
+  def _inner(*args, **kwargs):
     full_args = args + tuple(iteritems(kwargs))
     if full_args not in memory:
-      memory[full_args] = fn(*args, **kwargs)
+      memory[full_args] = func(*args, **kwargs)
     return memory[full_args]
 
-  return _impl
+  return _inner
 
 
 def mkdir_p(path):
@@ -377,6 +375,7 @@ def mkdir_p(path):
       raise
 
 
+# pylint: disable=inconsistent-return-statements
 def run_in_separate_process(func, *args, **kwargs):
   """Run function in a separate_process.
 
@@ -391,41 +390,36 @@ def run_in_separate_process(func, *args, **kwargs):
 
   # fork a child process.
   pid = os.fork()
-
   if pid > 0:  # in child process
     # close write file descriptor.
     os.close(write_fd)
 
     # open read file descriptor.
-    with os.fdopen(read_fd, "rb") as f:
-      status, result = pickle.load(f)
+    with os.fdopen(read_fd, "rb") as fd:
+      status, result = pickle.load(fd)
 
     # wait for completion of child process.
     os.waitpid(pid, 0)
 
     if status == 0:
       return result
-
     raise result
-  else:
-    # close read file descriptor
-    os.close(read_fd)
 
-    try:
-      # call the function.
-      # status: success=0 fail=1
-      result, status = func(*args, **kwargs), 0
-    except Exception as exc:
-      result, status = exc, 1
+  os.close(read_fd)  # close read file descriptor
 
-    with os.fdopen(write_fd, "wb") as f:
-      # dump results.
-      try:
-        pickle.dump((status, result), f, pickle.HIGHEST_PROTOCOL)
-      except pickle.PicklingError as exc:
-        pickle.dump((2, exc), f, pickle.HIGHEST_PROTOCOL)
+  try:
+    # call the function. status: success=0 fail=1
+    result, status = func(*args, **kwargs), 0
+  except Exception as e:  # pylint: disable=broad-except
+    result, status = e, 1
 
-    os._exit(0)  # noqa
+  with os.fdopen(write_fd, "wb") as fd:
+    try:  # dump results.
+      pickle.dump((status, result), fd, pickle.HIGHEST_PROTOCOL)
+    except pickle.PicklingError as e:
+      pickle.dump((2, e), fd, pickle.HIGHEST_PROTOCOL)
+
+  os._exit(0)  # noqa
 
 
 def script_dir():
@@ -436,12 +430,12 @@ def script_dir():
   return os.path.dirname(script_filename)
 
 
-def strtobool(val, strict_errors=True):
+def strtobool(value, strict_errors=True):
   """Convert a string representation of truth to true (1) or
   false (0).
 
   Args:
-    val (str or int): String to convert.
+    value (str or int): String to convert.
     strict_errors (bool): Raise error if val is not one the
       valid boolean values, otherwise return the input val.
 
@@ -452,18 +446,17 @@ def strtobool(val, strict_errors=True):
   Raises:
     ValueError: If "val" is anything else.
   """
-  v = val
-  if not isinstance(v, string_types):
-    v = text_type(v)
-  v = v.lower()
-  if v in ("y", "yes", "t", "true", "on", "1"):
+  value_copy = value
+  if not isinstance(value_copy, string_types):
+    value_copy = text_type(value_copy)
+  value_copy = value_copy.lower()
+  if value_copy in ("y", "yes", "t", "true", "on", "1"):
     return True
-  elif v in ("n", "no", "f", "false", "off", "0"):
+  if value_copy in ("n", "no", "f", "false", "off", "0"):
     return False
-  elif strict_errors:
-    raise ValueError("invalid truth value {!r}".format(val))
-  else:
-    return val
+  if strict_errors:
+    raise ValueError("invalid truth value {!r}".format(value))
+  return value
 
 
 def timestamp_from_datetime(dt, epoch=EPOCH):
@@ -473,8 +466,8 @@ def timestamp_from_datetime(dt, epoch=EPOCH):
     https://stackoverflow.com/a/8778548/141395
 
   Args:
-    dt (datetime): Datetime.
-    epoch (datetime): Epoch Datetime.
+    dt (datetime.datetime or datetime.date): Datetime.
+    epoch (datetime.datetime or datetime.date): Epoch Datetime.
 
   Returns:
     int: Timestamp
@@ -519,11 +512,8 @@ def touch(filepath):
   """Equivalent of Unix `touch` command
   """
   if not os.path.exists(filepath):
-    fh = open(filepath, "a")
-    try:
+    with open(filepath, "a"):
       os.utime(filepath, None)
-    finally:
-      fh.close()
 
 
 def isatty(fd=None):
@@ -535,13 +525,12 @@ def isatty(fd=None):
   """
   if fd is None:
     fd = sys.stdout
-
   if hasattr(fd, "fileno"):
     fd = fd.fileno()
-
+  # noinspection PyBroadException
   try:
     return os.isatty(fd)
-  except Exception:  # noqa
+  except Exception:  # pylint: disable=broad-except
     return False
 
 
@@ -568,14 +557,11 @@ def chunkify(iterable, chunksize):
   else:
     # generator, set, map, etc...
     chunk = []
-
     for i in iterable:
       chunk.append(i)
-
       if len(chunk) == chunksize:
         yield chunk
         chunk = []
-
     # TODO: if the length of the last chunk does not
     #   equal the provided chunksize, then fill (append to)
     #   chunk until its length is equal to chunksize.
@@ -615,16 +601,17 @@ def compress_file(fp, level=6):
       range 0-9 or -1; default is currently equivalent to 6).
       Higher compression levels are slower, but produce
       smaller results.
+
+  Returns:
+    (tuple of bytes,bytes): Compressed chunks and uncompressed chunked.
   """
+  # pylint: disable=c-extension-no-member
   compressor = zlib.compressobj(level)
   z_chunks, chunks = [], []
   for chunk in chunkify(fp, 512):
     chunks.append(chunk)
     z_chunks.append(compressor.compress(chunk))
-  return (
-      b"".join(z_chunks) + compressor.flush(),
-      b"".join(chunks)
-  )
+  return b"".join(z_chunks) + compressor.flush(), b"".join(chunks)
 
 
 def apply_values(func, mapping):
@@ -674,5 +661,5 @@ def get_file_size(path):
   Returns:
     int: Size of the specified file (int bytes).
   """
-  st = os.lstat(path)
-  return st.st_size
+  stats = os.lstat(path)
+  return stats.st_size
