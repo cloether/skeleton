@@ -8,47 +8,67 @@ from __future__ import absolute_import, print_function, unicode_literals
 import json
 import logging
 import re
+import sys
 import types
 from functools import partial
+from hashlib import sha3_256
 from logging import _checkLevel as check_level  # noqa
 from os import getenv
 
-from six import ensure_str, iteritems, string_types, text_type
-
-from .utils import as_number
+from six import ensure_binary, ensure_str, iteritems, string_types, text_type
 
 __all__ = (
     "log_level",
     "log_request",
     "log_response",
     "log_request_response",
-    "apply_session_hook"
+    "apply_session_hook",
+    "add_stderr_logger"
 )
 
 LOGGER = logging.getLogger(__name__)
 
-_CONTENT_DISPOSITION_RE = re.compile(r"attachment;\s?filename=[\"\w.]+", re.I)
+_CONTENT_DISPOSITION_PAT = r"attachment;\s?filename=[\"\w.]+"
+_CONTENT_DISPOSITION_RE = re.compile(_CONTENT_DISPOSITION_PAT, re.I)
+
+_URL_PAT = (
+    r"http[s]?://"
+    r"(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+)
+
+_WS_PAT = (
+    r"ws[s]?://"
+    r"(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+)
+
+HIDING_PATTERNS = [_URL_PAT, _WS_PAT]
+
 _LOGGING_JSON_SORT_KEYS = 1
 _LOGGING_JSON_INDENT = 1
 
 
-# public functions
+# private
 
 def _getenv(name, default=None):
   value = getenv(name, default)
-  if not value or value is None:
+
+  if not value or value is None or not isinstance(value, string_types):
     return value
-  if not isinstance(value, string_types):
-    return value
+
   value = value.strip()
+
   if value.isdecimal():
-    value = int(float(value))
-  elif value.isdigit():
-    value = int(value)
-  elif value.lower() == ("true", "1"):
-    value = True
-  elif value.lower() == ("false", "0"):
-    value = False
+    return int(float(value))
+
+  if value.isdigit():
+    return int(value)
+
+  if value.lower() == ("true", "1", "yes", "on"):
+    return True
+
+  if value.lower() == ("false", "0", "no", "off"):
+    return False
+
   return value
 
 
@@ -97,6 +117,7 @@ def _response_content_str(response, **kwargs):
     return "(STREAM-DATA)"
 
   content_disposition = response_headers["content-disposition"]
+
   if content_disposition and _CONTENT_DISPOSITION_RE.match(content_disposition):
     filename = content_disposition.partition("=")[2]
     return "(FILE-ATTACHMENT: {0})".format(filename)
@@ -114,10 +135,10 @@ def _response_content_str(response, **kwargs):
   return None
 
 
-# public functions
+# public
 
 def log_level(level):
-  """Return valid integer log level
+  """Return valid log level.
 
   Args:
     level (str or int): Log level
@@ -125,9 +146,14 @@ def log_level(level):
   Returns:
     int: Normalized log level.
   """
-  level = as_number(level)
   if isinstance(level, string_types):
-    level = text_type(level).upper()
+    level = level.strip()
+    if level.isnumeric() or level.isdigit():
+      level = int(level)
+    elif level.isdecimal():
+      level = float(level)
+    else:
+      level = level.upper()
   return check_level(level)
 
 
@@ -143,18 +169,23 @@ def log_request(request, **kwargs):
   """
   if not LOGGER.isEnabledFor(logging.DEBUG):
     return
+
   log_content = kwargs.setdefault("log_content", False)
+
   try:
     LOGGER.debug("REQUEST:")  # start
     LOGGER.debug(" - URL: %s", request.url)
     LOGGER.debug(" - PATH: %s", request.path_url)
     LOGGER.debug(" - METHOD: %s", request.method.upper())
+
     if request.headers:
       LOGGER.debug(" - HEADERS:")
+
       for header, value in iteritems(request.headers):
         if header.lower() == "authorization":
           value = "*" * len(value)
         LOGGER.debug("   - %s: %s", header, value)
+
     if request.body is None:
       LOGGER.debug(" - BODY:")
       LOGGER.debug("   - (NO-BODY)")
@@ -168,6 +199,7 @@ def log_request(request, **kwargs):
       LOGGER.debug("   - %s", text_type(request.body))
   except Exception as e:  # pylint: disable=broad-except
     LOGGER.error("FAILED to log request: %r", e)
+
   LOGGER.debug("--")  # end
 
 
@@ -242,5 +274,72 @@ def add_stderr_logger(level=logging.INFO, fmt=None, datefmt=None, style=None):
   handler.setFormatter(Formatter(fmt, datefmt=datefmt, style=style))
   logger.addHandler(handler)
   logger.setLevel(level)
-  logger.debug("Added stderr logging handle to logger: %s", __name__)
+  logger.debug("added stderr logging handle to logger: %s", logger.name)
   return handler
+
+
+def init_default_logger(level=logging.DEBUG, fmt=None, datefmt=None,
+                        style=None):
+  """Initialize the default logger.
+
+  Args:
+    level (str or int): Logging Level.
+    fmt (str): Logging format string.
+    datefmt (str): Logging date format.
+    style (str): Logging style.
+  """
+  handlers = []
+  formatter = logging.Formatter(fmt, datefmt=datefmt, style=style)
+  # formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
+  stream_handler = logging.StreamHandler(sys.stderr)
+  stream_handler.setFormatter(formatter)
+  stream_handler.setLevel(
+      log_level(level)
+  )
+  handlers.append(stream_handler)
+  logging.basicConfig(level=level, handlers=handlers)  # noqa
+
+
+class HidingFormatter:
+  """Hiding Log Formatter.
+
+  Args:
+    base_formatter (logging.Formatter): Logging Formatter.
+    patterns (list of str): List of hiding regex patterns.
+  """
+
+  def __init__(self, base_formatter, patterns):
+    self.base_formatter = base_formatter
+    self._patterns = patterns
+
+  @classmethod
+  def convert_match_to_sha3(cls, match):
+    """Convert pattern match to SHA3 hash.
+
+    Args:
+      match (re.Match): Regex match.
+
+    Returns:
+      str: Hexadecimal string representation of the
+        provided hashed (SHA3) match value.
+    """
+    value = ensure_binary(match.group(0), "utf8")
+    return sha3_256(value).digest().hex()
+
+  def format(self, record):
+    """Format log record.
+
+    Args:
+      record (logging.LogRecord): Log record to format.
+
+    Returns:
+      str: Log record text.
+    """
+    msg = self.base_formatter.format(record)
+    for pattern in self._patterns:
+      pat = re.compile(pattern)
+      msg = pat.sub(self.convert_match_to_sha3, msg)
+    return msg
+
+  def __getattr__(self, attr):
+    return getattr(self.base_formatter, attr)
