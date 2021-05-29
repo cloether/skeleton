@@ -9,16 +9,21 @@ import logging
 import sys
 from argparse import ArgumentParser
 
-from skeleton.cli import arg_parser
+from skeleton.cli import argparser
 from .utils import run
 
 LOGGER = logging.getLogger(__name__)
+
+__all__ = (
+    "test_arg_parser",
+    "test_main"
+)
 
 
 def test_arg_parser():
   """Test cli.py argparser.
   """
-  parser = arg_parser()
+  parser = argparser()
   is_argparser = isinstance(parser, ArgumentParser) is True
   assert is_argparser, "Invalid argparser type: {0}".format(type(parser))
   return is_argparser

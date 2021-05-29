@@ -10,6 +10,17 @@ from skeleton.log import (
   log_response
 )
 
+__all__ = (
+    "test_log_request",
+    "test_log_request_content",
+    "test_log_response",
+    "test_log_response_content",
+    "test_log_request_response",
+    "test_log_request_response_content",
+    "test_apply_session_hook",
+    "test_apply_session_hook_content"
+)
+
 
 def test_log_request(prepared_request):
   """Test `skeleton.log_request`

@@ -11,6 +11,20 @@ from subprocess import CalledProcessError, check_call
 from setuptools import find_packages
 from six import next
 
+__file__ = os.path.abspath(__file__)  # noqa
+
+__all__ = (
+    "PARENT",
+    "ROOT",
+    "LOG_DIR",
+    "DATA_DIR",
+    "TEST_DIR",
+    "cwd",
+    "module_name",
+    "run",
+    "run_in_root"
+)
+
 LOGGER = logging.getLogger(__name__)
 
 PARENT = os.path.abspath(os.path.dirname(__file__))
@@ -36,7 +50,7 @@ def cwd(dirname):
     os.chdir(orig)
 
 
-def module_name(exclude=("test*", "script*", "example*"), where="."):
+def module_name(exclude=("doc*", "test*", "script*", "example*"), where="."):
   """Get current module name.
 
   Returns:

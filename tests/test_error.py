@@ -9,6 +9,10 @@ import logging
 
 from skeleton.error import BaseError
 
+__all__ = (
+    "test_base_error",
+)
+
 LOGGER = logging.getLogger(__name__)
 
 

@@ -15,6 +15,14 @@ from skeleton.utils import (
   to_valid_module_name
 )
 
+__all__ = (
+    "test_safe_b64decode",
+    "test_as_number",
+    "test_as_bool",
+    "test_to_valid_filename",
+    "test_to_valid_module_name"
+)
+
 LOGGER = logging.getLogger(__name__)
 
 

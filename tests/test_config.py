@@ -10,6 +10,17 @@ from six import StringIO
 
 from skeleton.config import Configuration
 
+__all__ = (
+    "test_config",
+    "test_configuration_from_env",
+    "test_configuration_update_from_env",
+    "test_configuration_from_object",
+    "test_configuration_dump",
+    "test_configuration_from_dict",
+    "test_configuration_merge_all",
+    "test_configuration_search_paths"
+)
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -155,4 +166,13 @@ def test_configuration_dump():
   )
 
   assert config == config_dumped
+  return True
+
+
+def test_configuration_search_paths():
+  """Test Configuration.SEARCH_PATHS.
+  """
+  LOGGER.debug("Testing: Configuration.SEARCH_PATHS")
+  config = Configuration()
+  LOGGER.debug("Configuration Search Paths: %s", config.SEARCH_PATHS)
   return True
