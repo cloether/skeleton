@@ -17,6 +17,10 @@ To install the library into the current virtual environment::
 
     $ pip install skeleton
 
+or::
+
+    $ python -m pip install skeleton
+
 Running the Tests
 -----------------
 Install test dependencies and run `tox`::

@@ -1,13 +1,5 @@
-skeleton
-========
-
-Module contents
----------------
-
-.. automodule:: skeleton
-   :members:
-   :undoc-members:
-   :show-inheritance:
+skeleton package
+================
 
 Submodules
 ----------
@@ -56,6 +48,14 @@ skeleton.utils module
 ---------------------
 
 .. automodule:: skeleton.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: skeleton
    :members:
    :undoc-members:
    :show-inheritance:
