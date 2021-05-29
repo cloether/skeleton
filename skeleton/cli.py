@@ -18,26 +18,39 @@ from .const import (
   LOGGING_LEVEL
 )
 
-__all__ = ("arg_parser", "main")
+__all__ = ("argparser", "main")
 
 LOGGER = logging.getLogger(__name__)
 
 
-# TODO: Create argparser from Configuration
-def arg_parser(*args, **kwargs):
+# TODO: create argparser from configuration file/dict
+def argparser(**kwargs):
   """Build Argument Parser
 
-  Args:
-    args: Existing argparse.ArgumentParser instance.
-
   Keyword Args:
-    prog (str): Program Name
-    usage (str): Program Usage
-    description (str): Program Description
-    formatter_class (argparse.HelpFormatter): Help Formatter
+    prog (str): he name of the program (default: sys.argv[0]).
+    usage (str): A usage message (default: auto-generated from
+      arguments).
+    description (str): A description of what the program does.
+    epilog (str): Text following the argument descriptions.
+    formatter_class (argparse.HelpFormatter): HelpFormatter class
+      for printing help messages.
+    prefix_chars (list of str or str): Characters that prefix
+      optional arguments.
+    fromfile_prefix_chars (list of str or str): Characters that
+      prefix files containing additional arguments.
+    argument_default: The default value for all arguments.
+    add_help (bool): Add a -h/-help option.
+    conflict_handler (str): String indicating how to handle conflicts.
+    parents (list of argparse.ArgumentParser): Parsers whose arguments
+      should be copied into this one.
+    allow_abbrev (bool): Allow long options to be abbreviated
+      unambiguously.
+    exit_on_error (bool): Determines whether or not ArgumentParser
+      exits with error info when an error occurs
 
   Returns:
-    (argparse.ArgumentParser): ArgumentParser Instance
+    (argparse.ArgumentParser): ArgumentParser Instance.
   """
   # pylint: disable=import-outside-toplevel
   from argparse import (
@@ -47,7 +60,9 @@ def arg_parser(*args, **kwargs):
     SUPPRESS
   )
 
-  parser = args[0] if args else ArgumentParser(**kwargs)
+  LOGGER.debug("creating argument parser: kwargs=%s", kwargs)
+
+  parser = ArgumentParser(**kwargs)
   parser.set_defaults(
       argument_default=SUPPRESS,
       conflict_handler="resolve",
@@ -57,14 +72,15 @@ def arg_parser(*args, **kwargs):
       prog=__title__,
   )
   parser.add_argument(
-      "-v", "--version",
+      "-V", "--version",
       action="version",
       version=__version__
   )
   parser.add_argument(
       "-d", "--debug",
+      "-v", "--verbose",
       action="store_true",
-      help="enable debug logging"
+      help="enable verbose logging"
   )
   parser.add_argument(
       "-i", "--input",
@@ -89,29 +105,30 @@ def arg_parser(*args, **kwargs):
   return parser
 
 
-def main():
+def main(*args, **kwargs):
   """Module CLI Entry Point.
 
   Returns:
-    int: 0 if successful, otherwise any other integer.
+    int: returns 0 if successful otherwise any other integer.
   """
+  # create argument parser
+  parser = argparser(**kwargs)
+
   # parse cli arguments
-  parser = arg_parser()
-  options = parser.parse_args()
+  args = parser.parse_args(*args)
 
   # setup logging
   logging.basicConfig(
-      filename=options.logfile,
-      level=logging.DEBUG if options.debug else LOGGING_LEVEL,
+      filename=args.logfile,
+      level=logging.DEBUG if args.debug else LOGGING_LEVEL,
       format=LOGGING_FORMAT,
       datefmt=LOGGING_DATEFMT
   )
 
-  # run logic
   LOGGER.warning("command line interface not yet implemented.")
 
-  # write newline if output is connected to a terminal
-  if os.isatty(options.output.fileno()):
-    options.output.write(os.linesep)
-    options.output.flush()
+  # write newline and flush when output is connected to a terminal
+  if os.isatty(args.output.fileno()):
+    args.output.write(os.linesep)
+    args.output.flush()
   return 0
