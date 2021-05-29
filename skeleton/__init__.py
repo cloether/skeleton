@@ -47,15 +47,31 @@ try:
 except ImportError:
   from logging import Handler
 
+  # Needed for Backwards Compatibility (Python 2.6).
+  # Note: NullHandler was introduced in Python 2.7.
   class NullHandler(Handler):
-    """Needed for Backwards Compatibility (Python 2.6).
-
-    Notes:
-      NullHandler was introduced in Python 2.7.
+    """This handler does nothing. It's intended to be used
+    to avoid the "No handlers could be found for logger XXX"
+    one-off warning. This is important for library code, which
+    may contain code to log events. If a user of the library
+    does not configure logging, the one-off warning might be
+    produced; to avoid this, the library developer simply needs
+    to instantiate a NullHandler and add it to the top-level
+    logger of the library module or package.
     """
 
+    def handle(self, record):
+      """stub"""
+
     def emit(self, record):
-      """Emit Nothing."""
+      """stub"""
+
+    def createLock(self):
+      """stub."""
+      self.lock = None
+
+    def _at_fork_reinit(self):
+      """stub"""
 
 from logging import getLogger  # pylint: disable=wrong-import-order
 
