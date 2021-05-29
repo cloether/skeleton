@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding=utf8
 """apidoc.py
+
+Documentation utilities.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -139,7 +141,7 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
   return next(iter(packages), default)
 
 
-def docs_gen():
+def docs_generate(parser, args):
   """Generate Project Documentation Files using sphinx-apidoc.
 
   Returns:
@@ -151,7 +153,7 @@ def docs_gen():
   return run(" ".join(["sphinx-apidoc", "-f", "-o", docs_source, module_path]))
 
 
-def docs_build():
+def docs_build(parser, args):
   """Build Project Documentation.
 
   Returns:
@@ -161,7 +163,7 @@ def docs_build():
   return run("make html", os.path.abspath(os.path.join(repo_root, "docs")))
 
 
-def docs_update_index():
+def docs_update(parser, args):
   """Update index.rst to match the project README.rst
   """
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -169,63 +171,96 @@ def docs_update_index():
   readme_rst = os.path.join(repo_root, "README.rst")
   readme_content = _readfile(readme_rst, mode="rb")
   readme_hash = _hash_md5(readme_content)
-  LOGGER.debug("readme: filepath=\"%s\" md5=\"%s\"", readme_rst, readme_hash)
+
+  LOGGER.debug('readme: filepath="%s" md5="%s"', readme_rst, readme_hash)
 
   index_rst = os.path.join(repo_root, "docs", "source", "index.rst")
   index_content = _readfile(index_rst, mode="rb")[:len(readme_content) + 1]
   index_hash = _hash_md5(index_content)
-  LOGGER.debug("index: filepath=\"%s\" md5=\"%s\"", index_rst, index_hash)
+
+  LOGGER.debug('index: filepath="%s" md5="%s"', index_rst, index_hash)
 
   should_update = not readme_hash == index_hash
+
   LOGGER.debug("needs-update: %s", should_update)
 
   if not should_update:
     return 0
 
   readme_content = _readfile(readme_rst)
+
   readme_content += (
       os.linesep + INDEX_TEMPLATE.format(module_name(where=repo_root))
   )
+
   with open(index_rst, "w+") as f:
     f.write(readme_content)
 
-  LOGGER.debug("updated index.rst: filepath=\"%s\"", index_rst)
+  LOGGER.debug('updated index.rst: filepath="%s"', index_rst)
   return 0
 
 
-def main():
+def main(**kwargs):
   """CLI Entry Point
   """
-  from argparse import ArgumentParser
+  from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, SUPPRESS
 
-  parser = ArgumentParser()
-  parser.add_argument(
-      "action",
-      default="generate",
-      choices=["build", "generate", "update-index"],
-      help="Documentation action"
+  LOGGER.debug("creating argument parser: kwargs=%s", kwargs)
+
+  parser = ArgumentParser(**kwargs)
+
+  parser.set_defaults(
+      argument_default=SUPPRESS,
+      conflict_handler="resolve",
+      description="documentation utilities",
+      formatter_class=ArgumentDefaultsHelpFormatter,
+      prog=os.path.splitext(os.path.basename(__file__))[0],
   )
+
   parser.add_argument(
       "-d", "--debug",
       action="store_true",
       help="debug logging"
   )
+
+  sub = parser.add_subparsers(
+      title="Command",
+      description="command to run (default: generate)",
+      dest="command"
+  )
+
+  # build
+  build_parser = sub.add_parser(
+      "build",
+      add_help=False,
+      help="build full documentation from generated markup files"
+  )
+  build_parser.set_defaults(func=docs_build, command="build")
+
+  # generate
+  generate_parser = sub.add_parser(
+      "generate",
+      add_help=False,
+      help="generate documentation markup files from source"
+  )
+  generate_parser.set_defaults(func=docs_generate, command="generate")
+
+  # update
+  update_parser = sub.add_parser(
+      "update",
+      add_help=False,
+      help="update index.rst from README.rst"  # TODO: support markdown
+  )
+  update_parser.set_defaults(func=docs_update, command="update")
+
+  parser.set_defaults(func=docs_build, command="build")
+
   args = parser.parse_args()
 
-  if args.debug:
-    logging.basicConfig(level=logging.DEBUG)
-
-  if args.action == "build":
-    return docs_build()
-
-  if args.action == "generate":
-    return docs_gen()
-
-  if args.action == "update-index":
-    return docs_update_index()
-
-  LOGGER.error("unknown command: %s", args.action)
-  return 1
+  logging.basicConfig(
+      level=logging.DEBUG if args.debug else logging.CRITICAL
+  )
+  return args.func(parser, args)
 
 
 if __name__ == "__main__":
