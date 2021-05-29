@@ -1,19 +1,27 @@
+; References:
+;   https://coverage.readthedocs.io/
 [html]
-directory = tests/reports
+directory = tests/reports/coverage
 
 [run]
 branch = True
 omit =
-  */tests/*
   .eggs/*
   setup.py
   env/*
+  tests/*
+  */tests/*
   build/*
   dist/*
+  configs/*
+  venv/*
 
 [report]
 ignore_errors = True
-omit = */tests/*, .tox/*
+omit =
+  */tests/*
+  .tox/*
+  tests/*
 exclude_lines =
   raise NotImplementedError.*
   pragma: NO COVER
