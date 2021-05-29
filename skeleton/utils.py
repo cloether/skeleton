@@ -125,11 +125,11 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
     step (datetime.timedelta): Range Step Time.
 
   Examples:
-    now = datetime.now().date()
-    one_day = timedelta(days=1)
-    one_week_ago = now - timedelta(weeks=1)
-    for d in DateRange(start=one_week_ago, stop=now, step=one_day):
-      print(d)
+    > now = datetime.now().date()
+    > one_day = timedelta(days=1)
+    > one_week_ago = now - timedelta(weeks=1)
+    > for d in DateRange(start=one_week_ago, stop=now, step=one_day):
+    >> print(d)
   """
 
   def __init__(self, start=None, stop=None, step=None):
@@ -517,10 +517,13 @@ def touch(filepath):
 
 
 def isatty(fd=None):
-  """Check if stdout is connected to a terminal.
+  """Check if file descriptor is connected to a terminal.
+
+  Args:
+    fd (io.IO or int): File descriptor or file-like object.
 
   Returns:
-    bool: True if stdout is connected to a terminal
+    bool: True if file descriptor is connected to a terminal,
       otherwise False.
   """
   if fd is None:
@@ -579,12 +582,13 @@ def fpchunk(fp, chunksize=None):
   Yields:
     bytes: Chunk of bytes.
   """
-  chunksize = chunksize or DEFAULT_CHUNK_SIZE
   try:
     # beginning of file
     fp.seek(0)
   except (AttributeError, UnsupportedOperation):
     pass
+
+  chunksize = chunksize or DEFAULT_CHUNK_SIZE
   while True:
     data = fp.read(chunksize)
     if not data:
