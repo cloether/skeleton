@@ -27,7 +27,8 @@ __all__ = (
     "modname",
     "filename",
     "number",
-    "boolean"
+    "boolean",
+    "session"
 )
 
 
