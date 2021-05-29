@@ -1,7 +1,10 @@
 # coding=utf8
 """__main__.py
 
-Module CLI Entry Point
+Module CLI Entry Point.
+
+Usage:
+  python -m <module-name> [options...]
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -9,9 +12,35 @@ import errno
 import os
 import sys
 
+from .cli import main
+
 # force absolute path when running on python 2.
 # https://github.com/microsoft/debugpy/blob/master/src/debugpy/__main__.py
 __file__ = os.path.abspath(__file__)  # noqa
+
+
+def epipe(func):
+  """Decorator to Handle EPIPE Errors.
+
+  Args:
+    func (callable): Function to decorate.
+
+  Returns:
+    callable: Decorated function.
+
+  Raises:
+    IOError: Raised when non-EPIPE exceptions are encountered.
+  """
+
+  def _inner(*args, **kwargs):
+    try:
+      return func(*args, **kwargs)
+    except IOError as e:
+      if e.errno == errno.EPIPE:
+        sys.exit(e.errno)
+      raise
+
+  return _inner
 
 
 def handle_shutdown(func):
@@ -37,22 +66,52 @@ def handle_shutdown(func):
     """
     sys.stderr.write("\b\b")  # write 2 backspaces to stderr
     sys.stderr.write(
-        "interrupt detected: "
-        "signal={0:d} frame=\"{1:s}\"\n".format(signum, frame)
+        "interrupt detected: signal={0:d} "
+        "frame=\"{1:s}\"\n".format(signum, frame)
     )
     sys.exit(signum)
 
-  def _f(*args, **kwargs):
+  def _inner(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
+
     if os.name == "nt":
       # pylint: disable=no-member
       signal.signal(signal.SIGBREAK, _shutdown_handler)
-    result = func(*args, **kwargs)
-    # TODO: Remove signal handlers?
-    return result
 
-  return _f
+    # TODO: Remove signal handlers?
+    return func(*args, **kwargs)
+
+  return _inner
+
+
+def handle_errors(func):
+  """Error handler decorator.
+
+  Args:
+    func (callable): Function to decorate.
+
+  Returns:
+    callable: Decorated function.
+  """
+
+  def _inner(*args, **kwargs):
+    try:
+      ret = func(*args, **kwargs)
+    except NotImplementedError as e:
+      sys.stderr.write("{0!r}".format(e))
+      sys.stderr.flush()
+      sys.exit(0)
+    except KeyboardInterrupt as e:
+      sys.exit(e)
+    except Exception as e:  # pylint: disable=broad-except
+      sys.stderr.write("{0!r}".format(e))
+      sys.stderr.flush()
+      sys.exit(1)
+    else:
+      sys.exit(ret)
+
+  return _inner
 
 
 def persistence_mode(func):
@@ -90,65 +149,6 @@ def persistence_mode(func):
   return _inner
 
 
-def epipe(func):
-  """Decorator to Handle EPIPE Errors.
-
-  Args:
-    func (callable): Function to decorate.
-
-  Returns:
-    callable: Decorated function.
-
-  Raises:
-    IOError: Raised when non-EPIPE exceptions are encountered.
-  """
-
-  def _inner(*args, **kwargs):
-    try:
-      return func(*args, **kwargs)
-    except IOError as e:
-      if e.errno == errno.EPIPE:
-        sys.exit(e.errno)
-      raise
-
-  return _inner
-
-
-def handle_errors(func):
-  """Error handler decorator.
-
-  Args:
-    func (callable): Function to decorate.
-
-  Returns:
-    callable: Decorated function.
-  """
-
-  def _inner(*args, **kwargs):
-    # noinspection PyBroadException
-    try:
-      ret = func(*args, **kwargs)
-    except NotImplementedError as e:
-      sys.stderr.write("{0!r}".format(e))
-      sys.stderr.flush()
-      sys.exit(0)
-    except KeyboardInterrupt as e:
-      sys.exit(e)
-    except Exception as e:  # pylint: disable=broad-except
-      sys.stderr.write("{0!r}".format(e))
-      sys.stderr.flush()
-      sys.exit(1)
-    except:  # noqa # pylint: disable=bare-except
-      import traceback  # pylint: disable=import-outside-toplevel
-
-      traceback.print_last()
-      sys.exit(-1)
-    else:
-      sys.exit(ret)
-
-  return _inner
-
-
 def wrap_func(func, wrappers=()):
   """Wrap the provided function in each wrapper function.
 
@@ -162,16 +162,15 @@ def wrap_func(func, wrappers=()):
   """
   if not wrappers or wrappers is None:
     return func
+
   if callable(wrappers):
     wrappers = (wrappers,)
+
   for wrapper in wrappers:
     func = wrapper(func)
+
   return func
 
 
 if __name__ == "__main__":
-  # module cli entry point
-  # usage: python -m <module-name> [options...]
-  from .cli import main  # pylint: disable=import-outside-toplevel
-
   wrap_func(main, (persistence_mode, handle_shutdown, handle_errors))()
