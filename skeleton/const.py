@@ -38,10 +38,12 @@ LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
 LOGGING_FILEMODE = "a+"
 LOGGING_FILENAME = None
 LOGGING_FORMAT = (
-    "(%(asctime)s)[%(levelname)s]%(name)s.%(funcName)s(%(lineno)d):%(message)s"
+    "(%(asctime)s) [%(levelname)s] "
+    "%(name)s.%(funcName)s(%(lineno)d): %(message)s"
 )
 LOGGING_LEVEL = "ERROR"
 LOGGING_STYLE = "%"
+
 LOGGING_LEVELS = {
     logging.NOTSET: "sample",
     logging.DEBUG: "debug",
@@ -50,10 +52,9 @@ LOGGING_LEVELS = {
     logging.ERROR: "error",
     logging.FATAL: "fatal",
 }
-LOGGING_LEVELS_MAP = {
-    LOGGING_LEVELS[level]: level
-    for level in LOGGING_LEVELS
-}
+
+LOGGING_LEVELS_MAP = {LOGGING_LEVELS[lvl]: lvl for lvl in LOGGING_LEVELS}
+
 LOGGING_DICT = {  # TODO: implement test(s)
     "version": 1,
     "disable_existing_loggers": False,

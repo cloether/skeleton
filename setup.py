@@ -2,6 +2,7 @@
 """setup.py
 
 Examples:
+  # simple setup.py
   from setuptools import setup
 
   setup(
@@ -43,6 +44,8 @@ ROOT = path.abspath(path.dirname(__file__))
 MODULE_META_RE = re.compile(
     r"^__(?P<name>.*)__ = ['\"](?P<value>[^'\"]*)['\"]", re.M
 )
+
+DEFAULT_LICENSE = "MIT"
 
 
 def __find_meta(filepath):
@@ -87,17 +90,21 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
 
   long_description = None
   long_description_content_type = None
+
   for ext in extensions:
     filename = (
         basename
         if not ext or ext is None
         else "{0}.{1}".format(basename, ext)
     )
+
     filepath = path.join(ROOT, filename)
+
     if path.exists(filepath):
       long_description = __readfile(filepath)
       long_description_content_type = _readme_content_type(filename, "text")
       break
+
   return long_description, long_description_content_type
 
 
@@ -257,7 +264,7 @@ INCLUDE_PACKAGE_DATA = False
 
 KEYWORDS = "{0} template".format(NAME)
 
-LICENSE = METADATA.get("license")
+LICENSE = METADATA.get("license", DEFAULT_LICENSE)
 
 LONG_DESCRIPTION, LONG_DESCRIPTION_CONTENT_TYPE = __find_readme()
 
@@ -269,10 +276,8 @@ REQUIREMENTS = __readlines(path.join(ROOT, "requirements.txt"))
 
 SCRIPTS = None
 
-TITLE = METADATA.get("title")
-
+TITLE = METADATA.get("title", NAME)
 URL = METADATA.get("url")
-
 VERSION = METADATA["version"]
 
 ZIP_SAFE = False
