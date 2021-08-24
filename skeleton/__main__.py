@@ -74,11 +74,9 @@ def handle_shutdown(func):
   def _inner(*args, **kwargs):
     signal.signal(signal.SIGTERM, _shutdown_handler)
     signal.signal(signal.SIGINT, _shutdown_handler)
-
     if os.name == "nt":
       # pylint: disable=no-member
       signal.signal(signal.SIGBREAK, _shutdown_handler)
-
     # TODO: Remove signal handlers?
     return func(*args, **kwargs)
 
@@ -162,13 +160,10 @@ def wrap_func(func, wrappers=()):
   """
   if not wrappers or wrappers is None:
     return func
-
   if callable(wrappers):
     wrappers = (wrappers,)
-
   for wrapper in wrappers:
     func = wrapper(func)
-
   return func
 
 

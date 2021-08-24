@@ -20,7 +20,7 @@ from math import ceil  # pylint: disable=no-name-in-module
 from operator import itemgetter
 from string import Formatter
 
-from six import integer_types, iteritems, string_types, text_type
+from six import integer_types, iteritems, next, string_types, text_type
 from six.moves import filter, map, zip
 
 from .const import DEFAULT_CHUNK_SIZE, EPOCH
@@ -583,11 +583,9 @@ def fpchunk(fp, chunksize=None):
     bytes: Chunk of bytes.
   """
   try:
-    # beginning of file
-    fp.seek(0)
+    fp.seek(0)  # beginning of file
   except (AttributeError, UnsupportedOperation):
     pass
-
   chunksize = chunksize or DEFAULT_CHUNK_SIZE
   while True:
     data = fp.read(chunksize)

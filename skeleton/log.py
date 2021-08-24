@@ -51,24 +51,17 @@ _LOGGING_JSON_INDENT = 1
 
 def _getenv(name, default=None):
   value = getenv(name, default)
-
   if not value or value is None or not isinstance(value, string_types):
     return value
-
   value = value.strip()
-
   if value.isdecimal():
     return int(float(value))
-
   if value.isdigit():
     return int(value)
-
   if value.lower() == ("true", "1", "yes", "on"):
     return True
-
   if value.lower() == ("false", "0", "no", "off"):
     return False
-
   return value
 
 
@@ -112,26 +105,19 @@ def _response_content_str(response, **kwargs):
   response_headers = response.headers
   if "content-disposition" not in response_headers:
     return None
-
   if kwargs.get("stream", False):
     return "(STREAM-DATA)"
-
   content_disposition = response_headers["content-disposition"]
-
   if content_disposition and _CONTENT_DISPOSITION_RE.match(content_disposition):
     filename = content_disposition.partition("=")[2]
     return "(FILE-ATTACHMENT: {0})".format(filename)
-
   content_type = response_headers.get("content-type", "")
   if not content_type:
     return None
-
   if content_type.endswith("octet-stream"):
     return "(BINARY-DATA)"
-
   if content_type.endswith("image"):
     return "(IMAGE-DATA)"
-
   return None
 
 
@@ -293,9 +279,7 @@ def init_default_logger(level=logging.DEBUG, fmt=None, datefmt=None,
   # formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
   stream_handler = logging.StreamHandler(sys.stderr)
   stream_handler.setFormatter(formatter)
-  stream_handler.setLevel(
-      log_level(level)
-  )
+  stream_handler.setLevel(log_level(level))
   handlers.append(stream_handler)
   logging.basicConfig(level=level, handlers=handlers)  # noqa
 
