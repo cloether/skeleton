@@ -47,7 +47,7 @@ class BaseError(Exception):
   References:
     https://github.com/boto/botocore/blob/develop/botocore/exceptions.py
   """
-  fmt = "an unexpected error occurred: {error}"
+  fmt = "unexpected error occurred: {error}"
 
   def __init__(self, **kwargs):
     msg = self.fmt.format(**kwargs)

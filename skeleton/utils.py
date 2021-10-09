@@ -50,8 +50,21 @@ __all__ = (
     "isatty",
     "advance",
     "compress_file",
-    "group_continuous"
+    "group_continuous",
+    "typename"
 )
+
+
+def typename(obj):
+  """Return the name of the type for the provided object.
+
+  Args:
+    obj: Object to retrieve type name for.
+
+  Returns:
+    str: Name of the type for the provided object
+  """
+  return type(obj).__name__
 
 
 def group_continuous(iterable, key=None, start=0):
@@ -66,11 +79,13 @@ def group_continuous(iterable, key=None, start=0):
   """
   if key is None:
     def key(value):
-      """noop key function."""
+      """noop key function.
+      """
       return value
 
   def grouper(i, value):
-    """grouper function."""
+    """grouper function.
+    """
     return i - key(value)
 
   # pylint: disable=unused-variable
@@ -96,16 +111,23 @@ def safe_b64decode(data):
   """Incoming base64-encoded data is not always padded to a
   multiple of 4.
 
-  Python's parser is more strict and requires padding, so we
-  add padding if it's needed.
+  Notes:
+    Python's parser is more strict and requires padding, so we
+    add padding if it's needed.
+
+  Args:
+    data (str or bytes): Data to base64 encode
+
+  Returns:
+    bytes: Base64 encoded data.
   """
   overflow = len(data) % 4
   if overflow:
-    if isinstance(data, string_types):
-      padding = '=' * (4 - overflow)
-    else:
-      padding = b'=' * (4 - overflow)
-    data += padding
+    data += (
+        '=' * (4 - overflow)
+        if isinstance(data, string_types)
+        else b'=' * (4 - overflow)
+    )
   return b64decode(data)
 
 
@@ -134,9 +156,9 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
 
   def __init__(self, start=None, stop=None, step=None):
     if start is None:
-      raise TypeError("must provide starting point for DateRange.")
+      raise TypeError("must provide starting point for DateRange")
     if step is None:
-      raise TypeError("must provide step for DateRange.")
+      raise TypeError("must provide step for DateRange")
     if step == timedelta(0):
       raise TypeError("must provide non-zero step for DateRange")
     self.start = start
@@ -295,7 +317,8 @@ def as_bool(value):
 
 @contextmanager
 def cwd(dirname):
-  """A context manager for operating in a different directory.
+  """A context manager for operating in a different
+  directory.
   """
   orig = os.getcwd()
   os.chdir(dirname)
@@ -455,7 +478,7 @@ def strtobool(value, strict_errors=True):
   if value_copy in ("n", "no", "f", "false", "off", "0"):
     return False
   if strict_errors:
-    raise ValueError("invalid truth value {!r}".format(value))
+    raise ValueError("invalid truth value: {!r}".format(value))
   return value
 
 
@@ -509,7 +532,10 @@ def to_valid_module_name(module_name):
 
 
 def touch(filepath):
-  """Equivalent of Unix `touch` command
+  """Equivalent of Unix `touch` command.
+
+  Args:
+    filepath (str): Path to file to create.
   """
   if not os.path.exists(filepath):
     with open(filepath, "a"):

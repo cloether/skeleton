@@ -316,13 +316,13 @@ setup_options = dict(
     zip_safe=ZIP_SAFE
 )
 
-# compile module executable
+# compile module as executable
 if "py2exe" in sys.argv:
   # TODO: Test py2exe References:
   #  https://github.com/aws/aws-cli/blob/develop/setup.py
   import py2exe  # noqa
 
-  # py2exe specific options.
+  # py2exe specific options
   setup_options["options"] = {
       "py2exe": {
           "optimize": 0,

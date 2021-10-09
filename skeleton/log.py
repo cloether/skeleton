@@ -17,6 +17,8 @@ from os import getenv
 
 from six import ensure_binary, ensure_str, iteritems, string_types, text_type
 
+from .const import LOGGING_LEVEL
+
 __all__ = (
     "log_level",
     "log_request",
@@ -103,21 +105,30 @@ def _response_content_str(response, **kwargs):
     str: Content type string
   """
   response_headers = response.headers
+
   if "content-disposition" not in response_headers:
     return None
+
   if kwargs.get("stream", False):
     return "(STREAM-DATA)"
+
   content_disposition = response_headers["content-disposition"]
+
   if content_disposition and _CONTENT_DISPOSITION_RE.match(content_disposition):
     filename = content_disposition.partition("=")[2]
     return "(FILE-ATTACHMENT: {0})".format(filename)
+
   content_type = response_headers.get("content-type", "")
+
   if not content_type:
     return None
+
   if content_type.endswith("octet-stream"):
     return "(BINARY-DATA)"
+
   if content_type.endswith("image"):
     return "(IMAGE-DATA)"
+
   return None
 
 
@@ -201,24 +212,33 @@ def log_response(response, **kwargs):
   """
   if not LOGGER.isEnabledFor(logging.DEBUG):
     return
+
   log_content = kwargs.setdefault("log_content", False)
+
   try:
     _log_one("", "RESPONSE", ignore_empty=False, prefix="")  # start
+
     _log_items(response.cookies, "COOKIES")
     _log_one(response.encoding, "ENCODING")
     _log_items(response.headers, "HEADERS")
     _log_one(response.reason, "REASON")
     _log_one(response.status_code, "STATUS CODE")
+
     content_str = _response_content_str(response)
+
     if content_str:
       _log_list((content_str,), "CONTENT")
+
     elif log_content:
       try:
         _log_json(response.json(), "CONTENT")
+
       except ValueError:
         _log_list((ensure_str(response.content or b"(NONE)"),), "CONTENT")
+
   except Exception as e:  # pylint: disable=broad-except
     LOGGER.debug("FAILED to log response: %r", e)
+
   LOGGER.debug("--")  # end
 
 
@@ -256,15 +276,18 @@ def add_stderr_logger(level=logging.INFO, fmt=None, datefmt=None, style=None):
   from logging import StreamHandler, Formatter
 
   logger = logging.getLogger(__name__)
+
   handler = StreamHandler()
   handler.setFormatter(Formatter(fmt, datefmt=datefmt, style=style))
+
   logger.addHandler(handler)
   logger.setLevel(level)
+
   logger.debug("added stderr logging handle to logger: %s", logger.name)
   return handler
 
 
-def init_default_logger(level=logging.DEBUG, fmt=None, datefmt=None,
+def init_default_logger(level=LOGGING_LEVEL, fmt=None, datefmt=None,
                         style=None):
   """Initialize the default logger.
 
@@ -275,16 +298,19 @@ def init_default_logger(level=logging.DEBUG, fmt=None, datefmt=None,
     style (str): Logging style.
   """
   handlers = []
-  formatter = logging.Formatter(fmt, datefmt=datefmt, style=style)
+
   # formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
+  formatter = logging.Formatter(fmt, datefmt=datefmt, style=style)
+
   stream_handler = logging.StreamHandler(sys.stderr)
   stream_handler.setFormatter(formatter)
   stream_handler.setLevel(log_level(level))
   handlers.append(stream_handler)
+
   logging.basicConfig(level=level, handlers=handlers)  # noqa
 
 
-class HidingFormatter:
+class HidingFormatter(object):
   """Hiding Log Formatter.
 
   Args:
