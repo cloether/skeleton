@@ -311,9 +311,9 @@ def init_default_logger(level=LOGGING_LEVEL, fmt=None, datefmt=None,
 
 if sys.version_info >= (3, 6):
   # hashlib.sha3_256 was introduced in python 3.6
-  # References: https://docs.python.org/3/library/hashlib.html#hash-algorithms
+  # References:
+  #   https://docs.python.org/3/library/hashlib.html#hash-algorithms
   from hashlib import sha3_256
-
 
   class HidingFormatter:
     """Hiding Log Formatter.
