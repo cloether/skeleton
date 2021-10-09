@@ -208,9 +208,9 @@ def msvcrt_setmode():
   on Windows.
 
   Examples:
-    python -c "import sys; sys.stdout.write(\"_\n_\")" > file
-    python -c "print(repr(open(\"file\", \"rb\").read()))"
-    
+    python -c 'import sys; sys.stdout.write("\n")' > file
+    python -c 'print(repr(open("file", "rb").read()))'
+
   Returns:
     bool: True if running on windows otherwise False.
   """
