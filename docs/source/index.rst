@@ -38,14 +38,15 @@ Install documentation dependencies and build::
 Requirements
 ------------
 - six
+- appdirs
 
 Support
 -------
-- Submit an `Issue`_.
-- Submit a `Bug Report`_.
-- Submit a `Feature Request`_.
 - Ask a `Question`_.
 - Request `Assistance`_.
+- Submit `Bug Report`_.
+- Submit `Issue`_.
+- Submit `Feature Request`_.
 
 License
 -------
@@ -53,7 +54,7 @@ MIT - See `LICENSE`_ for more information.
 
 Copyright
 ---------
-Copyright (c) 2021 Chad Loether
+Copyright © 2021 Chad Loether
 
 .. _here: https://github.com/cloether/skeleton
 .. _Issue: https://github.com/cloether/skeleton/issues/new?template=blank-issue.md

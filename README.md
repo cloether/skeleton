@@ -28,15 +28,16 @@ Install documentation dependencies and build:
 
 ## Requirements
 
--   six
+- six
+- appdirs
 
 ## Support
 
-- Submit an [Issue](https://github.com/cloether/skeleton/issues/new?template=blank-issue.md)
-- Submit a [Bug Report](https://github.com/cloether/skeleton/issues/new?template=bug-report.md&labels=bug)
-- Submit a [Feature Request](https://github.com/cloether/skeleton/issues/new?template=feature-request.md&labels=enhancement)
 - Ask a [Question](https://github.com/cloether/skeleton/issues/new?template=question.md&labels=question)
 - Request [Assistance](https://github.com/cloether/skeleton/issues/new?template=need-help.md&labels=help+wanted)
+- Submit [Bug Report](https://github.com/cloether/skeleton/issues/new?template=bug-report.md&labels=bug)
+- Submit [Issue](https://github.com/cloether/skeleton/issues/new?template=blank-issue.md)
+- Submit [Feature Request](https://github.com/cloether/skeleton/issues/new?template=feature-request.md&labels=enhancement)
 
 ## License
 
@@ -46,4 +47,4 @@ for more information.
 
 ## Copyright
 
-Copyright (c) 2021 Chad Loether
+Copyright © 2021 Chad Loether
