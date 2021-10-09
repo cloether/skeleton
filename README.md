@@ -36,8 +36,8 @@ Install documentation dependencies and build:
 - Ask a [Question](https://github.com/cloether/skeleton/issues/new?template=question.md&labels=question)
 - Request [Assistance](https://github.com/cloether/skeleton/issues/new?template=need-help.md&labels=help+wanted)
 - Submit [Bug Report](https://github.com/cloether/skeleton/issues/new?template=bug-report.md&labels=bug)
-- Submit [Issue](https://github.com/cloether/skeleton/issues/new?template=blank-issue.md)
 - Submit [Feature Request](https://github.com/cloether/skeleton/issues/new?template=feature-request.md&labels=enhancement)
+- Submit [Issue](https://github.com/cloether/skeleton/issues/new?template=blank-issue.md)
 
 ## License
 

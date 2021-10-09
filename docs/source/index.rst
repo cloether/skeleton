@@ -45,8 +45,8 @@ Support
 - Ask a `Question`_.
 - Request `Assistance`_.
 - Submit `Bug Report`_.
-- Submit `Issue`_.
 - Submit `Feature Request`_.
+- Submit `Issue`_.
 
 License
 -------
