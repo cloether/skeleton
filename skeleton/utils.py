@@ -20,7 +20,7 @@ from math import ceil  # pylint: disable=no-name-in-module
 from operator import itemgetter
 from string import Formatter
 
-from six import integer_types, iteritems, next, string_types, text_type
+from six import integer_types, iteritems, string_types, text_type
 from six.moves import filter, map, zip
 
 from .const import DEFAULT_CHUNK_SIZE, EPOCH

@@ -310,46 +310,49 @@ def init_default_logger(level=LOGGING_LEVEL, fmt=None, datefmt=None,
   logging.basicConfig(level=level, handlers=handlers)  # noqa
 
 
-class HidingFormatter(object):
-  """Hiding Log Formatter.
-
-  Args:
-    base_formatter (logging.Formatter): Logging Formatter.
-    patterns (list of str): List of hiding regex patterns.
-  """
-
-  def __init__(self, base_formatter, patterns):
-    self.base_formatter = base_formatter
-    self._patterns = patterns
-
-  @classmethod
-  def convert_match_to_sha3(cls, match):
-    """Convert pattern match to SHA3 hash.
+if sys.version_info >= (3, 6):
+  # hashlib.sha3_256 was introduced in python 3.6
+  # References: https://docs.python.org/3/library/hashlib.html#hash-algorithms
+  class HidingFormatter:
+    """Hiding Log Formatter.
 
     Args:
-      match (re.Match): Regex match.
-
-    Returns:
-      str: Hexadecimal string representation of the
-        provided hashed (SHA3) match value.
+      base_formatter (logging.Formatter): Logging Formatter.
+      patterns (list of str): List of hiding regex patterns.
     """
-    value = ensure_binary(match.group(0), "utf8")
-    return sha3_256(value).digest().hex()
 
-  def format(self, record):
-    """Format log record.
+    def __init__(self, base_formatter, patterns):
+      self.base_formatter = base_formatter
+      self._patterns = patterns
 
-    Args:
-      record (logging.LogRecord): Log record to format.
+    @classmethod
+    def convert_match_to_sha3(cls, match):
+      """Convert pattern match to SHA3 hash.
 
-    Returns:
-      str: Log record text.
-    """
-    msg = self.base_formatter.format(record)
-    for pattern in self._patterns:
-      pat = re.compile(pattern)
-      msg = pat.sub(self.convert_match_to_sha3, msg)
-    return msg
+      Args:
+        match (re.Match): Regex match.
 
-  def __getattr__(self, attr):
-    return getattr(self.base_formatter, attr)
+      Returns:
+        str: Hexadecimal string representation of the
+          provided hashed (SHA3) match value.
+      """
+      value = ensure_binary(match.group(0), "utf8")
+      return sha3_256(value).digest().hex()
+
+    def format(self, record):
+      """Format log record.
+
+      Args:
+        record (logging.LogRecord): Log record to format.
+
+      Returns:
+        str: Log record text.
+      """
+      msg = self.base_formatter.format(record)
+      for pattern in self._patterns:
+        pat = re.compile(pattern)
+        msg = pat.sub(self.convert_match_to_sha3, msg)
+      return msg
+
+    def __getattr__(self, attr):
+      return getattr(self.base_formatter, attr)
