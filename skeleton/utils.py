@@ -51,7 +51,8 @@ __all__ = (
     "advance",
     "compress_file",
     "group_continuous",
-    "typename"
+    "typename",
+    "timedelta_isoformat"
 )
 
 
@@ -103,7 +104,8 @@ def make_executable(path):
     https://stackoverflow.com/a/30463972
   """
   mode = os.stat(path).st_mode
-  mode |= (mode & 0o444) >> 2  # copy R bits to X
+  # copy R bits to X
+  mode |= (mode & 0o444) >> 2
   os.chmod(path, mode)
 
 
@@ -124,10 +126,10 @@ def safe_b64decode(data):
   overflow = len(data) % 4
   if overflow:
     data += (
-        '=' * (4 - overflow)
-        if isinstance(data, string_types)
-        else b'=' * (4 - overflow)
-    )
+                "="
+                if isinstance(data, string_types)
+                else b"="
+            ) * (4 - overflow)
   return b64decode(data)
 
 
@@ -497,6 +499,31 @@ def timestamp_from_datetime(dt, epoch=EPOCH):
   """
   delta = dt - epoch
   return delta.seconds + delta.days * 86400
+
+
+def timedelta_isoformat(td):
+  """ISO-8601 encoding for timedelta.
+
+  Args:
+    td (datetime.timedelta): Timedelta to convert.
+
+  Returns:
+    str: ISO formatted timedelta.
+  """
+  minutes, seconds = divmod(td.seconds, 60)
+  hours, minutes = divmod(minutes, 60)
+  return (
+      'P{td.days}DT'
+      '{hours:d}H'
+      '{minutes:d}M'
+      '{seconds:d}'
+      '.{td.microseconds:06d}S'.format(
+          td=td,
+          hours=hours,
+          minutes=minutes,
+          seconds=seconds
+      )
+  )
 
 
 def to_valid_filename(filename):
