@@ -114,7 +114,7 @@ def handle_errors(func):
 
 def persistence_mode(func):
   """Decorator for when binary mode is required for
-  persistent mode on windows.
+  persistent mode on Windows.
 
   Notes:
     sys.stdout in Python is by default opened in text

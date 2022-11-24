@@ -6,7 +6,8 @@ Usage
 =====
 
 To generate a new changelog entry::
-    scripts/new-change
+
+  scripts/new-change
 
 This will open up a file in your editor (via the ``EDITOR`` env  var).
 You will see this template::
@@ -14,22 +15,19 @@ You will see this template::
   type:
 
   # Category is the high level feature area.
-  # This can be a service identifier (e.g ``s3``),
-  # or something like: Paginator.
+  # This can be a service identifier (e.g ``s3``), or something like: Paginator.
   category:
 
-  # A brief description of the change.  You can
-  # use github style references to issues such as
-  # "fixes #489", "skeleton/skeleton#100", etc.  These
-  # will get automatically replaced with the correct
-  # link.
+  # A brief description of the change.  You can use GitHub style
+  # references to issues such as "fixes #489", "skeleton/skeleton#100", etc.
+  # These will get automatically replaced with the correct link.
   description:
 
 
 Fill in the appropriate values, save and exit the editor.
 Make sure to commit these changes as part of your pull request.
 
-If, when your editor is open, you decide don't don't want to add
+If, when your editor is open, you decide don't want to add
 a changelog entry, save an empty file and no entry will be
 generated.
 
@@ -116,7 +114,7 @@ def has_empty_values(parsed_values):
   """Check for empty values.
 
   Returns:
-    bool: True if has empty values otherwise False.
+    bool: True if any values are empty, otherwise False.
   """
   return not (
       parsed_values.get('type')
@@ -166,7 +164,7 @@ def replace_issue_references(parsed, repo_name):
   description = parsed['description']
 
   def url(repository_name, issue):
-    """Make github issue url
+    """Make GitHub issue url
     """
     issue_number = issue[1:]
     return '`{0} <https://github.com/{1}/issues/{2}>`__'.format(
@@ -176,7 +174,7 @@ def replace_issue_references(parsed, repo_name):
     )
 
   def link(match):
-    """Link github issue.
+    """Link GitHub issue.
 
     Args:
       match (re.Match): Regex match.
@@ -204,7 +202,7 @@ def write_new_change(parsed_values):
     os.makedirs(dirname)
 
   # Need to generate a unique filename for this change.
-  # We'll try a couple things until we get a unique match.
+  # We will try a couple of things until we get a unique match.
   category = parsed_values['category']
 
   def _valid_char(x):

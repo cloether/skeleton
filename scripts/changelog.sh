@@ -1,4 +1,6 @@
 #!/bin/bash -uex
+# bashsupport disable=LongLine
+
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
@@ -9,7 +11,7 @@ set -o pipefail -o noglob
 
 if [[ $# != 3 ]]; then
   echo "ERROR: Expecting 3 args"
-  echo "usage: $(basename $0) start_commit finish_commit release_version"
+  echo "usage: $(basename "$0") start_commit finish_commit release_version"
   exit 1
 fi
 
@@ -20,10 +22,10 @@ echo "$(date -u)" >>CHANGELOG.new
 
 echo "" >>CHANGELOG.new
 
+# bashsupport disable=LongLine
 git log "$1".."$2" --oneline |
   grep -v Merge |
-  sed \
-    -e 's:\[\(\(FAB\|FABP\)-[0-9]*\)\]*:\[\1\](https\:\/\/jira.skeleton.org\/brwose\/\1):' \
+  sed -e 's:\[\(\(FAB\|FABP\)-[0-9]*\)\]*:\[\1\](https\:\/\/jira.skeleton.org\/browse\/\1):' \
     -e 's: \(\(FAB\|FABP\)-[0-9]*\): \[\1\](https\:\/\/jira.skeleton.org\/browse\/\1):' \
     -e 's:\([0-9|a-z]*\):* \[\1\](https\:\/\/github.com\/cloether\/skeleton\/commit\/\1):' \
     >>CHANGELOG.new

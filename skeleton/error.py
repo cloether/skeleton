@@ -1,7 +1,7 @@
 # coding=utf8
 """error.py
 
-Module Exception Definitions
+Module Exception Definitions.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -38,11 +38,13 @@ def _err_from_packed_args(exception_cls, args=None, kwargs=None):
 
 
 class BaseError(Exception):
+  # noinspection PyUnresolvedReferences
   """Base Exception Class for Module.
 
-  Keyword Args:
+  Attributes:
     fmt (str): Error Message Format String
-    msg (str): The descriptive message associated with the error.
+    msg (str): Descriptive message associated with the error.
+    json (dict): Exception in JSON Format.
 
   References:
     https://github.com/boto/botocore/blob/develop/botocore/exceptions.py
@@ -50,6 +52,12 @@ class BaseError(Exception):
   fmt = "unexpected error occurred: {error}"
 
   def __init__(self, **kwargs):
+    """Initialize Exception.
+
+    Keyword Args:
+      fmt (str): Error Message Format String
+      msg (str): The descriptive message associated with the error.
+    """
     msg = self.fmt.format(**kwargs)
     Exception.__init__(self, msg)
     self.kwargs = kwargs
@@ -74,7 +82,7 @@ class BaseError(Exception):
     """Return exception as json.
 
     Returns:
-      dict: Exception as JSON
+      dict: Exception as JSON.
     """
     return {"message": self.msg, "type": type(self).__name__}
 

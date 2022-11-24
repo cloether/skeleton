@@ -86,11 +86,14 @@ def test_configuration_from_object():
     CLIENT_CERT = "b"
 
   config = Configuration.from_object(CONFIG)
+
   LOGGER.debug(
       "(from_object) Configuration: %s",
       config.as_string(indent=2, sort_keys=True)
   )
+
   assert config.get("client_cert") == CONFIG.CLIENT_CERT, "invalid client cert"
+
   return True
 
 
@@ -103,6 +106,7 @@ def test_configuration_merge_all():
 
   config_1 = Configuration("b", proxies="C")
   config_2 = Configuration("c", proxies="D")
+
   config_merged = config_base.merge_all(config_1, config_2)
 
   LOGGER.debug(
@@ -154,11 +158,17 @@ def test_configuration_dump():
   LOGGER.debug("Testing: Configuration.dump")
 
   config = Configuration()
-  LOGGER.debug("Configuration: %s", config.as_string(indent=2, sort_keys=True))
+
+  LOGGER.debug("Configuration: %s", config.as_string(
+      indent=2, sort_keys=True
+  ))
 
   s = StringIO()
+
   config.dump(s)
-  config_dumped = Configuration.from_dict(s.getvalue())
+  config_dumped = Configuration.from_dict(
+      s.getvalue()
+  )
 
   LOGGER.debug(
       "(Dumped) Configuration: %s",
@@ -173,6 +183,8 @@ def test_configuration_search_paths():
   """Test Configuration.SEARCH_PATHS.
   """
   LOGGER.debug("Testing: Configuration.SEARCH_PATHS")
+
   config = Configuration()
+
   LOGGER.debug("Configuration Search Paths: %s", config.SEARCH_PATHS)
   return True

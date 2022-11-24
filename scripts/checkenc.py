@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf8
 """checkenc.py
 
@@ -202,7 +202,7 @@ def epipe(func):
 
 
 def msvcrt_setmode():
-  """Binary mode is required for persistent mode on windows.
+  """Binary mode is required for persistent mode on Windows.
   sys.stdout in Python is by default opened in text mode,
   and writes to this stdout produce corrupted binary data
   on Windows.
@@ -212,7 +212,7 @@ def msvcrt_setmode():
     python -c 'print(repr(open("file", "rb").read()))'
 
   Returns:
-    bool: True if running on windows otherwise False.
+    bool: True if running on Windows otherwise False.
   """
   if sys.platform != "Win32":
     return False

@@ -263,7 +263,7 @@ def apply_session_hook(session, **kwargs):
 
 def add_syslog_handler(logger, address='localhost', port=514,
                        facility=LOG_LOCAL7, fmt=None, datefmt=None,
-                       style=None):
+                       style='%', level=logging.INFO):
   """Add Syslog Handler.
 
   Args:
@@ -273,13 +273,18 @@ def add_syslog_handler(logger, address='localhost', port=514,
     facility (int): Syslog facility to log to.
     fmt (str): Logging format string.
     datefmt (str): Logging date format.
-    style (str): Logging style.
+    style (str or Literal): Logging style.
+    level (str or int): Logging level.
+
+  Returns:
+    SysLogHandler: Syslog handler which was added to logger.
   """
-  formatter = logging.Formatter(fmt, datefmt=datefmt, style=style)
+  formatter = logging.Formatter(fmt=fmt, datefmt=datefmt, style=style)
   handler = SysLogHandler(address=(address, port), facility=facility)
-  handler.setLevel(logging.INFO)
+  handler.setLevel(level)
   handler.setFormatter(formatter)
   logger.addHandler(handler)
+  return handler
 
 
 def add_stderr_logger(level=logging.INFO, fmt=None, datefmt=None, style=None):
@@ -289,16 +294,18 @@ def add_stderr_logger(level=logging.INFO, fmt=None, datefmt=None, style=None):
     level (str): Logging Level.
     fmt (str): Logging Format.
     datefmt (str): Logging Date Format.
-    style (str): Logging Style.
+    style (str or Literal): Logging Style.
 
   Returns:
     logging.Handler: the handler after adding it.
   """
   logger = logging.getLogger(__name__)
   handler = logging.StreamHandler()
-  handler.setFormatter(
-      logging.Formatter(fmt, datefmt=datefmt, style=style)
-  )
+  handler.setFormatter(logging.Formatter(
+      fmt=fmt,
+      datefmt=datefmt,
+      style=style
+  ))
   logger.addHandler(handler)
   logger.setLevel(level)
   logger.debug("added stderr logging handle to logger: %s", logger.name)
@@ -313,20 +320,25 @@ def init_default_logger(level=LOGGING_LEVEL, fmt=None, datefmt=None,
     level (str or int): Logging Level.
     fmt (str): Logging format string.
     datefmt (str): Logging date format.
-    style (str): Logging style.
+    style (str or Literal): Logging style.
+
+  Returns:
+    StreamHandler: Handler which was attached to the logger.
   """
   handlers = []
   # formatter = HidingFormatter(base_formatter, HIDING_PATTERNS)
-  formatter = logging.Formatter(fmt, datefmt=datefmt, style=style)
+  formatter = logging.Formatter(fmt=fmt, datefmt=datefmt, style=style)
   stream_handler = logging.StreamHandler(sys.stderr)
   stream_handler.setFormatter(formatter)
   stream_handler.setLevel(log_level(level))
   handlers.append(stream_handler)
   logging.basicConfig(level=level, handlers=handlers)  # noqa
+  return stream_handler
 
 
 if sys.version_info >= (3, 6):
   # hashlib.sha3_256 was introduced in python 3.6
+  #
   # References:
   #   https://docs.python.org/3/library/hashlib.html#hash-algorithms
   from hashlib import sha3_256

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf8
 """apidoc.py
 
@@ -130,7 +130,7 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
     include (tuple or list): sequence of package names to include.
       If it's specified, only the named packages will be included.
       If it's not specified, all found packages will be included.
-      'include' can contain shell style wildcard patterns just like
+      'include' may contain shell-style wildcard patterns, just like
       'exclude'.
     default: default value to return if module name is not found.
 
@@ -141,6 +141,7 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
   return next(iter(packages), default)
 
 
+# noinspection PyUnusedLocal
 def docs_generate(parser, args):
   """Generate Project Documentation Files using sphinx-apidoc.
 
@@ -153,6 +154,7 @@ def docs_generate(parser, args):
   return run(" ".join(["sphinx-apidoc", "-f", "-o", docs_source, module_path]))
 
 
+# noinspection PyUnusedLocal
 def docs_build(parser, args):
   """Build Project Documentation.
 
@@ -163,6 +165,7 @@ def docs_build(parser, args):
   return run("make html", os.path.abspath(os.path.join(repo_root, "docs")))
 
 
+# noinspection PyUnusedLocal
 def docs_update(parser, args):
   """Update index.rst to match the project README.rst
   """

@@ -28,10 +28,10 @@ def argparser(**kwargs):
   """Build Argument Parser
 
   Keyword Args:
-    prog (str): he name of the program (default: sys.argv[0]).
-    usage (str): A usage message (default: auto-generated from
+    prog (str): Name of the program (default: sys.argv[0]).
+    usage (str): Usage message (default: auto-generated from
       arguments).
-    description (str): A description of what the program does.
+    description (str): Description of what the program does.
     epilog (str): Text following the argument descriptions.
     formatter_class (argparse.HelpFormatter): HelpFormatter class
       for printing help messages.
@@ -39,15 +39,15 @@ def argparser(**kwargs):
       optional arguments.
     fromfile_prefix_chars (list of str or str): Characters that
       prefix files containing additional arguments.
-    argument_default: The default value for all arguments.
+    argument_default: Default value for all arguments.
     add_help (bool): Add a -h/-help option.
     conflict_handler (str): String indicating how to handle conflicts.
     parents (list of argparse.ArgumentParser): Parsers whose arguments
       should be copied into this one.
     allow_abbrev (bool): Allow long options to be abbreviated
       unambiguously.
-    exit_on_error (bool): Determines whether or not ArgumentParser
-      exits with error info when an error occurs
+    exit_on_error (bool): Determines whether ArgumentParser
+      exits with error info when an error occurs.
 
   Returns:
     (argparse.ArgumentParser): ArgumentParser Instance.
@@ -107,6 +107,10 @@ def argparser(**kwargs):
 
 def main(*args, **kwargs):
   """Module CLI Entry Point.
+
+  Notes:
+    args are passed into the function `ArgumentParser.parse_args`
+    kwargs are passed to the function `argparser`
 
   Returns:
     int: returns 0 if successful otherwise any other integer.

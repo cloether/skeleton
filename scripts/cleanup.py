@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf8
 """cleanup.py
 """
@@ -44,7 +44,7 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
     include (tuple or list): sequence of package names to include.
       If it's specified, only the named packages will be included.
       If it's not specified, all found packages will be included.
-      'include' can contain shell style wildcard patterns just like
+      'include' may contain shell-style wildcard patterns, just like
       'exclude'.
     default: default value to return if module name is not found.
 

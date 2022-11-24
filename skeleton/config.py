@@ -43,7 +43,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def getenv(keys, default=None, drop_null=True):
-  """Create Configuration from a environment variables.
+  """Create Configuration from an environment variables.
 
   Args:
     keys (list or tuple or str): Environment variables to retrieve.
@@ -54,15 +54,23 @@ def getenv(keys, default=None, drop_null=True):
     dict: Dict of environment variable key/vales.
   """
   config = {}
+
   if not keys:
     return config
+
   if isinstance(keys, string_types):
     keys = (keys,)
+
   for key in keys:
     value = os.getenv(key, None)
     if drop_null and (not value or value is None):
       continue
-    config[key] = value if value is not None else default
+
+    config[key] = (
+        value
+        if value is not None
+        else default
+    )
   return config
 
 
@@ -79,8 +87,8 @@ def import_string(import_name, silent=False):
   import fails.
 
   Args:
-    import_name: the dotted name for the object to import.
-    silent: if set to `True` import errors are ignored and
+    import_name (str): the dotted name for the object to import.
+    silent (bool): if set to `True` import errors are ignored and
       `None` is returned instead.
 
   Returns:
@@ -107,6 +115,7 @@ def import_string(import_name, silent=False):
       return getattr(module, obj_name)
     except AttributeError as e:
       traceback = sys.exc_info()[2]
+
       reraise(ImportError, e, traceback)
   except ImportError as e:
     if not silent:
@@ -169,11 +178,18 @@ class Configuration(dict):
       ('user_agent', __app_id__),
       ('verify', False),
   ])
+
   APP_DIRS = AppDirs(__title__, __author__, __version__)
+
   FILENAME = "{0}.json".format(__title__)
   FILEPATH_SITE = os.path.join(APP_DIRS.site_config_dir, FILENAME)
   FILEPATH_USER = os.path.join(APP_DIRS.user_config_dir, FILENAME)
-  SEARCH_PATHS = (FILEPATH_SITE, FILEPATH_USER, FILENAME)
+
+  SEARCH_PATHS = (
+      FILEPATH_SITE,
+      FILEPATH_USER,
+      FILENAME
+  )
 
   # noinspection PyMissingConstructor
   # pylint: disable=super-init-not-called
@@ -190,17 +206,15 @@ class Configuration(dict):
     """Set configuration values.
 
     Returns:
-      config: Configuration dictionary.
+      dict: Configuration dictionary.
     """
     config = {}
-
     for key, value in iteritems(kwargs):
       if key not in self.OPTIONS:
         raise ValueError("invalid key: {0}".format(key))
       config[key] = value
 
     keys = self.keylist()
-
     # number of args should not be longer than allowed options
     if len(args) > len(keys):
       raise TypeError(
@@ -215,32 +229,26 @@ class Configuration(dict):
       # if a kwarg was specified for the arg, then error out.
       if keys[i] in config:
         raise TypeError(
-            "multiple values for keyword argument: {0}".format(
-                keys[i]
-            )
+            "multiple values for keyword argument: {0}".format(keys[i])
         )
       config[keys[i]] = arg
-
     return config
 
   # compatibility
 
   if PY2:
     def items(self):
-      """Dict Items.
-      """
+      """Dict Items."""
       # noinspection PyCompatibility
       return self.iteritems()
 
     def keys(self):
-      """Dict Keys.
-      """
+      """Dict Keys."""
       # noinspection PyCompatibility
       return self.iterkeys()
 
     def values(self):
-      """Dict Values.
-      """
+      """Dict Values."""
       # noinspection PyCompatibility
       return self.itervalues()
   else:
@@ -290,7 +298,7 @@ class Configuration(dict):
     """Create Configuration from a file.
 
     Returns:
-      Configuration: Configuration Instance.
+      skeleton.config.Configuration: Configuration Instance.
     """
     with open(value) as fd:
       content = json.load(fd)
@@ -301,7 +309,7 @@ class Configuration(dict):
     """Create Configuration from a environment variables.
 
     Returns:
-      Configuration: Configuration Instance.
+      skeleton.config.Configuration: Configuration Instance.
     """
     return cls(**getenv(
         cls.keylist(),
@@ -323,7 +331,7 @@ class Configuration(dict):
     """Create Configuration from a environment variables.
 
     Returns:
-      Configuration: Configuration Instance.
+      skeleton.config.Configuration: Configuration Instance.
     """
     cls.validate_key(key)
     return cls(key=os.getenv(key, default))
@@ -432,11 +440,11 @@ class Configuration(dict):
     provided config and return a new config object.
 
     Args:
-      other (Configuration): Configuration to merge with.
+      other (skeleton.config.Configuration): Configuration to merge with.
 
     Returns:
-      Configuration: A config object built from the merged
-        values of both config objects.
+      skeleton.config.Configuration: A config object built
+        from the merged values of both config objects.
     """
     # copy current attributes in config object.
     # pylint: disable=protected-access
@@ -472,6 +480,10 @@ class Configuration(dict):
 
   def dump(self, *args, **kwargs):
     """Write configuration to buffer.
+
+    Keyword Args:
+      end (str): String to write to the output buffer
+        after the content is dumped.
     """
     fd = args[0] if args else sys.stdout
     end = kwargs.pop("end", None)
