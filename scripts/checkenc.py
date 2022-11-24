@@ -138,17 +138,21 @@ def walk_python_files(paths, is_python=looks_like_python, exclude_dirs=None):
   """
   if exclude_dirs is None:
     exclude_dirs = []
+
   for path in map(os.path.abspath, paths):
     if os.path.isfile(path):
       if is_python(path):
         yield path
+
     elif os.path.isdir(path):
       for dirpath, dirnames, filenames in os.walk(path):
         for exclude in exclude_dirs:
           if exclude in dirnames:
-            LOGGER.debug("excluded directory: %s",
-                         os.path.join(dirpath, exclude))
+            LOGGER.debug(
+                "excluded directory: %s", os.path.join(dirpath, exclude)
+            )
             dirnames.remove(exclude)
+
         for filename in filenames:
           full_path = os.path.join(dirpath, filename)
           if is_python(full_path):
@@ -271,8 +275,8 @@ def _parse_args():
       description=__doc__,
       formatter_class=RawDescriptionHelpFormatter,
       epilog="""References:
-    https://github.com/python/cpython/blob/master/Tools/scripts/findnocoding.py
-  """
+  https://github.com/python/cpython/blob/master/Tools/scripts/findnocoding.py
+"""
   )
   parser.add_argument(
       "paths",
@@ -317,10 +321,10 @@ def _parse_args():
 @handle_shutdown
 @epipe
 def main():
-  """Entry Point
+  """CLI Entry Point.
   """
   args = _parse_args()
-  write = args.output.dump
+  write = args.output.write
   for full_path in find_no_encoding(args.paths, args.compile, args.exclude):
     write(ensure_str("{0}\n".format(full_path)))
   args.output.flush()

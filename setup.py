@@ -167,7 +167,7 @@ def __readlines(filepath, **kwargs):
 # class RunTestsCommand(Command):
 #   """A custom command to run tests.
 #   """
-#   description = "run 'scripts/run-tests' to to run tests"
+#   description = "run 'scripts/run-tests' to run tests"
 #   user_options = [
 #       # The format is (long option, short option, description).
 #       ('test-runner', None, 'path to test runner script'),
@@ -274,7 +274,7 @@ PLATFORMS = "Posix; MacOS X; Windows"
 
 REQUIREMENTS = __readlines(path.join(ROOT, "requirements.txt"))
 
-SCRIPTS = None
+SCRIPTS = []
 
 TITLE = METADATA.get("title", NAME)
 URL = METADATA.get("url")
