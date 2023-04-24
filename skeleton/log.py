@@ -49,6 +49,34 @@ HIDING_PATTERNS = [_URL_PAT, _WS_PAT]
 _LOGGING_JSON_SORT_KEYS = 1
 _LOGGING_JSON_INDENT = 1
 
+# https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/aws_lambda_powertools/logging/formatter.py
+RESERVED_LOG_ATTRS = (
+    "name",
+    "msg",
+    "args",
+    "level",
+    "levelname",
+    "levelno",
+    "pathname",
+    "filename",
+    "module",
+    "exc_info",
+    "exc_text",
+    "stack_info",
+    "lineno",
+    "funcName",
+    "created",
+    "msecs",
+    "relativeCreated",
+    "thread",
+    "threadName",
+    "processName",
+    "process",
+    "asctime",
+    "location",
+    "timestamp",
+)
+
 
 # private
 
@@ -387,3 +415,46 @@ if sys.version_info >= (3, 6):
 
     def __getattr__(self, attr):
       return getattr(self.base_formatter, attr)
+
+
+class SuppressFilter(logging.Filter):
+  """Suppress Filter.
+  """
+
+  # noinspection PyMissingConstructor
+  def __init__(self, logger):
+    self.logger = logger
+
+  def filter(self, record):  # noqa: A003
+    """Suppress Log Records from registered logger.
+
+    It rejects log records from registered logger
+    e.g. a child logger otherwise it honours log
+    propagation from any log record created by loggers
+    who don't have a handler.
+
+    Args:
+      record (logging.LogRecord): Log Record.
+
+    Returns:
+      bool: True if record should be filtered, otherwise False.
+    """
+    logger = record.name
+    return self.logger not in logger
+
+
+class SyslogBOMFormatter(logging.Formatter):
+  """Syslog BOM Formatter
+  """
+
+  def format(self, record):
+    """Format Log Record.
+
+    Args:
+      record (logging.LogRecord): Log Record.
+
+    Returns:
+      str: Formatted Log Record.
+    """
+    result = super(SyslogBOMFormatter, self).format(record)
+    return "ufeff{0}".format(result)
