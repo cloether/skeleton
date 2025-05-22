@@ -21,11 +21,11 @@ __all__ = (
   "__version__",
 )
 
-__author__ = "Chad Loether"
-__author_email__ = "chad.loether@outlook.com"
-__copyright__ = "Copyright 2021 Chad Loether"
+__author__ = "cloether"
+__author_email__ = "20920516+cloether@users.noreply.github.com"
+__copyright__ = "Copyright 2025 Chad Loether"
 __description__ = "Python Module Template"
 __title__ = "skeleton"
 __license__ = "MIT"
 __url__ = "https://github.com/cloether/skeleton"
-__version__ = "0.0.10"
+__version__ = "0.0.11"

@@ -149,6 +149,10 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
 def docs_generate(parser, args):
   """Generate Project Documentation Files using sphinx-apidoc.
 
+  Args:
+    parser (argparse.ArgumentParser): Argument parser.
+    args (argparse.Namespace): Parsed arguments.
+
   Returns:
     int: Sphinx command return code.
   """
@@ -167,6 +171,37 @@ def docs_build(parser, args):
   """
   repo_root = os.path.abspath((os.path.dirname(os.path.dirname(__file__))))
   return run("make html", os.path.abspath(os.path.join(repo_root, "docs")))
+
+
+# noinspection PyUnusedLocal
+def readme_to_rst(parser, args):
+  """Convert README.md to README.rst using pandoc.
+
+  Args:
+    parser (argparse.ArgumentParser): Argument parser.
+    args (argparse.Namespace): Parsed arguments.
+
+  Returns:
+    int: Sphinx command return code.
+  """
+  repo_root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+  readme_md = os.path.join(repo_root, "README.md")
+  readme_rst = os.path.join(repo_root, "README.rst")
+  return run("pandoc -f markdown -t rst -o {0} {1}".format(readme_rst, readme_md))
+
+
+def convert_update_readme(parser, args):
+  """Convert README.md to README.rst and update index.rst.
+
+  Args:
+    parser (argparse.ArgumentParser): Argument parser.
+    args (argparse.Namespace): Parsed arguments.
+
+  Returns:
+    int: Sphinx command return code.
+  """
+  readme_to_rst(parser, args)
+  return docs_update(parser, args)
 
 
 # noinspection PyUnusedLocal
@@ -254,13 +289,25 @@ def main(**kwargs):
   )
   update_parser.set_defaults(func=docs_update, command="update")
 
+  convert_parser = sub.add_parser(
+    "convert",
+    add_help=False,
+    help="convert README.md to README.rst"
+  )
+  convert_parser.set_defaults(func=readme_to_rst, command="convert")
+
+  convert_update_parser = sub.add_parser(
+    "convert-update",
+    add_help=False,
+    help="convert README.md to README.rst and update index.rst"
+  )
+  convert_update_parser.set_defaults(func=convert_update_readme, command="convert-update")
+
   parser.set_defaults(func=docs_build, command="build")
 
   args = parser.parse_args()
 
-  logging.basicConfig(
-    level=logging.DEBUG if args.debug else logging.CRITICAL
-  )
+  logging.basicConfig(level=logging.DEBUG if args.debug else logging.CRITICAL)
   return args.func(parser, args)
 
 

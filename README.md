@@ -41,10 +41,8 @@ Install documentation dependencies and build:
 
 ## License
 
-MIT - See
-[LICENSE](https://github.com/cloether/skeleton/blob/master/LICENSE.txt)
-for more information.
+MIT - See [LICENSE](https://github.com/cloether/skeleton/blob/master/LICENSE.txt) for more information.
 
 ## Copyright
 
-Copyright © 2021 Chad Loether
+Copyright © 2025 cloether

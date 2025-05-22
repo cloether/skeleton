@@ -9,22 +9,81 @@ For a full list see the documentation:
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
+import runpy
 import sys
 import time
+
+from setuptools import find_packages
 
 # -- Path setup -----------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another
 # directory, add these directories to sys.path here. If the directory
 # is relative to the documentation root, use os.path.abspath to make
 # it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(__file__))
 
-from skeleton.__version__ import (
-  __author__,
-  __title__,
-  __version__,
-  __description__
-)  # noqa
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+
+sys.path.insert(0, os.path.abspath(__file__))
+sys.path.insert(0, project_root)
+
+
+def module_name(exclude=("docs*", "examples*", "scripts*", "tests*", "build*", "venv*"),
+                where=".", include=("*",), default=None):
+  """Infer the top-level module name for the current project.
+
+  Returns:
+    str: First matching module name, or `default` if none found.
+  """
+  packages = find_packages(where=where, include=include, exclude=exclude)
+  return next(iter(sorted(packages)), default)
+
+
+def load_metadata_from_version_file(root=None, module=None):
+  """Loads metadata from a __version__.py file somewhere under the project root.
+
+  Args:
+    root (str): Path to the root of the project. If None, the current directory is used.
+    module (str): Name of the module to load. If None, the first found module is used.
+
+  Returns:
+    dict: {
+      '__title__': str,
+      '__author__': str,
+      '__version__': str,
+      '__description__': str
+    }
+  """
+  if root is None:
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+
+  if module is None:
+    module = module_name(where=root)
+
+  version_file = os.path.join(root, module, "__version__.py")
+
+  if not os.path.isfile(version_file):
+    # Search for any __version__.py
+    for root, dirs, files in os.walk(root):
+      if "__version__.py" in files:
+        version_file = os.path.join(root, "__version__.py")
+        break
+    else:
+      raise FileNotFoundError("Could not locate __version__.py in project.")
+
+  metadata = runpy.run_path(version_file)
+  return {
+    "__title__": metadata.get("__title__", os.path.basename(root)),
+    "__author__": metadata.get("__author__", "Unknown"),
+    "__version__": metadata.get("__version__", "0.0.0"),
+    "__description__": metadata.get("__description__", ""),
+  }
+
+
+__meta__ = load_metadata_from_version_file(root=project_root)
+__title__ = __meta__["__title__"]
+__author__ = __meta__["__author__"]
+__version__ = __meta__["__version__"]
+__description__ = __meta__["__description__"]
 
 # -- Project information --------------------------------------------
 
@@ -33,7 +92,7 @@ project, author = __title__, __author__
 # noinspection PyShadowingBuiltins
 copyright = "{0}, {1}".format(author, time.strftime("%Y"))
 version = "{0}.".format(__version__.split(".")[:-1])  # Short X.Y version.
-release = __version__  # Full version, including alpha/beta/rc tags
+release = __version__  # full version, including alpha/beta/rc tags
 
 # -- General configuration ------------------------------------------
 
@@ -50,7 +109,7 @@ extensions = [
   "sphinx.ext.autodoc",
   "sphinx.ext.viewcode",
   "sphinx.ext.todo",
-  "sphinxcontrib.napoleon",
+  "sphinx.ext.napoleon",
   "guzzle_sphinx_theme"
 ]
 
