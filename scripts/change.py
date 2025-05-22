@@ -52,7 +52,7 @@ from tempfile import NamedTemporaryFile
 _VALID_CHARS = set(string.ascii_letters + string.digits)
 _ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-CHANGE_DIR = os.path.abspath(os.path.join(_ROOT_DIR, '.changes'))
+CHANGE_DIR = os.path.abspath(os.path.join(_ROOT_DIR, '.github', '.changes'))
 CHANGE_TYPES = ('bugfix', 'feature', 'enhancement', 'api-change')
 CHANGE_TEMPLATE = """\
 # Type should be one of: feature, bugfix, enhancement, api-change

@@ -3,6 +3,9 @@
 """checkenc.py
 
 Find Python files that are missing a coding directive.
+
+Example Usage:
+  python scripts/checkenc.py *.py skeleton/*.py docs/source/*.py scripts/*.py tests/*.py --debug
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -15,7 +18,7 @@ from operator import itemgetter
 
 from six import ensure_str, text_type
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 LOGGER = logging.getLogger(__name__)
 

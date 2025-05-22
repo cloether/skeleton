@@ -32,6 +32,9 @@ from os.path import abspath, exists, join, splitext
 
 LOGGER = logging.getLogger(__name__)
 
+PARENT_DIR = os.path.dirname(os.path.realpath(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(PARENT_DIR, '..'))
+
 CHECKERS = {}
 
 CHECKER_PROPS = {"severity": 1, "falsepositives": False}
@@ -155,6 +158,19 @@ SEEMS_DIRECTIVE_RE = re.compile(
   )
 )
 
+ENV_DIRS = frozenset(filter(None, [
+  os.path.join(ROOT_DIR, 'env'),
+  os.path.join(ROOT_DIR, 'env27'),
+  os.path.join(ROOT_DIR, '.tox'),
+  os.getenv('VIRTUAL_ENV', None),
+  os.path.join(ROOT_DIR, 'venv'),
+  os.path.join(ROOT_DIR, '.venv'),
+  os.path.join(ROOT_DIR, '.idea'),
+  os.path.join(ROOT_DIR, '.git'),
+  os.path.join(ROOT_DIR, '.github'),
+  "__pycache__"
+]))
+
 
 def checker(*suffixes, **kwargs):
   """Decorator to register a function as a checker.
@@ -262,7 +278,7 @@ def check_leaked_markup(_, lines):
       yield lno + 1, "possibly leaked markup: {0!r}".format(line)
 
 
-def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
+def lint(path, false_pos=False, ignore=ENV_DIRS, severity=1, verbose=False):
   """Check for stylistic and formal issues in .rst and .py files
   included in the documentation.
 
@@ -277,26 +293,55 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
     (defaultdict of int,int): Severity and Error Hit Count.
   """
   count = defaultdict(int)
+  totals = {
+    "checked": 0,
+    "skipped": 0,
+    "ignored": 0,
+    "errors": 0,
+    "total": 0
+  }
+
   for root, dirs, files in os.walk(path):
+
     # ignore subdirectories in ignore list
     if abspath(root) in ignore:
+      if verbose:
+        sys.stdout.write("[-] IGNORING: {0}\n".format(root))
       del dirs[:]
+      totals["ignored"] += 1
       continue
 
+    if os.path.basename(os.path.dirname(abspath(root))) in ignore:
+      if verbose:
+        sys.stdout.write("[-] IGNORING: {0}\n".format(root))
+      del dirs[:]
+      totals["total"] += 1
+      continue
+
+    files.sort()
     for fn in files:
+      totals["total"] += 1
+
       fn = join(root, fn)
       if fn[:2] == "./":
         fn = fn[2:]
 
       if abspath(fn) in ignore:
+        if verbose:
+          sys.stdout.write("[-] IGNORING: {0}\n".format(fn))
+        totals["ignored"] += 1
         continue  # ignore files in ignore list
 
       checker_list = CHECKERS.get(splitext(fn)[1], None)
       if not checker_list:
+        if verbose:
+          sys.stdout.write("[-] SKIPPING: {0}\n".format(fn))
+        totals["skipped"] += 1
         continue
 
       if verbose:
-        sys.stdout.write("[-] CHECKING: {0}...\n".format(fn))
+        sys.stdout.write("[-] CHECKING: {0}\n".format(fn))
+      totals["checked"] += 1
 
       # LOGGER.debug("checking: %s", fn)
 
@@ -307,6 +352,7 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
         # LOGGER.error("%s cannot open %s", fn, err)
         sys.stderr.write("[!] ERROR: {0}: cannot open: {1}\n".format(fn, err))
         count[4] += 1
+        totals["errors"] += 1
         continue
 
       for _checker in checker_list:
@@ -315,24 +361,29 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
         c_sev = _checker.severity
         if c_sev >= severity:
           for n, msg in _checker(fn, lines):
-            sys.stdout.write(
-              "[{0:d}] PROBLEMS: {1}:{2:d}: {3}\n".format(c_sev, fn, n, msg)
-            )
+            sys.stdout.write("[{0:d}] PROBLEMS: {1}:{2:d}: {3}\n".format(c_sev, fn, n, msg))
             count[c_sev] += 1
 
   if not count:
     if severity > 1:
-      sys.stdout.write(
-        "No Problems With Severity >= {0:d} Found.\n".format(severity)
-      )
+      sys.stdout.write("[-] No Problems With Severity >= {0:d} Found.\n".format(severity))
     else:
-      sys.stdout.write("No Problems Found.\n")
+      sys.stdout.write("[-] No Problems Found.\n")
   else:
     for severity in sorted(count):
       number = count[severity]
       sys.stdout.write("{0:d} Problem{1} With Severity {2:d} Found.\n".format(
         number, "s" if number > 1 else "", severity
       ))
+
+  if verbose:
+    sys.stdout.write("\n[-] Summary:\n")
+    sys.stdout.write("  Total:   {0}\n".format(totals["total"]))
+    sys.stdout.write("  Checked: {0}\n".format(totals["checked"]))
+    sys.stdout.write("  Skipped: {0}\n".format(totals["skipped"]))
+    sys.stdout.write("  Ignored: {0}\n".format(totals["ignored"]))
+    sys.stdout.write("  Errors:  {0}\n".format(totals["errors"]))
+    sys.stdout.write(os.linesep)
   return count
 
 
@@ -348,7 +399,7 @@ def _parse_args(argv):
   arg_d = {
     "verbose": False,
     "severity": 1,
-    "ignore": [],
+    "ignore": ENV_DIRS,
     "false_pos": False,
   }
   for opt, val in opts:
@@ -370,9 +421,28 @@ def _parse_args(argv):
     return 2
 
   if not exists(arg_d["path"]):
-    sys.stderr.write("ERROR: path {0} does not exist\n".format(arg_d["path"]))
+    sys.stderr.write("[!] ERROR: path {0} does not exist\n".format(arg_d["path"]))
     return 2
 
+  if arg_d["verbose"]:
+    sys.stdout.write("[-] ARGUMENTS:\n")
+    sys.stdout.write("  path: {0}\n".format(arg_d["path"]))
+    sys.stdout.write("  severity: {0}\n".format(arg_d["severity"]))
+    sys.stdout.write("  false positives: {0}\n".format(arg_d["false_pos"]))
+    sys.stdout.write("  ignore: \n")
+    for path in arg_d["ignore"]:
+      sys.stdout.write("    {0}\n".format(path))
+    sys.stdout.write("  verbose: {0}\n".format(arg_d["verbose"]))
+    sys.stdout.write(os.linesep)
+
+    sys.stdout.write("[-] CHECKERS:\n")
+    for suffix, checkers in CHECKERS.items():
+      sys.stdout.write("  {0} ({1})\n".format(suffix, len(checkers)))
+      for _checker in checkers:
+        sys.stdout.write("    {0}: severity={1} falsepositives={2}\n".format(
+          _checker.__name__, _checker.severity, _checker.falsepositives
+        ))
+    sys.stdout.write(os.linesep)
   return arg_d
 
 
@@ -380,6 +450,8 @@ def main():
   """Entry Point
   """
   import signal
+
+  logging.basicConfig(level=logging.INFO)
 
   def _shutdown_handler(signum, _):
     """Handle Shutdown.
@@ -405,7 +477,7 @@ def main():
   if args_dict["verbose"]:
     logging.basicConfig(level=logging.DEBUG)
 
-  return int(bool(rstlint(**args_dict)))
+  return int(bool(lint(**args_dict)))
 
 
 if __name__ == "__main__":

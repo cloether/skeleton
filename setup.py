@@ -42,7 +42,7 @@ from setuptools import find_packages, setup
 ROOT = path.abspath(path.dirname(__file__))
 
 MODULE_META_RE = re.compile(
-    r"^__(?P<name>.*)__ = ['\"](?P<value>[^'\"]*)['\"]", re.M
+  r"^__(?P<name>.*)__ = ['\"](?P<value>[^'\"]*)['\"]", re.M
 )
 
 DEFAULT_LICENSE = "MIT"
@@ -93,9 +93,9 @@ def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
 
   for ext in extensions:
     filename = (
-        basename
-        if not ext or ext is None
-        else "{0}.{1}".format(basename, ext)
+      basename
+      if not ext or ext is None
+      else "{0}.{1}".format(basename, ext)
     )
 
     filepath = path.join(ROOT, filename)
@@ -206,58 +206,58 @@ AUTHOR = METADATA.get("author")
 AUTHOR_EMAIL = METADATA.get("author_email")
 
 CLASSIFIERS = [
-    "Development Status :: 2 - Pre-Alpha",
-    "Natural Language :: English",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Natural Language :: English",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 2",
-    "Programming Language :: Python :: 2.6",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.3",
-    "Programming Language :: Python :: 3.4",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+  "Development Status :: 2 - Pre-Alpha",
+  "Natural Language :: English",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 2",
+  "Programming Language :: Python :: 2.6",
+  "Programming Language :: Python :: 2.7",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.3",
+  "Programming Language :: Python :: 3.4",
+  "Programming Language :: Python :: 3.5",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
 DESCRIPTION = METADATA.get("description")
 
 ENTRY_POINTS = {
-    "console_scripts": [
-        "{0}={0}.__main__:main".format(NAME)
-    ]
+  "console_scripts": [
+    "{0}={0}.__main__:main".format(NAME)
+  ]
 }
 
 EXTRAS_REQUIRE = {
-    "docs": [
-        "sphinx",
-        "sphinxcontrib-napoleon",
-        "guzzle_sphinx_theme"
-    ],
-    "tests": [
-        "check-manifest",
-        "coverage",
-        "pycodestyle",
-        "pytest",
-        "pytest-cov",
-        "pytest-html",
-        "tox",
-        "tox-travis",
-        "twine",
-        "wheel"
-    ],
-    ":python_version==\"2.6\"": [
-        "ordereddict==1.1",
-        "simplejson==3.3.0"
-    ],
-    ":python_version==\"2.7\"": [
-        "ipaddress"
-    ],
+  "docs": [
+    "sphinx",
+    "sphinxcontrib-napoleon",
+    "guzzle_sphinx_theme"
+  ],
+  "tests": [
+    "check-manifest",
+    "coverage",
+    "pycodestyle",
+    "pytest",
+    "pytest-cov",
+    "pytest-html",
+    "tox",
+    "tox-travis",
+    "twine",
+    "wheel"
+  ],
+  ":python_version==\"2.6\"": [
+    "ordereddict==1.1",
+    "simplejson==3.3.0"
+  ],
+  ":python_version==\"2.7\"": [
+    "ipaddress"
+  ],
 }
 
 INCLUDE_PACKAGE_DATA = False
@@ -283,37 +283,37 @@ VERSION = METADATA["version"]
 ZIP_SAFE = False
 
 PROJECT_URLS = {
-    # TODO: support more than github-based repositories.
-    #   - bitbucket
-    #   - gitlab
-    #   - etc...
-    "Source": URL,
-    "Tracker": "{0}/issues".format(URL)
+  # TODO: support more than github-based repositories.
+  #   - bitbucket
+  #   - gitlab
+  #   - etc...
+  "Source": URL,
+  "Tracker": "{0}/issues".format(URL)
 }
 
 # setup options
 setup_options = dict(
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
-    classifiers=CLASSIFIERS,
-    description=DESCRIPTION,
-    entry_points=ENTRY_POINTS,
-    extras_require=EXTRAS_REQUIRE,
-    include_package_data=INCLUDE_PACKAGE_DATA,
-    install_requires=REQUIREMENTS,
-    keywords=KEYWORDS,
-    license=LICENSE,
-    long_description=LONG_DESCRIPTION,
-    long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
-    name=NAME,
-    packages=PACKAGES,
-    package_data=PACKAGE_DATA,
-    platforms=PLATFORMS,
-    project_urls=PROJECT_URLS,
-    scripts=SCRIPTS,
-    url=URL,
-    version=VERSION,
-    zip_safe=ZIP_SAFE
+  author=AUTHOR,
+  author_email=AUTHOR_EMAIL,
+  classifiers=CLASSIFIERS,
+  description=DESCRIPTION,
+  entry_points=ENTRY_POINTS,
+  extras_require=EXTRAS_REQUIRE,
+  include_package_data=INCLUDE_PACKAGE_DATA,
+  install_requires=REQUIREMENTS,
+  keywords=KEYWORDS,
+  license=LICENSE,
+  long_description=LONG_DESCRIPTION,
+  long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
+  name=NAME,
+  packages=PACKAGES,
+  package_data=PACKAGE_DATA,
+  platforms=PLATFORMS,
+  project_urls=PROJECT_URLS,
+  scripts=SCRIPTS,
+  url=URL,
+  version=VERSION,
+  zip_safe=ZIP_SAFE
 )
 
 # compile module as executable
@@ -324,49 +324,49 @@ if "py2exe" in sys.argv:
 
   # py2exe specific options
   setup_options["options"] = {
-      "py2exe": {
-          "optimize": 0,
-          "skip_archive": True,
-          "dll_excludes": [
-              "crypt32.dll"
-          ],
-          "packages": [
-              "docutils",
-              "urllib",
-              "httplib",
-              "HTMLParser",
-              NAME,
-              "ConfigParser",
-              "xml.etree",
-              "pipes"
-          ],
-      }
+    "py2exe": {
+      "optimize": 0,
+      "skip_archive": True,
+      "dll_excludes": [
+        "crypt32.dll"
+      ],
+      "packages": [
+        "docutils",
+        "urllib",
+        "httplib",
+        "HTMLParser",
+        NAME,
+        "ConfigParser",
+        "xml.etree",
+        "pipes"
+      ],
+    }
   }
   setup_options["console"] = [
-      path.join("bin", NAME)
+    path.join("bin", NAME)
   ]
 
 # run setup
 setup(
-    author=AUTHOR,
-    author_email=AUTHOR_EMAIL,
-    classifiers=CLASSIFIERS,
-    description=DESCRIPTION,
-    entry_points=ENTRY_POINTS,
-    extras_require=EXTRAS_REQUIRE,
-    include_package_data=INCLUDE_PACKAGE_DATA,
-    install_requires=REQUIREMENTS,
-    keywords=KEYWORDS,
-    license=LICENSE,
-    long_description=LONG_DESCRIPTION,
-    long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
-    name=NAME,
-    packages=PACKAGES,
-    package_data=PACKAGE_DATA,
-    platforms=PLATFORMS,
-    project_urls=PROJECT_URLS,
-    scripts=SCRIPTS,
-    url=URL,
-    version=VERSION,
-    zip_safe=ZIP_SAFE
+  author=AUTHOR,
+  author_email=AUTHOR_EMAIL,
+  classifiers=CLASSIFIERS,
+  description=DESCRIPTION,
+  entry_points=ENTRY_POINTS,
+  extras_require=EXTRAS_REQUIRE,
+  include_package_data=INCLUDE_PACKAGE_DATA,
+  install_requires=REQUIREMENTS,
+  keywords=KEYWORDS,
+  license=LICENSE,
+  long_description=LONG_DESCRIPTION,
+  long_description_content_type=LONG_DESCRIPTION_CONTENT_TYPE,
+  name=NAME,
+  packages=PACKAGES,
+  package_data=PACKAGE_DATA,
+  platforms=PLATFORMS,
+  project_urls=PROJECT_URLS,
+  scripts=SCRIPTS,
+  url=URL,
+  version=VERSION,
+  zip_safe=ZIP_SAFE
 )
