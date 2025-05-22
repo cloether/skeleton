@@ -64,43 +64,43 @@ def argparser(**kwargs):
 
   parser = ArgumentParser(**kwargs)
   parser.set_defaults(
-      argument_default=SUPPRESS,
-      conflict_handler="resolve",
-      description=__description__,
-      formatter_class=ArgumentDefaultsHelpFormatter,
-      usage=__doc__,
-      prog=__title__,
+    argument_default=SUPPRESS,
+    conflict_handler="resolve",
+    description=__description__,
+    formatter_class=ArgumentDefaultsHelpFormatter,
+    usage=__doc__,
+    prog=__title__,
   )
   parser.add_argument(
-      "-V", "--version",
-      action="version",
-      version=__version__
+    "-V", "--version",
+    action="version",
+    version=__version__
   )
   parser.add_argument(
-      "-d", "--debug",
-      "-v", "--verbose",
-      action="store_true",
-      help="enable verbose logging"
+    "-d", "--debug",
+    "-v", "--verbose",
+    action="store_true",
+    help="enable verbose logging"
   )
   parser.add_argument(
-      "-i", "--input",
-      default="-",
-      metavar="path",
-      help="input location (default: %(default)s)",
-      type=FileType("{0!s}+".format(DEFAULT_FILE_READ_MODE))
+    "-i", "--input",
+    default="-",
+    metavar="path",
+    help="input location (default: %(default)s)",
+    type=FileType("{0!s}+".format(DEFAULT_FILE_READ_MODE))
   )
   parser.add_argument(
-      "-o", "--output",
-      default="-",
-      metavar="path",
-      help="output location (default: %(default)s)",
-      type=FileType("{0!s}+".format(DEFAULT_FILE_WRITE_MODE))
+    "-o", "--output",
+    default="-",
+    metavar="path",
+    help="output location (default: %(default)s)",
+    type=FileType("{0!s}+".format(DEFAULT_FILE_WRITE_MODE))
   )
   parser.add_argument(
-      "--logfile",
-      help="log to file. (default: %(default)s)",
-      metavar="FILE",
-      default=LOGGING_FILENAME
+    "--logfile",
+    help="log to file. (default: %(default)s)",
+    metavar="FILE",
+    default=LOGGING_FILENAME
   )
   return parser
 
@@ -123,10 +123,10 @@ def main(*args, **kwargs):
 
   # setup logging
   logging.basicConfig(
-      filename=args.logfile,
-      level=logging.DEBUG if args.debug else LOGGING_LEVEL,
-      format=LOGGING_FORMAT,
-      datefmt=LOGGING_DATEFMT
+    filename=args.logfile,
+    level=logging.DEBUG if args.debug else LOGGING_LEVEL,
+    format=LOGGING_FORMAT,
+    datefmt=LOGGING_DATEFMT
   )
 
   LOGGER.warning("command line interface not yet implemented.")

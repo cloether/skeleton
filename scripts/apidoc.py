@@ -88,8 +88,8 @@ def _run(command, **kwargs):
     return_code = check_call(command, **kwargs)
   except CalledProcessError as e:
     LOGGER.exception(
-        "error occurred while running command: "
-        "command=\"{0}\" returncode={1}".format(command, e.returncode)
+      "error occurred while running command: "
+      "command=\"{0}\" returncode={1}".format(command, e.returncode)
     )
     return_code = e.returncode
   return return_code
@@ -106,8 +106,8 @@ def run(command, location=None):
     int: Return Code.
   """
   LOGGER.debug(
-      'running command: command="%s" location="%s"',
-      command, location
+    'running command: command="%s" location="%s"',
+    command, location
   )
   if location is not None:
     with cwd(location):
@@ -137,7 +137,11 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
   Returns:
     str: Module name if found otherwise None.
   """
-  packages = find_packages(exclude=exclude, where=where, include=include)
+  packages = find_packages(
+    exclude=exclude,
+    where=where,
+    include=include
+  )
   return next(iter(packages), default)
 
 
@@ -174,24 +178,20 @@ def docs_update(parser, args):
   readme_rst = os.path.join(repo_root, "README.rst")
   readme_content = _readfile(readme_rst, mode="rb")
   readme_hash = _hash_md5(readme_content)
-
   LOGGER.debug('readme: filepath="%s" md5="%s"', readme_rst, readme_hash)
 
   index_rst = os.path.join(repo_root, "docs", "source", "index.rst")
   index_content = _readfile(index_rst, mode="rb")[:len(readme_content) + 1]
   index_hash = _hash_md5(index_content)
-
   LOGGER.debug('index: filepath="%s" md5="%s"', index_rst, index_hash)
 
   should_update = not readme_hash == index_hash
-
   LOGGER.debug("needs-update: %s", should_update)
 
   if not should_update:
     return 0
 
   readme_content = _readfile(readme_rst)
-
   readme_content += (
       os.linesep + INDEX_TEMPLATE.format(module_name(where=repo_root))
   )
@@ -211,48 +211,46 @@ def main(**kwargs):
   LOGGER.debug("creating argument parser: kwargs=%s", kwargs)
 
   parser = ArgumentParser(**kwargs)
-
   parser.set_defaults(
-      argument_default=SUPPRESS,
-      conflict_handler="resolve",
-      description="documentation utilities",
-      formatter_class=ArgumentDefaultsHelpFormatter,
-      prog=os.path.splitext(os.path.basename(__file__))[0],
+    argument_default=SUPPRESS,
+    conflict_handler="resolve",
+    description="documentation utilities",
+    formatter_class=ArgumentDefaultsHelpFormatter,
+    prog=os.path.splitext(os.path.basename(__file__))[0],
   )
-
   parser.add_argument(
-      "-d", "--debug",
-      action="store_true",
-      help="debug logging"
+    "-d", "--debug",
+    action="store_true",
+    help="debug logging"
   )
 
   sub = parser.add_subparsers(
-      title="Command",
-      description="command to run (default: generate)",
-      dest="command"
+    title="Command",
+    description="command to run (default: generate)",
+    dest="command"
   )
 
   # build
   build_parser = sub.add_parser(
-      "build",
-      add_help=False,
-      help="build full documentation from generated markup files"
+    "build",
+    add_help=False,
+    help="build full documentation from generated markup files"
   )
   build_parser.set_defaults(func=docs_build, command="build")
 
   # generate
   generate_parser = sub.add_parser(
-      "generate",
-      add_help=False,
-      help="generate documentation markup files from source"
+    "generate",
+    add_help=False,
+    help="generate documentation markup files from source"
   )
   generate_parser.set_defaults(func=docs_generate, command="generate")
 
   # update
   update_parser = sub.add_parser(
-      "update",
-      add_help=False,
-      help="update index.rst from README.rst"  # TODO: support markdown
+    "update",
+    add_help=False,
+    help="update index.rst from README.rst"  # TODO: support markdown
   )
   update_parser.set_defaults(func=docs_update, command="update")
 
@@ -261,7 +259,7 @@ def main(**kwargs):
   args = parser.parse_args()
 
   logging.basicConfig(
-      level=logging.DEBUG if args.debug else logging.CRITICAL
+    level=logging.DEBUG if args.debug else logging.CRITICAL
   )
   return args.func(parser, args)
 

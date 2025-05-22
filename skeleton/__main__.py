@@ -4,7 +4,7 @@
 Module CLI Entry Point.
 
 Usage:
-  python -m <module-name> [options...]
+  python3 -m <module-name> [options...]
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -66,8 +66,8 @@ def handle_shutdown(func):
     """
     sys.stderr.write("\b\b")  # write 2 backspaces to stderr
     sys.stderr.write(
-        "interrupt detected: signal={0:d} "
-        "frame=\"{1:s}\"\n".format(signum, frame)
+      "interrupt detected: signal={0:d} "
+      "frame=\"{1:s}\"\n".format(signum, frame)
     )
     sys.exit(signum)
 

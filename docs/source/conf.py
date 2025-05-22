@@ -4,7 +4,7 @@
 This file only contains a selection of the most common options.
 
 For a full list see the documentation:
-  http://www.sphinx-doc.org/en/master/config
+  https://www.sphinx-doc.org/en/master/config
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -47,11 +47,11 @@ release = __version__  # Full version, including alpha/beta/rc tags
 #   https://www.sphinx-doc.org/en/master/usage/extensions/viewcode.html
 #   https://www.sphinx-doc.org/en/master/usage/extensions/todo.html
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.todo",
-    "sphinxcontrib.napoleon",
-    "guzzle_sphinx_theme"
+  "sphinx.ext.autodoc",
+  "sphinx.ext.viewcode",
+  "sphinx.ext.todo",
+  "sphinxcontrib.napoleon",
+  "guzzle_sphinx_theme"
 ]
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
@@ -93,12 +93,12 @@ html_show_sourcelink = False
 
 # Custom sidebar templates, filenames relative to this file.
 html_sidebars = {
-    "**": [
-        "logo-text.html",
-        "globaltoc.html",
-        "localtoc.html",
-        "searchbox.html"
-    ]
+  "**": [
+    "logo-text.html",
+    "globaltoc.html",
+    "localtoc.html",
+    "searchbox.html"
+  ]
 }
 
 # Output file base name for HTML help builder.
@@ -117,25 +117,25 @@ html_theme = "guzzle_sphinx_theme"
 # -- Options for LaTeX output ---------------------------------------
 
 latex_elements = {
-    # Paper size ("letterpaper" or "a4paper").
-    # "papersize": "letterpaper",
-    #
-    # The font size ("10pt", "11pt" or "12pt").
-    # "pointsize": "10pt",
-    #
-    # Additional stuff for the LaTeX preamble.
-    # "preamble": "",
+  # Paper size ("letterpaper" or "a4paper").
+  # "papersize": "letterpaper",
+  #
+  # The font size ("10pt", "11pt" or "12pt").
+  # "pointsize": "10pt",
+  #
+  # Additional stuff for the LaTeX preamble.
+  # "preamble": "",
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author,
 # documentclass [howto/manual]).
 latex_documents = [
-    ("index",
-     "{0}.tex".format(project),
-     "{0} Documentation".format(project),
-     author,
-     "manual")
+  ("index",
+   "{0}.tex".format(project),
+   "{0} Documentation".format(project),
+   author,
+   "manual")
 ]
 
 # The name of an image file (relative to this directory) to place at
@@ -163,10 +163,10 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ("index", project,
-     "{0} Documentation".format(project),
-     [author],
-     3)
+  ("index", project,
+   "{0} Documentation".format(project),
+   [author],
+   3)
 ]
 
 # If true, show URL addresses after external links.
@@ -179,13 +179,13 @@ man_pages = [
 #  dir menu entry, description, category)
 
 texinfo_documents = [
-    ("index",
-     project,
-     "{0} Documentation".format(project),
-     author,
-     project,
-     __description__,
-     "Miscellaneous"),
+  ("index",
+   project,
+   "{0} Documentation".format(project),
+   author,
+   project,
+   __description__,
+   "Miscellaneous"),
 ]
 
 # Documents to append as an appendix to all manuals.

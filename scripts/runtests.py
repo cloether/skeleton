@@ -110,6 +110,8 @@ def touch(filepath):
       fh.close()
 
 
+# TODO: update for changes in pytest and coverage configs
+
 def main():
   """CLI Entry Point.
 
@@ -137,15 +139,15 @@ def main():
     tests_html_file = os.path.join(reports_dir, tests_html_filename)
 
     return_code = run(
-        "pytest {posargs} "
-        "--cov={module} "
-        "--html={tests_html_file} "
-        "--self-contained-html".format(
-            module=module,
-            tests_html_file=tests_html_file,
-            envname=env_name,
-            posargs=tests_dir
-        )
+      "pytest {posargs} "
+      "--cov={module} "
+      "--html={tests_html_file} "
+      "--self-contained-html".format(
+        module=module,
+        tests_html_file=tests_html_file,
+        envname=env_name,
+        posargs=tests_dir
+      )
     )
   return return_code
 

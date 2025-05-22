@@ -27,34 +27,34 @@ from .const import DEFAULT_CHUNK_SIZE, EPOCH
 from .error import PathNotFound
 
 __all__ = (
-    "advance",
-    "apply_values",
-    "as_bool",
-    "as_number",
-    "chunk",
-    "chunkify",
-    "compress_file",
-    "cwd",
-    "DateRange",
-    "get_file_size",
-    "group_continuous",
-    "isatty",
-    "is_file_newer_than_file",
-    "iterchunk",
-    "make_executable",
-    "memoize",
-    "mkdir_p",
-    "run_in_separate_process",
-    "safe_b64decode",
-    "script_dir",
-    "strtobool",
-    "timedelta_isoformat",
-    "TIMEDELTA_ZERO",
-    "timestamp_from_datetime",
-    "to_valid_filename",
-    "to_valid_module_name",
-    "touch",
-    "typename"
+  "advance",
+  "apply_values",
+  "as_bool",
+  "as_number",
+  "chunk",
+  "chunkify",
+  "compress_file",
+  "cwd",
+  "DateRange",
+  "get_file_size",
+  "group_continuous",
+  "isatty",
+  "is_file_newer_than_file",
+  "iterchunk",
+  "make_executable",
+  "memoize",
+  "mkdir_p",
+  "run_in_separate_process",
+  "safe_b64decode",
+  "script_dir",
+  "strtobool",
+  "timedelta_isoformat",
+  "TIMEDELTA_ZERO",
+  "timestamp_from_datetime",
+  "to_valid_filename",
+  "to_valid_module_name",
+  "touch",
+  "typename"
 )
 
 
@@ -102,9 +102,9 @@ def safe_b64decode(data):
   overflow = len(data) % 4
   if overflow:
     data += (
-                "="
-                if isinstance(data, string_types)
-                else b"="
+              "="
+              if isinstance(data, string_types)
+              else b"="
             ) * (4 - overflow)
   return b64decode(data)
 
@@ -293,15 +293,15 @@ def run_in_separate_process(func, *args, **kwargs):
   with os.fdopen(write_fd, "wb") as fd:
     try:  # dump results.
       pickle.dump(
-          (status, result),
-          fd,
-          pickle.HIGHEST_PROTOCOL
+        (status, result),
+        fd,
+        pickle.HIGHEST_PROTOCOL
       )
     except pickle.PicklingError as e:
       pickle.dump(
-          (2, e),
-          fd,
-          pickle.HIGHEST_PROTOCOL
+        (2, e),
+        fd,
+        pickle.HIGHEST_PROTOCOL
       )
 
   os._exit(0)  # noqa
@@ -560,10 +560,10 @@ def chunkify(iterable, size):
   if size <= 0:
     raise ValueError("non-positive chunk size: {0}".format(size))
   return (
-      chunk
-      if hasattr(iterable, '__getitem__')
-      # generator, set, map, etc...
-      else iterchunk
+    chunk
+    if hasattr(iterable, '__getitem__')
+    # generator, set, map, etc...
+    else iterchunk
   )(iterable, size)
 
 
@@ -625,16 +625,16 @@ def timedelta_isoformat(td):
   minutes, seconds = divmod(td.seconds, 60)
   hours, minutes = divmod(minutes, 60)
   return (
-      'P{td.days}DT'
-      '{hours:d}H'
-      '{minutes:d}M'
-      '{seconds:d}'
-      '.{td.microseconds:06d}S'.format(
-          td=td,
-          hours=hours,
-          minutes=minutes,
-          seconds=seconds
-      )
+    'P{td.days}DT'
+    '{hours:d}H'
+    '{minutes:d}M'
+    '{seconds:d}'
+    '.{td.microseconds:06d}S'.format(
+      td=td,
+      hours=hours,
+      minutes=minutes,
+      seconds=seconds
+    )
   )
 
 
@@ -680,10 +680,10 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
 
   def __repr__(self):
     return "{!s}(start={!r}, stop={!r}, step={!r}".format(
-        self.__class__.__name__,
-        self.start,
-        self.stop,
-        self.step
+      self.__class__.__name__,
+      self.start,
+      self.stop,
+      self.step
     )
 
   def __reversed__(self):
@@ -697,18 +697,18 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
       # it would be nice if float("inf") could be returned
       raise TypeError("infinite range")
     calc = (
-        self.start - self.stop
-        if self._has_neg_step
-        else self.stop - self.start
+      self.start - self.stop
+      if self._has_neg_step
+      else self.stop - self.start
     )
     return int(ceil(abs(calc.total_seconds() / self.step.total_seconds())))
 
   def __contains__(self, value):
     if self.stop is not None:
       check = (
-          self.start >= value > self.stop
-          if self._has_neg_step
-          else self.start <= value < self.stop
+        self.start >= value > self.stop
+        if self._has_neg_step
+        else self.start <= value < self.stop
       )
     else:
       check = self.start >= value if self._has_neg_step else self.start <= value
@@ -750,9 +750,9 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
     if isinstance(idx_or_slice, slice):
       return self._getslice(idx_or_slice)
     raise TypeError(
-        "DateRange indices must be integers or slices not {0}".format(
-            idx_or_slice.__class__
-        )
+      "DateRange indices must be integers or slices not {0}".format(
+        idx_or_slice.__class__
+      )
     )
 
   def _getidx(self, idx):

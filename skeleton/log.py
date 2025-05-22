@@ -21,12 +21,12 @@ from six import ensure_binary, ensure_str, iteritems, string_types, text_type
 from .const import LOGGING_LEVEL
 
 __all__ = (
-    "log_level",
-    "log_request",
-    "log_response",
-    "log_request_response",
-    "apply_session_hook",
-    "add_stderr_logger"
+  "log_level",
+  "log_request",
+  "log_response",
+  "log_request_response",
+  "apply_session_hook",
+  "add_stderr_logger"
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -35,13 +35,13 @@ _CONTENT_DISPOSITION_PAT = r"attachment;\s?filename=[\"\w.]+"
 _CONTENT_DISPOSITION_RE = re.compile(_CONTENT_DISPOSITION_PAT, re.I)
 
 _URL_PAT = (
-    r"http[s]?://"
-    r"(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+  r"http[s]?://"
+  r"(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
 )
 
 _WS_PAT = (
-    r"ws[s]?://"
-    r"(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+  r"ws[s]?://"
+  r"(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
 )
 
 HIDING_PATTERNS = [_URL_PAT, _WS_PAT]
@@ -51,30 +51,30 @@ _LOGGING_JSON_INDENT = 1
 
 # https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/aws_lambda_powertools/logging/formatter.py
 RESERVED_LOG_ATTRS = (
-    "name",
-    "msg",
-    "args",
-    "level",
-    "levelname",
-    "levelno",
-    "pathname",
-    "filename",
-    "module",
-    "exc_info",
-    "exc_text",
-    "stack_info",
-    "lineno",
-    "funcName",
-    "created",
-    "msecs",
-    "relativeCreated",
-    "thread",
-    "threadName",
-    "processName",
-    "process",
-    "asctime",
-    "location",
-    "timestamp",
+  "name",
+  "msg",
+  "args",
+  "level",
+  "levelname",
+  "levelno",
+  "pathname",
+  "filename",
+  "module",
+  "exc_info",
+  "exc_text",
+  "stack_info",
+  "lineno",
+  "funcName",
+  "created",
+  "msecs",
+  "relativeCreated",
+  "thread",
+  "threadName",
+  "processName",
+  "process",
+  "asctime",
+  "location",
+  "timestamp",
 )
 
 
@@ -181,6 +181,68 @@ def log_level(level):
     else:
       level = level.upper()
   return check_level(level)
+
+
+def log_flask_response(response, **kwargs):
+  """Log Flask Response.
+
+  Args:
+    response (flask.Response): Flask Response Object.
+  """
+  if not LOGGER.isEnabledFor(logging.DEBUG):
+    return
+  log_content = kwargs.setdefault("log_content", False)
+  try:
+    LOGGER.debug("RESPONSE:")  # start
+    LOGGER.debug(" - STATUS CODE: %s", response.status_code)
+    if response.headers:
+      LOGGER.debug(" - HEADERS:")
+      for header, value in iteritems(response.headers):
+        LOGGER.debug("   - %s: %s", header, value)
+    if response.data is None:
+      LOGGER.debug(" - BODY:")
+      LOGGER.debug("   - (NO-BODY)")
+    else:
+      if not log_content:
+        return
+      LOGGER.debug(" - BODY:")
+      LOGGER.debug("   - %s", text_type(response.data))
+  except Exception as e:  # pylint: disable=broad-except
+    LOGGER.error("FAILED to log response: %r", e)
+  LOGGER.debug("--")  # end
+
+
+def log_flask_request(request, **kwargs):
+  """Log Flask Request.
+
+  Args:
+    request (flask.Request): Flask Request Object.
+  """
+  if not LOGGER.isEnabledFor(logging.DEBUG):
+    return
+  log_content = kwargs.setdefault("log_content", False)
+  try:
+    LOGGER.debug("REQUEST:")  # start
+    LOGGER.debug(" - URL: %s", request.url)
+    LOGGER.debug(" - PATH: %s", request.path)
+    LOGGER.debug(" - METHOD: %s", request.method.upper())
+    if request.headers:
+      LOGGER.debug(" - HEADERS:")
+      for header, value in iteritems(request.headers):
+        if header.lower() == "authorization":
+          value = "*" * len(value)
+        LOGGER.debug("   - %s: %s", header, value)
+    if request.data is None:
+      LOGGER.debug(" - BODY:")
+      LOGGER.debug("   - (NO-BODY)")
+    else:
+      if not log_content:
+        return
+      LOGGER.debug(" - BODY:")
+      LOGGER.debug("   - %s", text_type(request.data))
+  except Exception as e:  # pylint: disable=broad-except
+    LOGGER.error("FAILED to log request: %r", e)
+  LOGGER.debug("--")  # end
 
 
 def log_request(request, **kwargs):
@@ -330,9 +392,9 @@ def add_stderr_logger(level=logging.INFO, fmt=None, datefmt=None, style=None):
   logger = logging.getLogger(__name__)
   handler = logging.StreamHandler()
   handler.setFormatter(logging.Formatter(
-      fmt=fmt,
-      datefmt=datefmt,
-      style=style
+    fmt=fmt,
+    datefmt=datefmt,
+    style=style
   ))
   logger.addHandler(handler)
   logger.setLevel(level)
@@ -395,6 +457,7 @@ if sys.version_info >= (3, 6):
         str: Hexadecimal string representation of the
           provided hashed (SHA3) match value.
       """
+      # noinspection PyArgumentEqualDefault
       value = ensure_binary(match.group(0), "utf8")
       return sha3_256(value).digest().hex()
 

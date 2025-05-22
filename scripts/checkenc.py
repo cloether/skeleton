@@ -149,7 +149,7 @@ def walk_python_files(paths, is_python=looks_like_python, exclude_dirs=None):
         for exclude in exclude_dirs:
           if exclude in dirnames:
             LOGGER.debug(
-                "excluded directory: %s", os.path.join(dirpath, exclude)
+              "excluded directory: %s", os.path.join(dirpath, exclude)
             )
             dirnames.remove(exclude)
 
@@ -271,46 +271,46 @@ def _parse_args():
 
   # noinspection PyTypeChecker
   parser = ArgumentParser(
-      prog=os.path.basename(__file__),
-      description=__doc__,
-      formatter_class=RawDescriptionHelpFormatter,
-      epilog="""References:
+    prog=os.path.basename(__file__),
+    description=__doc__,
+    formatter_class=RawDescriptionHelpFormatter,
+    epilog="""References:
   https://github.com/python/cpython/blob/master/Tools/scripts/findnocoding.py
 """
   )
   parser.add_argument(
-      "paths",
-      metavar="PATHS",
-      nargs="+",
-      help="search path(s)."
+    "paths",
+    metavar="PATHS",
+    nargs="+",
+    help="search path(s)."
   )
   parser.add_argument(
-      "-c", "--compile",
-      action="store_true",
-      help="recognize python files by trying to compile. (default: %(default)s)"
+    "-c", "--compile",
+    action="store_true",
+    help="recognize python files by trying to compile. (default: %(default)s)"
   )
   parser.add_argument(
-      "-e", "--exclude",
-      nargs="+",
-      default=[".git", ".idea", "__pycache__"],
-      help="directories to exclude while searching. (default: %(default)s)"
+    "-e", "--exclude",
+    nargs="+",
+    default=[".git", ".idea", "__pycache__"],
+    help="directories to exclude while searching. (default: %(default)s)"
   )
   parser.add_argument(
-      "-d", "--debug",
-      action="store_true",
-      help="enable debug logging. (default: %(default)s)"
+    "-d", "--debug",
+    action="store_true",
+    help="enable debug logging. (default: %(default)s)"
   )
   parser.add_argument(
-      "-v", "--version",
-      version=__version__,
-      action="version"
+    "-v", "--version",
+    version=__version__,
+    action="version"
   )
   parser.add_argument(
-      "-o", "--output",
-      default="-",
-      metavar="path",
-      help="Output Location (default: %(default)s)",
-      type=FileType("{0!s}+".format("wb" if sys.version_info[0] == 2 else "w"))
+    "-o", "--output",
+    default="-",
+    metavar="path",
+    help="Output Location (default: %(default)s)",
+    type=FileType("{0!s}+".format("wb" if sys.version_info[0] == 2 else "w"))
   )
   args = parser.parse_args()
   if args.debug is True:

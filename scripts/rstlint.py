@@ -39,120 +39,120 @@ CHECKER_PROPS = {"severity": 1, "falsepositives": False}
 DEFAULT_ROLE_RE = re.compile(r"(?:^| )`\w(?P<default_role>[^`]*?\w)?`(?:$| )")
 
 DIRECTIVES = [
-    # standard docutils ones
-    "admonition",
-    "attention",
-    "caution",
-    "class",
-    "compound",
-    "container",
-    "contents",
-    "csv-table",
-    "danger",
-    "date",
-    "default-role",
-    "epigraph",
-    "error",
-    "figure",
-    "footer",
-    "header",
-    "highlights",
-    "hint",
-    "image",
-    "important",
-    "include",
-    "line-block",
-    "list-table",
-    "meta",
-    "note",
-    "parsed-literal",
-    "pull-quote",
-    "raw",
-    "replace",
-    "restructuredtext-test-directive",
-    "role",
-    "rubric",
-    "sectnum",
-    "sidebar",
-    "table",
-    "target-notes",
-    "tip",
-    "title",
-    "topic",
-    "unicode",
-    "warning",
-    # Sphinx and Python docs custom ones
-    "acks",
-    "attribute",
-    "autoattribute",
-    "autoclass",
-    "autodata",
-    "autoexception",
-    "autofunction",
-    "automethod",
-    "automodule",
-    "centered",
-    "cfunction",
-    "class",
-    "classmethod",
-    "cmacro",
-    "cmdoption",
-    "cmember",
-    "code-block",
-    "confval",
-    "cssclass",
-    "ctype",
-    "currentmodule",
-    "cvar",
-    "data",
-    "decorator",
-    "decoratormethod",
-    "deprecated-removed",
-    "deprecated(?!-removed)",
-    "describe",
-    "directive",
-    "doctest",
-    "envvar",
-    "event",
-    "exception",
-    "function",
-    "glossary",
-    "highlight",
-    "highlightlang",
-    "impl-detail",
-    "index",
-    "literalinclude",
-    "method",
-    "miscnews",
-    "module",
-    "moduleauthor",
-    "opcode",
-    "pdbcommand",
-    "productionlist",
-    "program",
-    "role",
-    "sectionauthor",
-    "seealso",
-    "sourcecode",
-    "staticmethod",
-    "tabularcolumns",
-    "testcode",
-    "testoutput",
-    "testsetup",
-    "toctree",
-    "todo",
-    "todolist",
-    "versionadded",
-    "versionchanged",
+  # standard docutils ones
+  "admonition",
+  "attention",
+  "caution",
+  "class",
+  "compound",
+  "container",
+  "contents",
+  "csv-table",
+  "danger",
+  "date",
+  "default-role",
+  "epigraph",
+  "error",
+  "figure",
+  "footer",
+  "header",
+  "highlights",
+  "hint",
+  "image",
+  "important",
+  "include",
+  "line-block",
+  "list-table",
+  "meta",
+  "note",
+  "parsed-literal",
+  "pull-quote",
+  "raw",
+  "replace",
+  "restructuredtext-test-directive",
+  "role",
+  "rubric",
+  "sectnum",
+  "sidebar",
+  "table",
+  "target-notes",
+  "tip",
+  "title",
+  "topic",
+  "unicode",
+  "warning",
+  # Sphinx and Python docs custom ones
+  "acks",
+  "attribute",
+  "autoattribute",
+  "autoclass",
+  "autodata",
+  "autoexception",
+  "autofunction",
+  "automethod",
+  "automodule",
+  "centered",
+  "cfunction",
+  "class",
+  "classmethod",
+  "cmacro",
+  "cmdoption",
+  "cmember",
+  "code-block",
+  "confval",
+  "cssclass",
+  "ctype",
+  "currentmodule",
+  "cvar",
+  "data",
+  "decorator",
+  "decoratormethod",
+  "deprecated-removed",
+  "deprecated(?!-removed)",
+  "describe",
+  "directive",
+  "doctest",
+  "envvar",
+  "event",
+  "exception",
+  "function",
+  "glossary",
+  "highlight",
+  "highlightlang",
+  "impl-detail",
+  "index",
+  "literalinclude",
+  "method",
+  "miscnews",
+  "module",
+  "moduleauthor",
+  "opcode",
+  "pdbcommand",
+  "productionlist",
+  "program",
+  "role",
+  "sectionauthor",
+  "seealso",
+  "sourcecode",
+  "staticmethod",
+  "tabularcolumns",
+  "testcode",
+  "testoutput",
+  "testsetup",
+  "toctree",
+  "todo",
+  "todolist",
+  "versionadded",
+  "versionchanged",
 ]
 
 ALL_DIRECTIVES = "({0})".format("|".join(DIRECTIVES))
 
 LEAKED_MARKDOWN_RE = re.compile(r"[a-z]::\s|`|\.\.\s*\w+:")
 SEEMS_DIRECTIVE_RE = re.compile(
-    r"(?<!\.)\.\. {0}(?P<directive>[^a-z:]|:(?!:))".format(
-        ALL_DIRECTIVES
-    )
+  r"(?<!\.)\.\. {0}(?P<directive>[^a-z:]|:(?!:))".format(
+    ALL_DIRECTIVES
+  )
 )
 
 
@@ -316,14 +316,14 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
         if c_sev >= severity:
           for n, msg in _checker(fn, lines):
             sys.stdout.write(
-                "[{0:d}] PROBLEMS: {1}:{2:d}: {3}\n".format(c_sev, fn, n, msg)
+              "[{0:d}] PROBLEMS: {1}:{2:d}: {3}\n".format(c_sev, fn, n, msg)
             )
             count[c_sev] += 1
 
   if not count:
     if severity > 1:
       sys.stdout.write(
-          "No Problems With Severity >= {0:d} Found.\n".format(severity)
+        "No Problems With Severity >= {0:d} Found.\n".format(severity)
       )
     else:
       sys.stdout.write("No Problems Found.\n")
@@ -331,7 +331,7 @@ def rstlint(path, false_pos=False, ignore=None, severity=1, verbose=False):
     for severity in sorted(count):
       number = count[severity]
       sys.stdout.write("{0:d} Problem{1} With Severity {2:d} Found.\n".format(
-          number, "s" if number > 1 else "", severity
+        number, "s" if number > 1 else "", severity
       ))
   return count
 
@@ -346,10 +346,10 @@ def _parse_args(argv):
     return 2
 
   arg_d = {
-      "verbose": False,
-      "severity": 1,
-      "ignore": [],
-      "false_pos": False,
+    "verbose": False,
+    "severity": 1,
+    "ignore": [],
+    "false_pos": False,
   }
   for opt, val in opts:
     if opt == "-v":

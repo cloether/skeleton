@@ -33,9 +33,9 @@ PY_LICENSE_HEADER = """\
 """
 
 ENV_DIRS = frozenset([
-    os.path.join(ROOT_DIR, 'env'),
-    os.path.join(ROOT_DIR, 'env27'),
-    os.path.join(ROOT_DIR, '.tox'),
+  os.path.join(ROOT_DIR, 'env'),
+  os.path.join(ROOT_DIR, 'env27'),
+  os.path.join(ROOT_DIR, '.tox'),
 ])
 
 
@@ -83,9 +83,9 @@ def main():
   """Entry Point.
   """
   missing_header = [
-      file_path
-      for file_path, file_contents
-      in get_files_without_header()
+    file_path
+    for file_path, file_contents
+    in get_files_without_header()
   ]
   n = len(missing_header)
   sys.stderr.write("file(s) missing license header: {0:d}\n".format(n))
