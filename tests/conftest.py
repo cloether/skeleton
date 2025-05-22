@@ -20,15 +20,15 @@ from skeleton.error import BaseError
 from .utils import module_name as _modname
 
 __all__ = (
-    "module_name",
-    "prepared_request",
-    "response",
-    "error",
-    "modname",
-    "filename",
-    "number",
-    "boolean",
-    "session"
+  "module_name",
+  "prepared_request",
+  "response",
+  "error",
+  "modname",
+  "filename",
+  "number",
+  "boolean",
+  "session"
 )
 
 
@@ -65,8 +65,8 @@ def prepared_request():
     """
     body = b""
     headers = {
-        "Accept": "application/json",
-        "Content-type": "application/json"
+      "Accept": "application/json",
+      "Content-type": "application/json"
     }
     method = "get"
     path_url = "?p1=param1&p2=param2"
@@ -90,9 +90,9 @@ def response():
     cookies = {}
     encoding = "utf8"
     headers = {
-        "Accept": "application/json",
-        "Content-type": "application/json",
-        "Content-disposition": "application/json"
+      "Accept": "application/json",
+      "Content-type": "application/json",
+      "Content-disposition": "application/json"
     }
     reason = "OK"
     status_code = 200
@@ -103,8 +103,8 @@ def response():
       """
       body = b""
       headers = {
-          "Accept": "application/json",
-          "Content-type": "application/json"
+        "Accept": "application/json",
+        "Content-type": "application/json"
       }
       method = "get"
       path_url = "?p1=param1&p2=param2"

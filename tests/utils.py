@@ -14,15 +14,15 @@ from six import next
 __file__ = os.path.abspath(__file__)  # noqa
 
 __all__ = (
-    "PARENT",
-    "ROOT",
-    "LOG_DIR",
-    "DATA_DIR",
-    "TEST_DIR",
-    "cwd",
-    "module_name",
-    "run",
-    "run_in_root"
+  "PARENT",
+  "ROOT",
+  "LOG_DIR",
+  "DATA_DIR",
+  "TEST_DIR",
+  "cwd",
+  "module_name",
+  "run",
+  "run_in_root"
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -78,13 +78,13 @@ def run(command, location=None):
       ret = e.returncode
 
       LOGGER.exception(
-          "error occurred while running command: %s return_code: %s",
-          _command, ret
+        "error occurred while running command: %s return_code: %s",
+        _command, ret
       )
     else:
       LOGGER.debug(
-          "successfully ran command: %s return_code: %s",
-          _command, ret
+        "successfully ran command: %s return_code: %s",
+        _command, ret
       )
     return ret
 

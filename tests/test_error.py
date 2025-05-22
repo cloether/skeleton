@@ -10,7 +10,7 @@ import logging
 from skeleton.error import BaseError
 
 __all__ = (
-    "test_base_error",
+  "test_base_error",
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -29,12 +29,13 @@ BaseError:
   args=%s
   kwargs=%s
 """, error.msg, error.kwargs, error.fmt, error.args)
+
   try:
     raise error
   except BaseError as e:
     LOGGER.exception("Caught Test Exception: %s", e.json)
     assert e.args[0] == BaseError.fmt.format(error="TEST ERROR MESSAGE")
-    return True
+
   except Exception as e:
     LOGGER.debug("Caught Incorrect Exception: %r", e)
-    return False
+    assert False, "Caught Incorrect Exception: {0}".format(e)

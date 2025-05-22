@@ -6,9 +6,9 @@ Module Exception Definitions.
 from __future__ import absolute_import, print_function, unicode_literals
 
 __all__ = (
-    "BaseError",
-    "ImportStringError",
-    "PathNotFound"
+  "BaseError",
+  "ImportStringError",
+  "PathNotFound"
 )
 
 
@@ -91,24 +91,24 @@ class ImportStringError(BaseError):
   """Import String Exception.
   """
   fmt = (
-      "import_string() failed for {import_name}. possible reasons are:\n\n"
-      "- missing __init__.py in a package;\n"
-      "- package or module path not included in sys.path;\n"
-      "- duplicated package or module name taking precedence in "
-      "sys.path;\n"
-      "- missing module, class, function or variable;\n\n"
-      "debugged import:\n\n{exception_name}\n\n"
-      "original exception:\n\n{exception}"
+    "import_string() failed for {import_name}. possible reasons are:\n\n"
+    "- missing __init__.py in a package;\n"
+    "- package or module path not included in sys.path;\n"
+    "- duplicated package or module name taking precedence in "
+    "sys.path;\n"
+    "- missing module, class, function or variable;\n\n"
+    "debugged import:\n\n{exception_name}\n\n"
+    "original exception:\n\n{exception}"
   )
 
   def __init__(self, import_name, exception):
     self.import_name = import_name
     self.exception = exception
     BaseError.__init__(
-        self,
-        import_name=import_name,
-        exception_name=exception.__class__.__name__,
-        exception=exception
+      self,
+      import_name=import_name,
+      exception_name=exception.__class__.__name__,
+      exception=exception
     )
 
 

@@ -38,8 +38,8 @@ def win_compile(filename, output_filename, arch=DEFAULT_ARCH,
     reg_path = r"{0}\Setup\VC".format(msvc9compiler.VS_BASE % vc_ver)
 
     vcvars = os.path.join(
-        msvc9compiler.Reg.get_value(reg_path, "productdir"),
-        "bin", "vcvars{0:d}.bat".format(arch == "x86" and 32 or 64)
+      msvc9compiler.Reg.get_value(reg_path, "productdir"),
+      "bin", "vcvars{0:d}.bat".format(arch == "x86" and 32 or 64)
     )
 
   path = os.path.splitext(output_filename)
@@ -47,7 +47,7 @@ def win_compile(filename, output_filename, arch=DEFAULT_ARCH,
   obj_filename = "{0}.obj".format(path[0])
 
   command = "\"{0}\" {1} & cl {2} /Fe{3} /Fo{4}".format(
-      vcvars, arch, filename, output_filename, obj_filename
+    vcvars, arch, filename, output_filename, obj_filename
   )
 
   p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -85,10 +85,10 @@ def main():
   args = parser.parse_args()
   try:
     win_compile(
-        args.filename,
-        args.output_filename,
-        arch=args.arch,
-        vc_ver=args.vc_ver
+      args.filename,
+      args.output_filename,
+      arch=args.arch,
+      vc_ver=args.vc_ver
     )
   except Exception as e:
     sys.stderr.write("{0}\n".format(e))

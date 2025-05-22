@@ -12,6 +12,7 @@ Warnings:
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
 import os
 from contextlib import contextmanager
 from errno import EEXIST
@@ -96,6 +97,23 @@ def mkdir_p(path):
       raise
 
 
+def mkdirs_p(*path):
+  """Create multiple directories.
+
+  Notes:
+    Unix "mkdir -p" equivalent.
+
+  Args:
+    path (str): Filepaths to create.
+
+  Raises:
+    OSError: Raised for exceptions unrelated to the
+      directory already existing.
+  """
+  for p in path:
+    mkdir_p(p)
+
+
 def touch(filepath):
   """Equivalent of Unix `touch` command.
 
@@ -110,43 +128,39 @@ def touch(filepath):
       fh.close()
 
 
+# TODO: update for changes in pytest and coverage configs
+
 def main():
   """CLI Entry Point.
 
   Returns:
     int: Command return code.
   """
+  logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s")
+
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   module = module_name(where=repo_root)
+  logging.debug("running tests for module: %s", module)
 
   return_code = -1  # noqa
+
   with cwd(repo_root):
+    # noinspection PyUnusedLocal
     env_name = os.getenv("ENVNAME", "test")
 
     tests_dir = os.path.join(repo_root, "tests")
     logs_dir = os.path.join(tests_dir, "logs")
-    mkdir_p(logs_dir)
-
+    reports_dir = os.path.join(tests_dir, "reports")
     tests_log_file = os.path.join(logs_dir, "pytest.log")
+
+    mkdirs_p(logs_dir, reports_dir)
     touch(tests_log_file)  # prevent pytest error due to missing log file
 
-    reports_dir = os.path.join(tests_dir, "reports")
-    mkdir_p(reports_dir)
+    return_code = run("pytest {posargs} --cov={module}".format(
+      posargs=tests_dir,
+      module=module
+    ))
 
-    tests_html_filename = "{0!s}.html".format(env_name)
-    tests_html_file = os.path.join(reports_dir, tests_html_filename)
-
-    return_code = run(
-        "pytest {posargs} "
-        "--cov={module} "
-        "--html={tests_html_file} "
-        "--self-contained-html".format(
-            module=module,
-            tests_html_file=tests_html_file,
-            envname=env_name,
-            posargs=tests_dir
-        )
-    )
   return return_code
 
 

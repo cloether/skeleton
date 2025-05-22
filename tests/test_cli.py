@@ -15,8 +15,8 @@ from .utils import run
 LOGGER = logging.getLogger(__name__)
 
 __all__ = (
-    "test_arg_parser",
-    "test_main"
+  "test_arg_parser",
+  "test_main"
 )
 
 
@@ -26,7 +26,6 @@ def test_arg_parser():
   parser = argparser()
   is_argparser = isinstance(parser, ArgumentParser) is True
   assert is_argparser, "Invalid argparser type: {0}".format(type(parser))
-  return is_argparser
 
 
 def test_main(module_name):
@@ -45,15 +44,14 @@ def test_main(module_name):
     success = False
   except Exception as e:
     LOGGER.exception(
-        "cli command execution: status=failed command=%s error=%r",
-        command, e
+      "cli command execution: status=failed command=%s error=%r",
+      command, e
     )
     success = False
   else:
     success = True if ret == 0 else False
     LOGGER.debug(
-        "cli command execution: status=%s command=%s error=%r",
-        success, command, None
+      "cli command execution: status=%s command=%s error=%r",
+      success, command, None
     )
   assert success is True, "CLI Test Failed with return_code: {0}".format(ret)
-  return success

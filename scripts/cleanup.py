@@ -13,19 +13,19 @@ from setuptools import find_packages
 from six import next
 
 TARGETS = [
-    # TODO: Add support for globs/regex
-    (".coverage*",),
-    (".pytest_cache",),
-    (".tox",),
-    ("build",),
-    ("dist",),
-    ("docs", "build"),
-    ("logs",),
-    ("tests", ".pytest_cache"),
-    ("tests", "pytest.log"),
-    ("tests", "logs"),
-    ("tests", "reports"),
-    ("tests", "tests")
+  # TODO: Add support for globs/regex
+  (".coverage*",),
+  (".pytest_cache",),
+  (".tox",),
+  ("build",),
+  ("dist",),
+  ("docs", "build"),
+  ("logs",),
+  ("tests", ".pytest_cache"),
+  ("tests", "pytest.log"),
+  ("tests", "logs"),
+  ("tests", "reports"),
+  ("tests", "tests")
 ]
 
 

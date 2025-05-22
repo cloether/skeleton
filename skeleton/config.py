@@ -42,13 +42,15 @@ from .error import ImportStringError
 LOGGER = logging.getLogger(__name__)
 
 
-def getenv(keys, default=None, drop_null=True):
-  """Create Configuration from an environment variables.
+def getenv(keys, default=None, ignore_unset=True):
+  """Create configuration from one or more environment
+  variable key/values pairs.
 
   Args:
-    keys (list or tuple or str): Environment variables to retrieve.
+    keys (list or tuple or str): Environment variable key(s) to
     default: Default value to set for key when no value is found.
-    drop_null (bool): If True null values will be ignored.
+    ignore_unset (bool): Does not set the key if the environment
+      variable value is not set or is empty.
 
   Returns:
     dict: Dict of environment variable key/vales.
@@ -63,14 +65,9 @@ def getenv(keys, default=None, drop_null=True):
 
   for key in keys:
     value = os.getenv(key, None)
-    if drop_null and (not value or value is None):
+    if ignore_unset and (not value or value is None):
       continue
-
-    config[key] = (
-        value
-        if value is not None
-        else default
-    )
+    config[key] = (value if value is not None else default)
   return config
 
 
@@ -120,9 +117,9 @@ def import_string(import_name, silent=False):
   except ImportError as e:
     if not silent:
       reraise(
-          tp=ImportStringError,
-          value=ImportStringError(import_name, e),
-          tb=sys.exc_info()[2]
+        tp=ImportStringError,
+        value=ImportStringError(import_name, e),
+        tb=sys.exc_info()[2]
       )
       raise
 
@@ -159,24 +156,24 @@ class Configuration(dict):
   """
   # defaults
   OPTIONS = OrderedDict([
-      ('client_cert', None),
-      ('connect_timeout', DEFAULT_TIMEOUT),
-      ('log_datefmt', LOGGING_DATEFMT),
-      ('log_format', LOGGING_FORMAT),
-      ('log_file', LOGGING_FILENAME),
-      ('log_filemode', LOGGING_FILEMODE),
-      ('log_level', LOGGING_LEVEL),
-      ('log_style', LOGGING_STYLE),
-      ('max_pool_connections', DEFAULT_MAX_POOL_CONNECTIONS),
-      ('poolblock', DEFAULT_POOLBLOCK),
-      ('poolsize', DEFAULT_POOLSIZE),
-      ('pool_timeout', DEFAULT_POOL_TIMEOUT),
-      ('proxies', None),
-      ('proxies_config', None),
-      ('read_timeout', DEFAULT_TIMEOUT),
-      ('retries', DEFAULT_RETRIES),
-      ('user_agent', __app_id__),
-      ('verify', False),
+    ('client_cert', None),
+    ('connect_timeout', DEFAULT_TIMEOUT),
+    ('log_datefmt', LOGGING_DATEFMT),
+    ('log_format', LOGGING_FORMAT),
+    ('log_file', LOGGING_FILENAME),
+    ('log_filemode', LOGGING_FILEMODE),
+    ('log_level', LOGGING_LEVEL),
+    ('log_style', LOGGING_STYLE),
+    ('max_pool_connections', DEFAULT_MAX_POOL_CONNECTIONS),
+    ('poolblock', DEFAULT_POOLBLOCK),
+    ('poolsize', DEFAULT_POOLSIZE),
+    ('pool_timeout', DEFAULT_POOL_TIMEOUT),
+    ('proxies', None),
+    ('proxies_config', None),
+    ('read_timeout', DEFAULT_TIMEOUT),
+    ('retries', DEFAULT_RETRIES),
+    ('user_agent', __app_id__),
+    ('verify', False),
   ])
 
   APP_DIRS = AppDirs(__title__, __author__, __version__)
@@ -186,9 +183,9 @@ class Configuration(dict):
   FILEPATH_USER = os.path.join(APP_DIRS.user_config_dir, FILENAME)
 
   SEARCH_PATHS = (
-      FILEPATH_SITE,
-      FILEPATH_USER,
-      FILENAME
+    FILEPATH_SITE,
+    FILEPATH_USER,
+    FILENAME
   )
 
   # noinspection PyMissingConstructor
@@ -218,9 +215,9 @@ class Configuration(dict):
     # number of args should not be longer than allowed options
     if len(args) > len(keys):
       raise TypeError(
-          "takes at most {0} arguments ({1} given)".format(
-              len(keys), len(args)
-          )
+        "takes at most {0} arguments ({1} given)".format(
+          len(keys), len(args)
+        )
       )
 
     # iterate through args passed through to the constructor
@@ -229,7 +226,7 @@ class Configuration(dict):
       # if a kwarg was specified for the arg, then error out.
       if keys[i] in config:
         raise TypeError(
-            "multiple values for keyword argument: {0}".format(keys[i])
+          "multiple values for keyword argument: {0}".format(keys[i])
         )
       config[keys[i]] = arg
     return config
@@ -312,18 +309,18 @@ class Configuration(dict):
       skeleton.config.Configuration: Configuration Instance.
     """
     return cls(**getenv(
-        cls.keylist(),
-        default=default,
-        drop_null=drop_null
+      cls.keylist(),
+      default=default,
+      ignore_unset=drop_null
     ))
 
   def _update_from_env(self, default=None, drop_null=True):
     """Update Configuration from environment variables.
     """
     dict.update(self, getenv(
-        self.keylist(),
-        default=default,
-        drop_null=drop_null
+      self.keylist(),
+      default=default,
+      ignore_unset=drop_null
     ))
 
   @classmethod

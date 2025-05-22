@@ -12,21 +12,21 @@ The official repo is `here`_.
 from __future__ import absolute_import, print_function, unicode_literals
 
 __all__ = (
-    "__app_id__",
-    "__author__",
-    "__author_email__",
-    "__copyright__",
-    "__description__",
-    "__license__",
-    "__title__",
-    "__url__",
-    "__version__",
-    "cli",
-    "config",
-    "const",
-    "error",
-    "log",
-    "utils"
+  "__app_id__",
+  "__author__",
+  "__author_email__",
+  "__copyright__",
+  "__description__",
+  "__license__",
+  "__title__",
+  "__url__",
+  "__version__",
+  "cli",
+  "config",
+  "const",
+  "error",
+  "log",
+  "utils"
 )
 
 from .__version__ import (
@@ -46,6 +46,7 @@ try:
   from logging import NullHandler
 except ImportError:
   from logging import Handler
+
 
   # Needed for Backwards Compatibility (Python 2.6).
   # Note: NullHandler was introduced in Python 2.7.

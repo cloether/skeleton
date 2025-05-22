@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # coding=utf8
-"""Generate a new changelog entry.
+"""change.py
+
+Generate a new changelog entry.
 
 Usage
 =====
@@ -9,13 +11,14 @@ To generate a new changelog entry::
 
   scripts/new-change
 
-This will open up a file in your editor (via the ``EDITOR`` env  var).
+This will open up a file in your editor (via the ``EDITOR`` env var).
 You will see this template::
   # Type should be one of: feature, bugfix
   type:
 
   # Category is the high level feature area.
-  # This can be a service identifier (e.g ``s3``), or something like: Paginator.
+  # This can be a service identifier (e.g. ``s3``),
+  # or something like: ``Paginator``.
   category:
 
   # A brief description of the change.  You can use GitHub style
@@ -24,10 +27,10 @@ You will see this template::
   description:
 
 
-Fill in the appropriate values, save and exit the editor.
+Fill in the appropriate values, save, and exit the editor.
 Make sure to commit these changes as part of your pull request.
 
-If, when your editor is open, you decide don't want to add
+If, when your editor is open, you decide do not want to add
 a changelog entry, save an empty file and no entry will be
 generated.
 
@@ -49,7 +52,7 @@ from tempfile import NamedTemporaryFile
 _VALID_CHARS = set(string.ascii_letters + string.digits)
 _ROOT_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
-CHANGE_DIR = os.path.abspath(os.path.join(_ROOT_DIR, '.changes'))
+CHANGE_DIR = os.path.abspath(os.path.join(_ROOT_DIR, '.github', '.changes'))
 CHANGE_TYPES = ('bugfix', 'feature', 'enhancement', 'api-change')
 CHANGE_TEMPLATE = """\
 # Type should be one of: feature, bugfix, enhancement, api-change
@@ -86,13 +89,13 @@ def new_changelog_entry(args):
   """
   # get values from change content
   parsed_values = (
-      {
-          'type': args.change_type,
-          'category': args.category,
-          'description': args.description
-      }
-      if all_values_provided(args)
-      else get_values_from_editor(args)
+    {
+      'type': args.change_type,
+      'category': args.category,
+      'description': args.description
+    }
+    if all_values_provided(args)
+    else get_values_from_editor(args)
   )
 
   # exit if empty values are found
@@ -138,9 +141,9 @@ def get_values_from_editor(args, template=CHANGE_TEMPLATE):
   """
   with NamedTemporaryFile('w') as f:
     contents = template.format(
-        change_type=args.change_type,
-        category=args.category,
-        description=args.description,
+      change_type=args.change_type,
+      category=args.category,
+      description=args.description,
     )
     f.write(contents)
     f.flush()
@@ -153,8 +156,8 @@ def get_values_from_editor(args, template=CHANGE_TEMPLATE):
 
     with open(f.name) as _f:
       filled_in_contents = _f.read()
-
       parsed_values = parse_filled_in_contents(filled_in_contents)
+
     return parsed_values
 
 
@@ -168,9 +171,9 @@ def replace_issue_references(parsed, repo_name):
     """
     issue_number = issue[1:]
     return '`{0} <https://github.com/{1}/issues/{2}>`__'.format(
-        issue,
-        repository_name,
-        issue_number
+      issue,
+      repository_name,
+      issue_number
     )
 
   def link(match):
@@ -209,17 +212,17 @@ def write_new_change(parsed_values):
     return x in _VALID_CHARS
 
   filename = '{type_name}-{summary}'.format(
-      type_name=parsed_values['type'],
-      summary=''.join(filter(_valid_char, category))
+    type_name=parsed_values['type'],
+    summary=''.join(filter(_valid_char, category))
   )
 
   possible_filename = os.path.join(
-      dirname, '{0}-{1}.json'.format(filename, random.randint(1, 100000))
+    dirname, '{0}-{1}.json'.format(filename, random.randint(1, 100000))
   )
 
   while os.path.isfile(possible_filename):
     possible_filename = os.path.join(
-        dirname, '{0}-{1}.json'.format(filename, random.randint(1, 100000))
+      dirname, '{0}-{1}.json'.format(filename, random.randint(1, 100000))
     )
 
   with open(possible_filename, 'w') as f:
@@ -244,7 +247,6 @@ def parse_filled_in_contents(contents):
     return {}
 
   parsed = {}
-
   lines = iter(contents.splitlines())
 
   for line in (line.strip() for line in lines):
@@ -253,8 +255,10 @@ def parse_filled_in_contents(contents):
 
     if 'type' not in parsed and line.startswith('type:'):
       parsed['type'] = line.split(':')[1].strip()
+
     elif 'category' not in parsed and line.startswith('category:'):
       parsed['category'] = line.split(':')[1].strip()
+
     elif 'description' not in parsed and line.startswith('description:'):
       # Assume that everything until the end of the file is part
       # of the description, so we can break once we pull in the
@@ -263,6 +267,7 @@ def parse_filled_in_contents(contents):
       full_description = '\n'.join([first_line] + list(lines))
       parsed['description'] = full_description.strip()
       break
+
   return parsed
 
 
@@ -276,25 +281,25 @@ def main():
 
   parser = ArgumentParser()
   parser.add_argument(
-      '-t', '--type',
-      dest='change_type',
-      default='',
-      choices=CHANGE_TYPES
+    '-t', '--type',
+    dest='change_type',
+    default='',
+    choices=CHANGE_TYPES
   )
   parser.add_argument(
-      '-c', '--category',
-      dest='category',
-      default=''
+    '-c', '--category',
+    dest='category',
+    default=''
   )
   parser.add_argument(
-      '-d', '--description',
-      dest='description',
-      default=''
+    '-d', '--description',
+    dest='description',
+    default=''
   )
   parser.add_argument(
-      '-r', '--repo',
-      default='owner/repo',
-      help='Optional repo name, e.g: owner/repo'
+    '-r', '--repo',
+    default='owner/repo',
+    help='Optional repo name, e.g: owner/repo'
   )
   args = parser.parse_args()
   return new_changelog_entry(args)

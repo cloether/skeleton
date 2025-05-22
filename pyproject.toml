@@ -1,0 +1,95 @@
+# pyproject.toml is a configuration file that is used to
+# specify the build system requirements for a Python project.
+#
+# References:
+# - [PEP-518](https://peps.python.org/pep-0518/)
+# - [PEP-517](https://peps.python.org/pep-0517/)
+# - [PEP-621](https://peps.python.org/pep-0621/)
+# - [PEP-660](https://peps.python.org/pep-0660/)
+# - [Python Packaging Reference - pyproject.toml](https://packaging.python.org/en/latest/specifications/pyproject-toml/#pyproject-toml-specification
+#
+# JSON Schema:
+#    {
+#      "$schema": "http://json-schema.org/schema#",
+#      "type": "object",
+#      "additionalProperties": false,
+#      "properties": {
+#        "build-system": {
+#          "type": "object",
+#          "additionalProperties": false,
+#          "properties": {
+#            "requires": {
+#              "type": "array",
+#              "items": {
+#                "type": "string"
+#              }
+#            }
+#          },
+#          "required": [
+#            "requires"
+#          ]
+#        },
+#        "tool": {
+#          "type": "object"
+#        }
+#      }
+#    }
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skeleton"
+version = "0.0.11"
+description = "Python Module Template"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Chad Loether", email = "chad.loether@outlook.com" }]
+keywords = ["template", "skeleton"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Natural Language :: English",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.6",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.3",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = ["six", "appdirs"]
+
+[project.urls]
+Source = "https://github.com/cloether/skeleton"
+Tracker = "https://github.com/cloether/skeleton/issues"
+
+[tool.setuptools.packages.find]
+include = ["skeleton"]
+exclude = ["doc*", "example*", "script*", "test*"]
+
+[project.optional-dependencies]
+docs = ["sphinx", "sphinxcontrib-napoleon", "guzzle_sphinx_theme"]
+tests = [
+    "check-manifest",
+    "coverage",
+    "pycodestyle",
+    "pytest",
+    "pytest-cov",
+    "pytest-html",
+    "tox",
+    "tox-travis",
+    "twine",
+    "wheel"
+]
+python2 = ["ordereddict==1.1", "simplejson==3.3.0", "ipaddress"]
+
+[project.scripts]
+skeleton = "skeleton.__main__:main"

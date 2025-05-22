@@ -11,14 +11,14 @@ from six import StringIO
 from skeleton.config import Configuration
 
 __all__ = (
-    "test_config",
-    "test_configuration_from_env",
-    "test_configuration_update_from_env",
-    "test_configuration_from_object",
-    "test_configuration_dump",
-    "test_configuration_from_dict",
-    "test_configuration_merge_all",
-    "test_configuration_search_paths"
+  "test_config",
+  "test_configuration_from_env",
+  "test_configuration_update_from_env",
+  "test_configuration_from_object",
+  "test_configuration_dump",
+  "test_configuration_from_dict",
+  "test_configuration_merge_all",
+  "test_configuration_search_paths"
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -35,9 +35,9 @@ def test_config():
 
   LOGGER.debug("configuration: %s", config)
 
-  assert isinstance(config, Configuration), "Invalid configuration type: " \
-                                            "{0}".format(type(config))
-  return True
+  assert isinstance(config, Configuration), (
+    "Invalid configuration type: {0}"
+  ).format(type(config).__name__)
 
 
 def test_configuration_from_env():
@@ -48,10 +48,9 @@ def test_configuration_from_env():
   config = Configuration.from_env()
 
   LOGGER.debug(
-      "(from_env) Configuration: %s",
-      config.as_string(indent=2, sort_keys=True)
+    "(from_env) Configuration: %s",
+    config.as_string(indent=2, sort_keys=True)
   )
-  return True
 
 
 def test_configuration_update_from_env():
@@ -69,10 +68,9 @@ def test_configuration_update_from_env():
   assert os.environ["client_cert"] == "bbb", "Failed to update from env"
 
   LOGGER.debug(
-      "(update_from_env) Configuration: %s",
-      config.as_string(indent=2, sort_keys=True)
+    "(update_from_env) Configuration: %s",
+    config.as_string(indent=2, sort_keys=True)
   )
-  return True
 
 
 def test_configuration_from_object():
@@ -88,13 +86,10 @@ def test_configuration_from_object():
   config = Configuration.from_object(CONFIG)
 
   LOGGER.debug(
-      "(from_object) Configuration: %s",
-      config.as_string(indent=2, sort_keys=True)
+    "(from_object) Configuration: %s",
+    config.as_string(indent=2, sort_keys=True)
   )
-
   assert config.get("client_cert") == CONFIG.CLIENT_CERT, "invalid client cert"
-
-  return True
 
 
 def test_configuration_merge_all():
@@ -110,10 +105,9 @@ def test_configuration_merge_all():
   config_merged = config_base.merge_all(config_1, config_2)
 
   LOGGER.debug(
-      "(merged) Configuration: %s",
-      config_merged.as_string(indent=2, sort_keys=True)
+    "(merged) Configuration: %s",
+    config_merged.as_string(indent=2, sort_keys=True)
   )
-  return True
 
 
 def test_configuration_from_dict():
@@ -122,34 +116,33 @@ def test_configuration_from_dict():
   LOGGER.debug("Testing: Configuration.from_dict")
 
   config = Configuration.from_dict({
-      'client_cert': "b",
-      'connect_timeout': 60,
-      'log_datefmt': "%Y-%m-%d %H:%M:%S",
-      'log_file': None,
-      'log_filemode': "a+",
-      'log_format': (
-          "(%(asctime)s)[%(levelname)s]%(name)s."
-          "%(funcName)s(%(lineno)d):%(message)s"
-      ),
-      'log_level': "ERROR",
-      'log_style': "%",
-      'max_pool_connections': 10,
-      'pool_timeout': None,
-      'poolblock': False,
-      'poolsize': 10,
-      'proxies': "C",
-      'proxies_config': None,
-      "read_timeout": 60,
-      "retries": 0,
-      "user_agent": "skeleton-0.0.8",
-      "verify": False
+    'client_cert': "b",
+    'connect_timeout': 60,
+    'log_datefmt': "%Y-%m-%d %H:%M:%S",
+    'log_file': None,
+    'log_filemode': "a+",
+    'log_format': (
+      "(%(asctime)s)[%(levelname)s]%(name)s."
+      "%(funcName)s(%(lineno)d):%(message)s"
+    ),
+    'log_level': "ERROR",
+    'log_style': "%",
+    'max_pool_connections': 10,
+    'pool_timeout': None,
+    'poolblock': False,
+    'poolsize': 10,
+    'proxies': "C",
+    'proxies_config': None,
+    "read_timeout": 60,
+    "retries": 0,
+    "user_agent": "skeleton-0.0.8",
+    "verify": False
   })
 
   LOGGER.debug(
-      "(from_dict) Configuration: %s",
-      config.as_string(indent=2, sort_keys=True)
+    "(from_dict) Configuration: %s",
+    config.as_string(indent=2, sort_keys=True)
   )
-  return True
 
 
 def test_configuration_dump():
@@ -159,24 +152,17 @@ def test_configuration_dump():
 
   config = Configuration()
 
-  LOGGER.debug("Configuration: %s", config.as_string(
-      indent=2, sort_keys=True
-  ))
+  LOGGER.debug("Configuration: %s", config.as_string(indent=2, sort_keys=True))
 
   s = StringIO()
-
   config.dump(s)
-  config_dumped = Configuration.from_dict(
-      s.getvalue()
-  )
+  config_dumped = Configuration.from_dict(s.getvalue())
 
   LOGGER.debug(
-      "(Dumped) Configuration: %s",
-      config_dumped.as_string(indent=2, sort_keys=True)
+    "(Dumped) Configuration: %s",
+    config_dumped.as_string(indent=2, sort_keys=True)
   )
-
   assert config == config_dumped
-  return True
 
 
 def test_configuration_search_paths():
@@ -187,4 +173,3 @@ def test_configuration_search_paths():
   config = Configuration()
 
   LOGGER.debug("Configuration Search Paths: %s", config.SEARCH_PATHS)
-  return True
