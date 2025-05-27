@@ -5,27 +5,27 @@ Module Exception Definitions.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+from typing import Any, Callable, Dict, Optional, Tuple, Type, TypeVar
+
 __all__ = (
   "BaseError",
   "ImportStringError",
   "PathNotFound"
 )
 
+T = TypeVar("T", bound=BaseException)
 
-def _err_from_packed_args(exception_cls, args=None, kwargs=None):
+
+def _err_from_packed_args(
+    exception_cls: Type[T],
+    args: Optional[Tuple[Any, ...]] = None,
+    kwargs: Optional[Dict[str, Any]] = None
+) -> T:
   """This is helpful for reducing Exceptions that only accept kwargs as
   only positional arguments can be provided for __reduce__.
 
   Ideally, this would also be a class method on the BaseError but instance
   methods cannot be pickled.
-
-  References:
-    https://github.com/boto/botocore/blob/develop/botocore/exceptions.py
-
-  Args:
-    exception_cls (type): Exception class
-    args (tuple): Packed exception arguments
-    kwargs (dict): Packed exception keyword arguments
 
   Returns:
     Exception: Exception from packed arguments
@@ -38,59 +38,42 @@ def _err_from_packed_args(exception_cls, args=None, kwargs=None):
 
 
 class BaseError(Exception):
-  # noinspection PyUnresolvedReferences
   """Base Exception Class for Module.
 
   Attributes:
     fmt (str): Error Message Format String
     msg (str): Descriptive message associated with the error.
     json (dict): Exception in JSON Format.
-
-  References:
-    https://github.com/boto/botocore/blob/develop/botocore/exceptions.py
   """
-  fmt = "unexpected error occurred: {error}"
+  fmt: str = "unexpected error occurred: {error}"
+  kwargs: Dict[str, Any]
 
-  def __init__(self, **kwargs):
-    """Initialize Exception.
-
-    Keyword Args:
-      fmt (str): Error Message Format String
-      msg (str): The descriptive message associated with the error.
-    """
+  def __init__(self, **kwargs: Any) -> None:
     msg = self.fmt.format(**kwargs)
-    Exception.__init__(self, msg)
+    super().__init__(msg)
     self.kwargs = kwargs
 
-  def __reduce__(self):
+  def __reduce__(self) -> Tuple[Callable[..., T], Tuple[Type[T], None, Dict[str, Any]]]:
     return _err_from_packed_args, (self.__class__, None, self.kwargs)
 
-  def __dict__(self):
+  def __dict__(self) -> Dict[str, Any]:
     return self.json
 
   @property
-  def msg(self):
-    """Return exception message.
-
-    Returns:
-      str: Exception message.
-    """
+  def msg(self) -> str:
+    """Return the exception message."""
     return self.args[0]
 
   @property
-  def json(self):
-    """Return exception as json.
-
-    Returns:
-      dict: Exception as JSON.
-    """
+  def json(self) -> Dict[str, str]:
+    """Return the exception in JSON format."""
     return {"message": self.msg, "type": type(self).__name__}
 
 
 class ImportStringError(BaseError):
   """Import String Exception.
   """
-  fmt = (
+  fmt: str = (
     "import_string() failed for {import_name}. possible reasons are:\n\n"
     "- missing __init__.py in a package;\n"
     "- package or module path not included in sys.path;\n"
@@ -100,12 +83,13 @@ class ImportStringError(BaseError):
     "debugged import:\n\n{exception_name}\n\n"
     "original exception:\n\n{exception}"
   )
+  import_name: str
+  exception: Exception
 
-  def __init__(self, import_name, exception):
+  def __init__(self, import_name: str, exception: Exception) -> None:
     self.import_name = import_name
     self.exception = exception
-    BaseError.__init__(
-      self,
+    super().__init__(
       import_name=import_name,
       exception_name=exception.__class__.__name__,
       exception=exception
@@ -113,15 +97,17 @@ class ImportStringError(BaseError):
 
 
 class PathNotFound(BaseError):
-  """Exception raised for errors in the input salary.
+  """Exception raised for missing ancestors in a path.
 
   Attributes:
-    ancestor: input salary which caused the error
-    dirname: explanation of the error
+    ancestor: input path component which could not be found
+    dirname: containing directory where lookup failed
   """
-  fmt = "unable to find ancestor {ancestor} in {dirname}"
+  fmt: str = "unable to find ancestor {ancestor} in {dirname}"
+  ancestor: str
+  dirname: str
 
-  def __init__(self, ancestor, dirname):
+  def __init__(self, ancestor: str, dirname: str) -> None:
     self.ancestor = ancestor
     self.dirname = dirname
-    BaseError.__init__(self, ancestor=self.ancestor, dirname=self.dirname)
+    super().__init__(ancestor=self.ancestor, dirname=self.dirname)
