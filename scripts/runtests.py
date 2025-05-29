@@ -2,35 +2,99 @@
 # coding=utf8
 """run_tests.py
 
-Run tests for python module.
+Run tests for the Python module from outside the source directory.
 
-Warnings:
-  Do not run tests from the root repo dir.
-
-  We want to ensure we're importing from the installed binary package not
-  from the CWD.
+Warning:
+  Do not run this script from the root repo directory. This ensures
+  we import the installed module, not the local source.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import os
+import threading
 from contextlib import contextmanager
 from errno import EEXIST
-from subprocess import CalledProcessError, check_call
+from io import TextIOWrapper
+from subprocess import PIPE, Popen
+from typing import NamedTuple
 
 from setuptools import find_packages
 from six import next
 
 
-def run(command):
-  """Run Command.
+class RunResult(NamedTuple):
+  """Structured result of a command execution."""
+  returncode: int
+  stdout: str
+  stderr: str
+
+
+def _stream_output(
+    stream: TextIOWrapper,
+    target: TextIOWrapper,
+    buffer: list,
+    flush: bool = True
+):
+  for line in stream:
+    print(line, end="", file=target)
+    buffer.append(line)
+    if flush and hasattr(target, "flush"):
+      target.flush()
+  stream.close()
+
+
+def run_command(command: str, env: dict = None) -> RunResult:
+  """Run a shell command with concurrent stdout/stderr streaming and capture.
+
+  Args:
+    command (str): Shell command to execute.
+    env (dict, optional): Environment variables to set for the command.
+      If None, it uses the current environment.
+
+  Returns:
+    RunResult: Captured return code, stdout, and stderr.
   """
-  try:
-    return_code = check_call(command, shell=True)
-  except CalledProcessError as e:
-    sys.stderr.write("{0!r}\n".format(e))
-    return_code = e.returncode
-  return return_code
+  if env is None:
+    env = os.environ.copy()
+
+  proc = Popen(
+    command,
+    shell=True,
+    env=env,
+    stdout=PIPE,
+    stderr=PIPE,
+    text=True,
+    bufsize=1
+  )
+
+  assert proc.stdout is not None and proc.stderr is not None
+
+  stdout_lines = []
+  stderr_lines = []
+
+  # Stream both stdout and stderr concurrently
+  t_out = threading.Thread(
+    target=_stream_output,
+    args=(proc.stdout, sys.stdout, stdout_lines)
+  )
+  t_err = threading.Thread(
+    target=_stream_output,
+    args=(proc.stderr, sys.stderr, stderr_lines)
+  )
+
+  t_out.start()
+  t_err.start()
+
+  proc.wait()
+  t_out.join()
+  t_err.join()
+
+  return RunResult(
+    returncode=proc.returncode,
+    stdout="".join(stdout_lines).strip(),
+    stderr="".join(stderr_lines).strip()
+  )
 
 
 @contextmanager
@@ -53,7 +117,7 @@ def cwd(dirname):
 
 def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
                 include=('*',), default=None):
-  """Get current module name.
+  """Get the current module name.
 
   Args:
     exclude (tuple or list): sequence of package names to exclude;
@@ -78,7 +142,7 @@ def module_name(exclude=("doc*", "example*", "script*", "test*"), where=".",
 
 
 def mkdir_p(path):
-  """Create entire filepath.
+  """Create a directory and any necessary parent directories.
 
   Notes:
     Unix "mkdir -p" equivalent.
@@ -123,6 +187,7 @@ def touch(filepath):
   if not os.path.exists(filepath):
     fh = open(filepath, "a+")
     try:
+      # noinspection PyArgumentEqualDefault
       os.utime(filepath, None)
     finally:
       fh.close()
@@ -136,32 +201,39 @@ def main():
   Returns:
     int: Command return code.
   """
-  logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s")
+  logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s"
+  )
 
   repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   module = module_name(where=repo_root)
+
+  if not module:
+    logging.error("module name not found in repo root: %s", repo_root)
+    return -1
+
   logging.debug("running tests for module: %s", module)
 
-  return_code = -1  # noqa
+  run_result = -1  # noqa
+
+  # noinspection PyUnusedLocal
+  env_name = os.getenv("ENVNAME", "test")
+
+  tests_dir = os.path.join(repo_root, "tests")
+  logs_dir = os.path.join(tests_dir, "logs")
+  reports_dir = os.path.join(tests_dir, "reports")
+  tests_log_file = os.path.join(logs_dir, "pytest.log")
+
+  mkdirs_p(logs_dir, reports_dir)
+  touch(tests_log_file)  # prevent pytest error due to missing log file
 
   with cwd(repo_root):
-    # noinspection PyUnusedLocal
-    env_name = os.getenv("ENVNAME", "test")
-
-    tests_dir = os.path.join(repo_root, "tests")
-    logs_dir = os.path.join(tests_dir, "logs")
-    reports_dir = os.path.join(tests_dir, "reports")
-    tests_log_file = os.path.join(logs_dir, "pytest.log")
-
-    mkdirs_p(logs_dir, reports_dir)
-    touch(tests_log_file)  # prevent pytest error due to missing log file
-
-    return_code = run("pytest {posargs} --cov={module}".format(
+    run_result = run_command("pytest --color=yes {posargs} --cov={module}".format(
       posargs=tests_dir,
       module=module
     ))
-
-  return return_code
+  return run_result.returncode
 
 
 if __name__ == "__main__":

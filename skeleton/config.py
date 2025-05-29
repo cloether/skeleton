@@ -11,6 +11,7 @@ import logging
 import os
 import sys
 from collections import OrderedDict
+from typing import Any, Callable, Dict, List, Optional, Type
 
 from appdirs import AppDirs
 from six import (
@@ -126,14 +127,31 @@ def import_string(import_name, silent=False):
 
 # pylint: disable=useless-object-inheritance
 class ConfigAttribute(object):
-  """Makes an attribute forward to the config.
+  """Forwards an attribute to the configuration object.
+
+  Args:
+    name (str): The name of the configuration attribute.
+    get_converter (Callable, optional): A function to convert the value.
   """
 
-  def __init__(self, name, get_converter=None):
+  def __init__(
+      self,
+      name: str,
+      get_converter: Optional[Callable[[Any], Any]] = None
+  ):
     self.__name__ = name
     self.get_converter = get_converter
 
-  def __get__(self, instance, owner=None):
+  def __get__(self, instance: Any, owner: Optional[Type] = None) -> Any:
+    """Retrieve the value of the configuration attribute.
+
+    Args:
+      instance (Any): The instance of the class.
+      owner (Type, optional): The owner class.
+
+    Returns:
+      Any: The value of the configuration attribute.
+    """
     if instance is None:
       return self
     value = instance.config[self.__name__]
@@ -141,7 +159,14 @@ class ConfigAttribute(object):
       value = self.get_converter(value)
     return value
 
-  def __set__(self, instance, value):
+  def __set__(self, instance: Any, value: Any) -> None:
+    """
+    Set the value of the configuration attribute.
+
+    Args:
+      instance (Any): The instance of the class.
+      value (Any): The value to set.
+    """
     instance.set(self.__name__, value)
 
 
@@ -190,7 +215,7 @@ class Configuration(dict):
 
   # noinspection PyMissingConstructor
   # pylint: disable=super-init-not-called
-  def __init__(self, *args, **kwargs):
+  def __init__(self, *args: Any, **kwargs: Any):
     # record user provided options
     self._user_options = self._make_options(*args, **kwargs)
     # merge the user_provided options onto the default options
@@ -199,7 +224,7 @@ class Configuration(dict):
     # set the attributes based on the config_vars
     dict.update(self, config_vars)
 
-  def _make_options(self, *args, **kwargs):
+  def _make_options(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
     """Set configuration values.
 
     Returns:
@@ -411,7 +436,7 @@ class Configuration(dict):
 
   # get
 
-  def get(self, key, default=None, strict=False):
+  def get(self, key, default=None, strict=False) -> Any:
     """Get configuration value.
     """
     if key not in self.OPTIONS:
@@ -420,7 +445,7 @@ class Configuration(dict):
       return default
     return dict.__getitem__(self, key)
 
-  def getall(self, keys, default=None, strict=False):
+  def getall(self, keys, default=None, strict=False) -> List[Any]:
     """Get configuration value.
 
     Returns:
@@ -430,7 +455,7 @@ class Configuration(dict):
 
   # merge
 
-  def merge(self, other):
+  def merge(self, other: "Configuration") -> "Configuration":
     """Merge current config with another config.
 
     This will merge in all non-default values from the

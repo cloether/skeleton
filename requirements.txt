@@ -1,2 +1,4 @@
-six
-appdirs
+# Updated by depupdate.py on 2025-05-29T00:19:36 by user
+# Do not edit this section manually.
+six==1.17.0
+appdirs==1.4.4

@@ -1,10 +1,20 @@
 # coding=utf8
-"""utils.py
+"""types.py
 
-Generic Utilities
+Shared type aliases and interfaces.
+
+This file defines shared types used across this project to keep annotations
+consistent, reduce duplication, and simplify updates. Useful for paths, data
+structures, and function signatures.
+
+References:
+- PEP 484: https://peps.python.org/pep-0484/
+- PEP 586: https://peps.python.org/pep-0586/
+- typing documentation: https://docs.python.org/3/library/typing.html
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import itertools
 import os
 import pickle
 import re
@@ -12,13 +22,18 @@ import sys
 import zlib
 from base64 import b64decode
 from contextlib import contextmanager
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 from errno import EEXIST
 from io import UnsupportedOperation
 from itertools import groupby, islice
 from math import ceil
 from operator import itemgetter
 from string import Formatter
+from typing import (
+  Iterable, Iterator, List,
+  Optional, Sequence, TypeVar,
+  Union, overload
+)
 
 from six import integer_types, iteritems, string_types, text_type
 from six.moves import filter, map
@@ -162,12 +177,12 @@ def as_number(value):
   if isinstance(value, integer_types):
     return value
   if isinstance(value, string_types):
-    if value.isnumeric():
-      value = int(value)
-    elif value.isdecimal():
-      value = float(value)
-    elif value.isdigit():
-      value = int(value)
+    if value.isdigit():
+      return int(value)
+    try:
+      return float(value)
+    except ValueError:
+      return value
   return value
 
 
@@ -254,35 +269,35 @@ def run_in_separate_process(func, *args, **kwargs):
   """Run function in a separate_process.
 
   Args:
-    func (Callable): Function to invoked.
+    func (Callable): Function to invoke.
 
   Returns:
     return value of the invoked function
   """
-  # create a pipe.
+  # create a pipe for inter-process communication.
   read_fd, write_fd = os.pipe()
 
-  # fork a child process.
+  # fork the current process
   pid = os.fork()
 
-  if pid > 0:  # in child process
-
-    # close write file descriptor.
+  if pid > 0:  # in parent process
+    # close the write end of the pipe in the parent
     os.close(write_fd)
 
-    # open read file descriptor.
+    # read the result from the child process.
     with os.fdopen(read_fd, "rb") as fd:
       status, result = pickle.load(fd)
 
-    # wait for completion of child process.
+    # wait for the child process to finish
     os.waitpid(pid, 0)
 
     if status == 0:
       return result
-
     raise result
 
-  os.close(read_fd)  # close read file descriptor
+  # child process: close the read end and write end of the pipe.
+  os.close(read_fd)
+  os.close(write_fd)
 
   try:
     # call the function. status: success=0 fail=1
@@ -291,19 +306,23 @@ def run_in_separate_process(func, *args, **kwargs):
     result, status = e, 1
 
   with os.fdopen(write_fd, "wb") as fd:
+    fd_typed = cast(SupportsWrite[bytes], fd)
+
     try:  # dump results.
       pickle.dump(
         (status, result),
         fd,
         pickle.HIGHEST_PROTOCOL
       )
-    except pickle.PicklingError as e:
+    except pickle.PicklingError:
+      # if the result cannot be pickled, write a generic error.
       pickle.dump(
-        (2, e),
+        (2, "PicklingError occurred"),
         fd,
         pickle.HIGHEST_PROTOCOL
       )
 
+  # exit the child process
   os._exit(0)  # noqa
 
 
@@ -367,7 +386,7 @@ def mkdir_p(path):
       raise
 
 
-def touch(filepath):
+def touch(filepath: Union[str, bytes]):
   """Equivalent of Unix `touch` command.
 
   Args:
@@ -498,7 +517,32 @@ def apply_values(func, mapping):
   return dict(zip(keys, func(values)))
 
 
-def chunk(iterable, size):
+T = TypeVar("T")
+
+
+def pad_iterable(iterable, size, fillvalue=None):
+  """Pads an iterable to a fixed size with a fill value.
+
+  Args:
+    iterable (Iterable[T]): Iterable to pad.
+    size (int): Desired length.
+    fillvalue (Optional[T]): Value to pad with.
+
+  Returns:
+    List[Optional[T]]: Padded list.
+  """
+  return list(
+    itertools.islice(
+      itertools.chain(
+        iterable,
+        itertools.repeat(fillvalue)
+      ),
+      size
+    )
+  )
+
+
+def chunk(iterable: Sequence[T], size: int) -> Iterator[List[T]]:
   """Splits an iterable into batches of the specified size.
 
   Notes:
@@ -506,17 +550,17 @@ def chunk(iterable, size):
     through it.
 
   Args:
-    iterable (Iterable): Iterable of data.
+    iterable (Sequence): Iterable of data.
     size (int): Chunk size.
 
   Yields:
     list: Chunk of data from iterable.
   """
   for i in range(0, len(iterable), size):
-    yield iterable[i:i + size]
+    yield list(iterable[i:i + size])
 
 
-def iterchunk(iterable, size):
+def iterchunk(iterable: Iterable[T], size: int) -> Iterator[List[T]]:
   """Splits an iterable into chunks of size chunksize.
 
   Notes:
@@ -529,42 +573,47 @@ def iterchunk(iterable, size):
   Yields:
     list: Chunk of data from iterable.
   """
-  result = []
+  result: List[T] = []
   for i in iterable:
     result.append(i)
     if len(result) == size:
       yield result
       result = []
-  # TODO: if the length of the last chunk does not
-  #   equal the provided size, then fill (append to)
-  #   chunk until its length is equal to size.
-  if result:
-    # handle last chunk
+  if result:  # handle last chunk
+    if len(result) < size:
+      # pad the last chunk to a fixed size
+      result.extend([None] * (size - len(result)))
     yield result
 
 
-# TODO: add option to fill the last chunk to the specified size.
-def chunkify(iterable, size):
+def chunkify(
+    iterable: Iterable[T],
+    size: int,
+    fill_value: Optional[T] = None
+) -> Iterator[List[Optional[T]]]:
   """Splits an iterable into chunks of size chunksize.
 
   Notes:
-    The last chunk may be smaller than the provided chunksize.
+    The last chunk will be filled to the specified size with `fill_value`.
 
   Args:
     iterable (Iterable): Iterable of data.
     size (int): Chunk size.
+    fill_value (Any): Value to fill the last chunk if it is smaller than `size`.
 
   Yields:
     list: Chunk of data from iterable.
   """
   if size <= 0:
     raise ValueError("non-positive chunk size: {0}".format(size))
-  return (
-    chunk
-    if hasattr(iterable, '__getitem__')
-    # generator, set, map, etc...
-    else iterchunk
-  )(iterable, size)
+  iterator = iter(iterable)
+  while True:
+    chunk = list(islice(iterator, size))
+    if not chunk:
+      break
+    if len(chunk) < size:
+      chunk.extend([fill_value] * (size - len(chunk)))
+    yield chunk
 
 
 def group_continuous(iterable, key=None, start=0):
@@ -596,15 +645,18 @@ def group_continuous(iterable, key=None, start=0):
 # datetime
 
 
-def timestamp_from_datetime(dt, epoch=EPOCH):
+def timestamp_from_datetime(
+    dt: Union[datetime, date],
+    epoch: Union[datetime, date] = EPOCH
+) -> int:
   """Convert a datetime to a timestamp.
 
   References:
     https://stackoverflow.com/a/8778548/141395
 
   Args:
-    dt (datetime.datetime or datetime.date): Datetime.
-    epoch (datetime.datetime or datetime.date): Epoch Datetime.
+    dt (datetime or date): Datetime.
+    epoch (datetime or date): Epoch Datetime.
 
   Returns:
     int: Timestamp
@@ -613,7 +665,7 @@ def timestamp_from_datetime(dt, epoch=EPOCH):
   return delta.seconds + delta.days * 86400
 
 
-def timedelta_isoformat(td):
+def timedelta_isoformat(td: timedelta) -> str:
   """ISO-8601 encoding for timedelta.
 
   Args:
@@ -639,7 +691,7 @@ def timedelta_isoformat(td):
 
 
 # noinspection PyArgumentEqualDefault
-TIMEDELTA_ZERO = timedelta(0)
+TIMEDELTA_ZERO: timedelta = timedelta(0)
 
 
 class DateRange(object):  # pylint: disable=useless-object-inheritance
@@ -653,9 +705,9 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
   provided.
 
   Args:
-    start (datetime.datetime or datetime.date): Range Start Time.
-    stop (datetime.datetime or datetime.date): Range End Time.
-    step (datetime.timedelta): Range Step Time.
+    start (datetime or date): Range Start Time.
+    stop (datetime or date): Range End Time.
+    step (timedelta): Range Step Time.
 
   Examples:
     > now = datetime.now().date()
@@ -665,7 +717,12 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
     >> print(d)
   """
 
-  def __init__(self, start=None, stop=None, step=None):
+  def __init__(
+      self,
+      start: Union[date, datetime],
+      stop: Optional[Union[date, datetime]],
+      step: timedelta
+  ):
     if start is None:
       raise TypeError("must provide starting point for DateRange")
     if step is None:
@@ -673,12 +730,12 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
     # noinspection PyArgumentEqualDefault
     if step == timedelta(0):
       raise TypeError("must provide non-zero step for DateRange")
-    self.start = start
-    self.stop = stop
-    self.step = step
+    self.start: Union[date, datetime] = start
+    self.stop: Optional[Union[date, datetime]] = stop
+    self.step: timedelta = step
     self._has_neg_step = self.step < TIMEDELTA_ZERO
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     return "{!s}(start={!r}, stop={!r}, step={!r}".format(
       self.__class__.__name__,
       self.start,
@@ -686,13 +743,13 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
       self.step
     )
 
-  def __reversed__(self):
+  def __reversed__(self) -> "DateRange":
     if self.stop:
       # pylint: disable=invalid-unary-operand-type
       return DateRange(self.stop, self.start, -self.step)
     raise ValueError("cannot reverse infinite range")
 
-  def __len__(self):
+  def __len__(self) -> int:
     if self.stop is None:
       # it would be nice if float("inf") could be returned
       raise TypeError("infinite range")
@@ -703,7 +760,7 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
     )
     return int(ceil(abs(calc.total_seconds() / self.step.total_seconds())))
 
-  def __contains__(self, value):
+  def __contains__(self, value: Union[date, datetime]) -> bool:
     if self.stop is not None:
       check = (
         self.start >= value > self.stop
@@ -717,20 +774,21 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
     difference = value - self.start
     return difference.total_seconds() % self.step.total_seconds() == 0
 
-  def _check_stop(self, current):
+  def _check_stop(self, current: Union[date, datetime]) -> bool:
     if self._has_neg_step:
       return current <= self.stop
     return current >= self.stop
 
-  def __iter__(self):
-    current, stopping = self.start, self.stop is not None
+  def __iter__(self) -> Iterator[Union[date, datetime]]:
+    current = self.start
+    stopping = self.stop is not None
     while True:
       if stopping and self._check_stop(current):
         break
       yield current
       current += self.step
 
-  def __eq__(self, other):
+  def __eq__(self, other: object) -> bool:
     if isinstance(other, DateRange):
       return (
           self.start == other.start
@@ -739,12 +797,23 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
       )
     return NotImplemented
 
-  def __ne__(self, other):
+  def __ne__(self, other: object) -> bool:
     if isinstance(other, DateRange):
       return not self == other
     return NotImplemented
 
-  def __getitem__(self, idx_or_slice):
+  @overload
+  def __getitem__(self, idx: int) -> Union[date, datetime]:
+    ...
+
+  @overload
+  def __getitem__(self, idx: slice) -> "DateRange":
+    ...
+
+  def __getitem__(
+      self,
+      idx_or_slice: Union[int, slice]
+  ) -> Union[date, datetime, "DateRange"]:
     if isinstance(idx_or_slice, int):
       return self._getidx(idx_or_slice)
     if isinstance(idx_or_slice, slice):
@@ -755,7 +824,7 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
       )
     )
 
-  def _getidx(self, idx):
+  def _getidx(self, idx: int) -> Union[date, datetime]:
     if not self.stop and idx < 0:
       raise IndexError("Cannot negative index infinite range")
     if self.stop and abs(idx) > len(self) - 1:
@@ -766,13 +835,13 @@ class DateRange(object):  # pylint: disable=useless-object-inheritance
       idx += len(self)
     return self.start + (self.step * idx)
 
-  def _getslice(self, slice_):
+  def _getslice(self, slice_: slice) -> "DateRange":
     sss = slice_.start, slice_.stop, slice_.step
     # if s == (None, None, None) or s == (None, None, 1):
     if sss in [(None, None, None), (None, None, 1)]:
       return DateRange(start=self.start, stop=self.stop, step=self.step)
     start, stop, step = sss
-    # seems redundant but we are converting None -> 0
+    # seems redundant, but we are converting None -> 0
     start = start or 0
     stop = stop or 0
     step = step or 1  # use 1 here because of multiplication

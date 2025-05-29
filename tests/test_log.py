@@ -3,10 +3,12 @@
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import logging
 from unittest.mock import patch
 
+import pytest
+
 from skeleton.log import (
-  apply_session_hook,
   log_request,
   log_request_response,
   log_response
@@ -30,9 +32,10 @@ def test_log_request(prepared_request):
   Args:
     prepared_request (PreparedRequest): PreparedRequest Instance
   """
-  with patch("skeleton.log.logger") as mock_logger:
+  logging.basicConfig(level=logging.DEBUG)
+  with patch("skeleton.log.LOGGER") as mock_logger:
     log_request(prepared_request)
-    mock_logger.info.assert_called()
+    mock_logger.debug.assert_called()
 
 
 def test_log_request_content(prepared_request, log_content=True):
@@ -41,9 +44,10 @@ def test_log_request_content(prepared_request, log_content=True):
   Args:
     prepared_request (PreparedRequest): PreparedRequest Instance
   """
-  with patch("skeleton.log.logger") as mock_logger:
+  logging.basicConfig(level=logging.DEBUG)
+  with patch("skeleton.log.LOGGER") as mock_logger:
     log_request(prepared_request, log_content=log_content)
-    mock_logger.info.assert_called()
+    mock_logger.debug.assert_called()
 
 
 def test_log_response(response):
@@ -52,9 +56,10 @@ def test_log_response(response):
   Args:
     response (Response): Response Instance
   """
-  with patch("skeleton.log.logger") as mock_logger:
+  logging.basicConfig(level=logging.DEBUG)
+  with patch("skeleton.log.LOGGER") as mock_logger:
     log_response(response)
-    mock_logger.info.assert_called()
+    mock_logger.debug.assert_called()
 
 
 def test_log_response_content(response, log_content=True):
@@ -63,9 +68,10 @@ def test_log_response_content(response, log_content=True):
   Args:
     response (Response): Response Instance
   """
-  with patch("skeleton.log.logger") as mock_logger:
+  logging.basicConfig(level=logging.DEBUG)
+  with patch("skeleton.log.LOGGER") as mock_logger:
     log_response(response, log_content=log_content)
-    mock_logger.info.assert_called()
+    mock_logger.debug.assert_called()
 
 
 def test_log_request_response(response, log_content=False):
@@ -74,20 +80,44 @@ def test_log_request_response(response, log_content=False):
   Args:
     response (Response): Response Instance
   """
-  with patch("skeleton.log.logger") as mock_logger:
+  logging.basicConfig(level=logging.DEBUG)
+  with patch("skeleton.log.LOGGER") as mock_logger:
     log_request_response(response, log_content=log_content)
-    mock_logger.info.assert_called()
+    mock_logger.debug.assert_called()
 
 
-def test_log_request_response_content(response, log_content=True):
+def test_log_request_response_content(
+    response,
+    caplog: pytest.LogCaptureFixture,
+    log_content: bool = True,
+):
   """Test `skeleton.log_request_response` with log_content set to True.
 
   Args:
     response (Response): Response Instance
   """
-  with patch("skeleton.log.logger") as mock_logger:
+  import logging
+
+  logging.basicConfig(level=logging.DEBUG)
+
+  from skeleton.log import LOGGER
+
+  LOGGER.setLevel(logging.DEBUG)
+  # Ensure the logger propagates to the root logger
+  LOGGER.propagate = True
+
+  with caplog.at_level(logging.DEBUG, logger=LOGGER.name):
     log_request_response(response, log_content=log_content)
-    mock_logger.info.assert_called()
+    log_text = caplog.text
+    assert "REQUEST:" in log_text
+    assert "- METHOD:" in log_text
+    assert "- URL:" in log_text
+    assert "- HEADERS:" in log_text
+    assert "- BODY:" in log_text
+    assert "RESPONSE:" in log_text
+    assert "- HEADERS:" in log_text
+    assert "- STATUS CODE:" in log_text
+    assert "- CONTENT:" in log_text
 
 
 def test_apply_session_hook(session, log_content=False):
@@ -96,19 +126,29 @@ def test_apply_session_hook(session, log_content=False):
   Args:
     session (requests.Session): Session Instance
   """
+  from functools import partial
+  from skeleton.log import log_request_response, apply_session_hook
+
   apply_session_hook(session, log_content=log_content)
-  assert session.hooks["response"] == [log_response], (
-    "log_response was not set as a session hook"
+  hook = session.hooks["response"][0]
+  assert isinstance(hook, partial), "Session hook is not a functools.partial"
+  assert hook.func is log_request_response, (
+    "Session hook does not use log_request_response"
   )
 
 
 def test_apply_session_hook_content(session, log_content=True):
-  """Test `skeleton.apply_session_hook` with log_content set to True.
+  """Test `skeleton.apply_session_hook` with `log_content` set to True.
 
   Args:
     session (requests.Session): Session Instance
   """
+  from functools import partial
+  from skeleton.log import log_request_response, apply_session_hook
+
   apply_session_hook(session, log_content=log_content)
-  assert session.hooks["response"] == [log_response], (
-    "log_response was not set as a session hook"
+  hook = session.hooks["response"][0]
+  assert isinstance(hook, partial), "Session hook is not a functools.partial"
+  assert hook.func is log_request_response, (
+    "Session hook does not use log_request_response"
   )
