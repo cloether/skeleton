@@ -52,6 +52,18 @@ def module_name():
   return _modname(where=repo_root)
 
 
+@pytest.fixture(name="version_file")
+def version_file():
+  """Version file fixture.
+
+  Returns:
+    str: Path to the version file.
+  """
+  return os.path.join(
+    os.path.dirname(__file__), "..", "skeleton", "__version__.py"
+  )
+
+
 @pytest.fixture(name="prepared_request")
 def prepared_request():
   """PreparedRequest Fixture for Testing `skeleton.log_request`

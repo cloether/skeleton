@@ -521,3 +521,78 @@ class SyslogBOMFormatter(logging.Formatter):
     """
     result = super(SyslogBOMFormatter, self).format(record)
     return "ufeff{0}".format(result)
+
+
+class JSONFormatter(logging.Formatter):
+  """JSON Log Formatter.
+
+  This formatter outputs log records in JSON format, which is useful
+  for structured logging and can be easily parsed by log management systems.
+
+  Example usage:
+    logger = logging.getLogger("json_logger")
+    handler = logging.StreamHandler()
+    handler.setFormatter(JSONFormatter())
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+  """
+
+  def format(self, record):
+    """Format Log Record as JSON.
+
+    Args:
+      record (logging.LogRecord): Log Record to format.
+
+    Returns:
+      str: JSON formatted log record.
+    """
+    log_record = {
+      "time": self.formatTime(record, self.datefmt),
+      "level": record.levelname,
+      "message": record.getMessage(),
+      "module": record.module,
+    }
+    return json.dumps(log_record)
+
+# Log filters and handlers can be added here as needed.
+#
+# class ContextFilter(logging.Filter):
+#   """Context Filter to add user_id to log records.
+#
+#   This filter adds a user_id to each log record, which can be useful
+#   for tracking logs related to a specific user in applications.
+#
+#   Example usage:
+#     logger = logging.getLogger("contextual_logger")
+#     logger.addFilter(ContextFilter(user_id="12345"))
+#     logger.info("Log with user context")
+#   """
+#
+#   def __init__(self, user_id):
+#     super().__init__()
+#     self.user_id = user_id
+#
+#   def filter(self, record):
+#     record.user_id = self.user_id
+#     return True
+#
+#
+# class DatabaseHandler(logging.Handler):
+#   """Custom logging handler to save logs to a database.
+#
+#   This is a placeholder for an actual database handler.
+#   You would implement the logic to connect to your database
+#   and save the log records.
+#
+#   Example usage:
+#     db_handler = DatabaseHandler()
+#     logger = logging.getLogger("custom_handler_logger")
+#     logger.addHandler(db_handler)
+#     logger.setLevel(logging.INFO)
+#     logger.info("Custom handler log example")
+#   """
+#
+#   def emit(self, record):
+#     # Example: Save log to a database
+#     log_entry = self.format(record)
+#     print(f"Saving to database: {log_entry}")
