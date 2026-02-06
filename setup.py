@@ -53,7 +53,6 @@ def __find_meta(filepath):
 
   Args:
     filepath (str): Path to the file.
-    **kwargs: Additional arguments for `open()`.
 
   Returns:
     dict: A dictionary containing the metadata.
@@ -263,14 +262,7 @@ EXTRAS_REQUIRE = {
     "tox-travis",
     "twine",
     "wheel"
-  ],
-  ":python_version==\"2.6\"": [
-    "ordereddict==1.1",
-    "simplejson==3.3.0"
-  ],
-  ":python_version==\"2.7\"": [
-    "ipaddress"
-  ],
+  ]
 }
 
 INCLUDE_PACKAGE_DATA = False

@@ -16,7 +16,7 @@ from datetime import datetime
 from subprocess import CalledProcessError, PIPE, check_call, run
 
 # script version
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 _SCRIPT_NAME = os.path.splitext(os.path.basename(__file__))[0]
 
@@ -95,13 +95,6 @@ def argument_parser(**kwargs):
     dest="logfile",
     required=False,
     help="path to log file"
-  )
-  parser.add_argument(
-    "input",
-    nargs="?",
-    default="-",
-    type=_filetype_read,
-    help="program input"
   )
   parser.add_argument(
     "-o", "--output",
@@ -378,8 +371,6 @@ def main(*args):
     prog, __version__, return_code
   )
 
-  if args.input and not args.input.closed:
-    args.input.close()
   if args.output and not args.output.closed:
     args.output.close()
 

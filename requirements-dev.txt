@@ -1,0 +1,21 @@
+# Updated by depupdate.py on 2026-02-05T22:27:06 by user
+# Do not edit this section manually.
+mypy==1.19.1
+flake8==7.3.0
+pytest==9.0.2
+black==26.1.0
+isort==7.0.0
+check-manifest==0.51
+coverage==7.13.3
+pycodestyle==2.14.0
+pytest==9.0.2
+pytest-cov==7.0.0
+pytest-html==4.2.0
+pytest-json-report==1.5.0
+tox==4.34.1
+tox-travis==0.13
+twine==6.2.0
+wheel==0.46.3
+sphinx==9.0.4
+sphinxcontrib-napoleon==0.7
+guzzle_sphinx_theme==0.7.11
