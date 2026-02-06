@@ -12,11 +12,11 @@ Examples:
       author_email="my.self@example.com",
       url="https://github.com/me/my_other_package",
       description="Descriptive",
-      license="Open-Source-Baybeeeeee-1.0",
+      license="Open-Source-1.0",
       install_requires=["setuptools"],
       packages=["my_other_package"],
       package_data={"my_other_package": ["py.typed", "bar.pyi"]},
-      data_files=[],
+      data_files=[]
   )
 
 References:
@@ -30,7 +30,7 @@ import re
 import sys
 # io.open is needed for projects that support Python 2.7. It ensures open()
 # defaults to text mode with universal newlines, and accepts an argument to
-# specify the text encoding. Python 3 only  projects can skip this import.
+# specify the text encoding. Python 3 only projects can skip this import.
 #
 # References:
 #   https://raw.githubusercontent.com/pypa/sampleproject/master/setup.py
@@ -41,19 +41,28 @@ from setuptools import find_packages, setup
 
 ROOT = path.abspath(path.dirname(__file__))
 
-MODULE_META_RE = re.compile(
-  r"^__(?P<name>.*)__ = ['\"](?P<value>[^'\"]*)['\"]", re.M
-)
-
 DEFAULT_LICENSE = "MIT"
+
+MODULE_META_RE = re.compile(
+  r'^__(?P<name>[a-zA-Z0-9_]+)__\s*=\s*([\'"])(?P<value>.*?)(?<!\\)\2\s*$', re.M
+)
 
 
 def __find_meta(filepath):
+  """Extract metadata from a Python file.
+
+  Args:
+    filepath (str): Path to the file.
+    **kwargs: Additional arguments for `open()`.
+
+  Returns:
+    dict: A dictionary containing the metadata.
+  """
   content = __readfile(filepath)
   match = MODULE_META_RE.findall(content)
   if not match:
     raise RuntimeError("error finding module meta in file: %s" % filepath)
-  return dict(match)
+  return {k: v for k, _, v in match}
 
 
 def __find_readme(basename="README", extensions=("rst", "md", "txt", "")):
@@ -132,7 +141,7 @@ def __readlines(filepath, **kwargs):
 #   """
 #   description = "run 'make --clean' to delete generated doc files"
 #   user_options = [
-#       # The format is (long option, short option, description).
+#       # The format is (long-option, short-option, description).
 #       ('build-dir=', None, 'path to docs build dir'),
 #   ]
 #
@@ -222,6 +231,10 @@ CLASSIFIERS = [
   "Programming Language :: Python :: 3.6",
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 

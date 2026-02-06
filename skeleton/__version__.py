@@ -1,12 +1,7 @@
 # coding=utf8
 """__version__.py
 
-Module Metadata Attributes.
-
-Notes:
-  Attributes in this file are used within `setup.py` to
-  partially (and automatically) populate module build
-  parameters.
+Module-level metadata used by setup.py and for runtime introspection.
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
