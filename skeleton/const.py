@@ -8,42 +8,44 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import sys
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 from .__version__ import __title__
 
 # DATETIME CONSTANTS
-EPOCH = datetime(1970, 1, 1)
-ISO_DATETIME_STRING = "1970-01-01 00:00:00.000"
-ISO_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+EPOCH: datetime = datetime(1970, 1, 1)
+ISO_DATETIME_STRING: str = "1970-01-01 00:00:00.000"
+ISO_DATETIME_FORMAT: str = "%Y-%m-%d %H:%M:%S.%f"
 
 # CONNECTION DEFAULTS
-DEFAULT_MAX_POOL_CONNECTIONS = 10
-DEFAULT_RETRIES = 0
-DEFAULT_POOL_TIMEOUT = None
-DEFAULT_POOLBLOCK = False
-DEFAULT_POOLSIZE = 10
-DEFAULT_TIMEOUT = 60
+DEFAULT_MAX_POOL_CONNECTIONS: int = 10
+DEFAULT_RETRIES: int = 0
+DEFAULT_POOL_TIMEOUT: Optional[int] = None
+DEFAULT_POOLBLOCK: bool = False
+DEFAULT_POOLSIZE: int = 10
+DEFAULT_TIMEOUT: int = 60
 
 # FILE DEFAULTS
-DEFAULT_CHUNK_SIZE = 64 * 2 ** 10
-DEFAULT_FILE_MODE_SUFFIX = "b" if sys.version_info[0] == 2 else ""
-DEFAULT_FILE_WRITE_MODE = "w{0}".format(DEFAULT_FILE_MODE_SUFFIX)
-DEFAULT_FILE_READ_MODE = "r{0}".format(DEFAULT_FILE_MODE_SUFFIX)
+DEFAULT_CHUNK_SIZE: int = 64 * 2 ** 10
+DEFAULT_FILE_MODE_SUFFIX: str = "b" if sys.version_info[0] == 2 else ""
+DEFAULT_FILE_WRITE_MODE: str = "w{0}".format(DEFAULT_FILE_MODE_SUFFIX)
+DEFAULT_FILE_READ_MODE: str = "r{0}".format(DEFAULT_FILE_MODE_SUFFIX)
 
 # LOGGING DEFAULTS
-DEFAULT_LOGGER_NAME = __title__
+DEFAULT_LOGGER_NAME: str = __title__
 
 # LOGGING OPTIONS
-LOGGING_DATEFMT = "%Y-%m-%d %H:%M:%S"
-LOGGING_FILEMODE = "a+"
-LOGGING_FILENAME = None
-LOGGING_FORMAT = (
+LOGGING_DATEFMT: str = "%Y-%m-%d %H:%M:%S"
+LOGGING_FILEMODE: str = "a+"
+LOGGING_FILENAME: Optional[str] = None
+LOGGING_FORMAT: str = (
   "(%(asctime)s) [%(levelname)s] "
   "%(name)s.%(funcName)s(%(lineno)d): %(message)s"
 )
-LOGGING_LEVEL = logging.ERROR
-LOGGING_STYLE = "%"
-LOGGING_LEVELS = {
+LOGGING_LEVEL: int = logging.ERROR
+LOGGING_STYLE: str = "%"
+
+LOGGING_LEVELS: Dict[int, str] = {
   logging.NOTSET: "sample",
   logging.DEBUG: "debug",
   logging.INFO: "info",
@@ -51,12 +53,13 @@ LOGGING_LEVELS = {
   logging.ERROR: "error",
   logging.FATAL: "fatal",
 }
-LOGGING_LEVELS_MAP = {
+
+LOGGING_LEVELS_MAP: Dict[str, int] = {
   LOGGING_LEVELS[lvl]: lvl
   for lvl in LOGGING_LEVELS
 }
-LOGGING_DICT = {
-  # TODO: implement test(s)
+
+LOGGING_DICT: Dict[str, Any] = {
   "version": 1,
   "disable_existing_loggers": False,
   "formatters": {
